@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<body style="margin:0;background:#0a0b0a;color:#e9e6dd;font-family:Georgia,'Times New Roman',serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0b0a">
+    <tr><td align="center" style="padding:48px 20px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
+        <tr><td style="font-family:'Courier New',monospace;font-size:12px;letter-spacing:6px;color:#e9e6dd">UMBRA</td></tr>
+        <tr><td style="padding-top:40px;font-size:32px;line-height:1.15;color:#f4f1ea">Recupera tu acceso.</td></tr>
+        <tr><td style="padding-top:20px;font-size:17px;line-height:1.6;color:#a9aaa3">
+          Has pedido crear una contraseña nueva. El enlace caduca en una hora.
+        </td></tr>
+        <tr><td style="padding-top:32px">
+          <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/nueva-contrasena"
+             style="display:inline-block;background:#e9e6dd;color:#0a0b0a;text-decoration:none;font-family:Arial,sans-serif;font-size:15px;padding:14px 24px">
+            Crear contraseña nueva
+          </a>
+        </td></tr>
+        <tr><td style="padding-top:32px;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;color:#8b8d86">
+          Si no lo has pedido tú, ignora este mensaje: tu contraseña no cambiará.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

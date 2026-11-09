@@ -1,0 +1,96 @@
+import { Avatar } from "@/components/ui/avatar";
+import { AVAILABILITY_LABELS } from "@/lib/content";
+import type { ChatAvailability } from "@/lib/supabase/types";
+
+export type ProfileViewData = {
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  bio: string;
+  country: string | null;
+  region: string | null;
+  availability: ChatAvailability;
+  looking_for: string;
+  personal_projects: string;
+  languages: string[];
+  created_at: string;
+  interests: { slug: string; name: string; is_favorite: boolean }[];
+};
+
+const fmt = new Intl.DateTimeFormat("es", { month: "long", year: "numeric" });
+
+export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: React.ReactNode }) {
+  const name = p.display_name ?? p.username ?? "";
+  const place = [p.region, p.country].filter(Boolean).join(", ");
+  const favs = p.interests.filter((i) => i.is_favorite);
+  const rest = p.interests.filter((i) => !i.is_favorite);
+
+  return (
+    <article className="max-w-5xl">
+      <header className="flex flex-col gap-8 border-b hairline pb-12 sm:flex-row sm:items-end">
+        <Avatar url={p.avatar_url} name={name} size={112} />
+        <div className="min-w-0 flex-1 animate-rise">
+          <p className="font-mono text-sm text-stone">@{p.username}</p>
+          <h1 className="display mt-3 break-words text-[clamp(2.4rem,6vw,4rem)] text-bone">{name}</h1>
+          <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone">
+            {place && <span>{place}</span>}
+            <span className={p.availability === "open" ? "text-lichen" : ""}>{AVAILABILITY_LABELS[p.availability]}</span>
+            <span>Miembro desde {fmt.format(new Date(p.created_at))}</span>
+          </p>
+        </div>
+        {actions && <div className="flex gap-2">{actions}</div>}
+      </header>
+
+      <div className="grid gap-12 pt-12 md:grid-cols-[1.4fr_1fr] md:gap-16">
+        <div className="space-y-12">
+          <Block title="Sobre mí" text={p.bio} empty="Todavía sin descripción." />
+          <Block title="A quién le gustaría conocer" text={p.looking_for} />
+          <Block title="Proyectos personales" text={p.personal_projects} />
+        </div>
+        <aside className="space-y-12">
+          {favs.length > 0 && (
+            <div>
+              <h2 className="label mb-4">Favoritos</h2>
+              <ul className="space-y-2">
+                {favs.map((i) => (
+                  <li key={i.slug} className="flex items-baseline gap-3 font-serif text-lg text-bone">
+                    <span aria-hidden="true" className="text-lichen">✦</span>
+                    {i.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {rest.length > 0 && (
+            <div>
+              <h2 className="label mb-4">Intereses</h2>
+              <ul className="flex flex-wrap gap-2">
+                {rest.map((i) => (
+                  <li key={i.slug} className="border border-line-2 px-3 py-1.5 text-sm text-stone-2">{i.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {p.languages.length > 0 && (
+            <div>
+              <h2 className="label mb-4">Idiomas</h2>
+              <p className="text-stone-2">{p.languages.join(" · ")}</p>
+            </div>
+          )}
+        </aside>
+      </div>
+    </article>
+  );
+}
+
+function Block({ title, text, empty }: { title: string; text: string; empty?: string }) {
+  if (!text && !empty) return null;
+  return (
+    <section>
+      <h2 className="label mb-4">{title}</h2>
+      <p className={`whitespace-pre-line font-serif text-lg leading-relaxed ${text ? "text-stone-2" : "text-stone"}`}>
+        {text || empty}
+      </p>
+    </section>
+  );
+}

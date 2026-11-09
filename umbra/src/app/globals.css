@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   UMBRA · Sistema de diseño
+   Carbón, grafito, piedra, blanco roto. Acento: verde musgo profundo y plata.
+   ========================================================================== */
+
+@theme {
+  --color-carbon: #0a0b0a;
+  --color-ink: #0f110f;
+  --color-graphite: #161816;
+  --color-graphite-2: #1d201d;
+  --color-graphite-3: #262a26;
+  --color-stone: #8b8d86;
+  --color-stone-2: #a9aaa3;
+  --color-bone: #e9e6dd;
+  --color-bone-2: #f4f1ea;
+  --color-moss: #2e5a45;
+  --color-moss-2: #3f7a5e;
+  --color-lichen: #9cc2a9;
+  --color-silver: #b8bcb6;
+  --color-danger: #d99a8f;
+  --color-line: rgb(233 230 221 / 0.09);
+  --color-line-2: rgb(233 230 221 / 0.16);
+
+  --font-serif: var(--font-source-serif), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--font-geist), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --ease-umbra: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --animate-rise: rise 0.9s var(--ease-umbra) both;
+  --animate-fade: fade 1.2s var(--ease-umbra) both;
+  --animate-orbit: orbit 120s linear infinite;
+  --animate-orbit-rev: orbit 180s linear infinite reverse;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes orbit {
+    to { transform: rotate(360deg); }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --nav-h: 64px;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--color-carbon);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    min-height: 100dvh;
+  }
+  ::selection {
+    background: var(--color-moss);
+    color: var(--color-bone-2);
+  }
+  :focus-visible {
+    outline: 1.5px solid var(--color-lichen);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+  input, textarea, select { font: inherit; color: inherit; }
+  input::placeholder, textarea::placeholder { color: var(--color-stone); opacity: 0.7; }
+  img { max-width: 100%; }
+}
+
+@layer components {
+  /* Etiqueta de metadatos: mono, versalitas, espaciado amplio */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+
+  .display {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+    font-optical-sizing: auto;
+  }
+
+  .prose-umbra {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-stone-2);
+  }
+  .prose-umbra h2 {
+    font-family: var(--font-serif);
+    color: var(--color-bone);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 2.5rem 0 0.75rem;
+    letter-spacing: -0.01em;
+  }
+  .prose-umbra p, .prose-umbra ul { margin: 0 0 1rem; }
+  .prose-umbra ul { padding-left: 1.1rem; list-style: square; }
+  .prose-umbra li { margin: 0.25rem 0; }
+  .prose-umbra li::marker { color: var(--color-moss-2); }
+  .prose-umbra strong { color: var(--color-bone); font-weight: 500; }
+  .prose-umbra a { color: var(--color-bone); text-decoration: underline; text-decoration-color: var(--color-line-2); text-underline-offset: 3px; }
+
+  /* Enlace con subrayado que se dibuja */
+  .link-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.5s var(--ease-umbra), color 0.3s;
+  }
+  .link-draw:hover, .link-draw:focus-visible { background-size: 100% 1px; }
+
+  /* Botones */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 48px;
+    padding: 0 1.4rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    border: 1px solid transparent;
+    transition: background-color 0.3s var(--ease-umbra), color 0.3s, border-color 0.3s, transform 0.3s var(--ease-umbra);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active:not(:disabled) { transform: scale(0.985); }
+  .btn:disabled { opacity: 0.45; }
+  .btn-primary { background: var(--color-bone); color: var(--color-carbon); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-bone-2); }
+  .btn-ghost { border-color: var(--color-line-2); color: var(--color-bone); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--color-stone); background: rgb(233 230 221 / 0.03); }
+  .btn-quiet { color: var(--color-stone-2); padding: 0 0.75rem; }
+  .btn-quiet:hover:not(:disabled) { color: var(--color-bone); }
+
+  /* Campos de formulario: línea inferior, sin cajas */
+  .field {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--color-line-2);
+    padding: 0.85rem 0 0.7rem;
+    font-size: 1.0625rem;
+    transition: border-color 0.3s var(--ease-umbra);
+    border-radius: 0;
+  }
+  .field:hover { border-color: var(--color-stone); }
+  .field:focus { outline: none; border-color: var(--color-lichen); }
+  .field[aria-invalid="true"] { border-color: var(--color-danger); }
+  textarea.field { resize: vertical; min-height: 6rem; line-height: 1.55; }
+  select.field { appearance: none; background-image: none; }
+
+  /* Ficha seleccionable (intereses, opciones) */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 40px;
+    padding: 0 0.95rem;
+    border: 1px solid var(--color-line-2);
+    font-size: 0.875rem;
+    color: var(--color-stone-2);
+    transition: all 0.25s var(--ease-umbra);
+    user-select: none;
+  }
+  .chip:hover { color: var(--color-bone); border-color: var(--color-stone); }
+  .chip[aria-pressed="true"], .chip:has(input:checked) {
+    color: var(--color-bone-2);
+    border-color: var(--color-moss-2);
+    background: rgb(46 90 69 / 0.28);
+  }
+  .chip:has(input:focus-visible) { outline: 1.5px solid var(--color-lichen); outline-offset: 2px; }
+
+  .hairline { border-color: var(--color-line); }
+
+  /* Grano sutil para dar materia al negro */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
