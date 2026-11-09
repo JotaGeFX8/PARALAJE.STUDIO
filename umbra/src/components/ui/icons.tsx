@@ -235,3 +235,25 @@ export const IconLink = (p: P) => (
     <path d="M14 10a3.5 3.5 0 0 0-5 0l-3 3a3.5 3.5 0 0 0 5 5l1-1" />
   </Base>
 );
+export const IconPoll = (p: P) => (
+  <Base {...p}>
+    <path d="M5 19.5V11M10 19.5V5M15 19.5v-6M20 19.5V8.5" />
+  </Base>
+);
+export const IconFile = (p: P) => (
+  <Base {...p}>
+    <path d="M14 3.5H7a1.5 1.5 0 0 0-1.5 1.5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8Z" />
+    <path d="M14 3.5V8h4.5M9 13h6M9 16.5h4" />
+  </Base>
+);
+export const IconDownload = (p: P) => (
+  <Base {...p}>
+    <path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14" />
+  </Base>
+);
+export const IconBook = (p: P) => (
+  <Base {...p}>
+    <path d="M12 6.5C10.3 5.2 7.8 4.5 4.5 4.5v13c3.3 0 5.8.7 7.5 2 1.7-1.3 4.2-2 7.5-2v-13c-3.3 0-5.8.7-7.5 2Z" />
+    <path d="M12 6.5v13" />
+  </Base>
+);

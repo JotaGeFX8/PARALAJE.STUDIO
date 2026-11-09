@@ -37,7 +37,7 @@ export const AREAS: Area[] = [
     href: "/comunidad",
     name: "Comunidad",
     short: "Foros",
-    description: "Doce territorios de conversación larga y ordenada, del cosmos a la huerta.",
+    description: "Siete foros con normas propias y subcategorías: del cosmos a la huerta, pasando por el Ágora.",
     icon: IconCommunity,
     phase: 3,
   },
@@ -66,7 +66,7 @@ export const AREAS: Area[] = [
     phase: 5,
   },
   {
-    href: "/agora",
+    href: "/comunidad/agora",
     name: "Ágora",
     short: "Plaza",
     description: "La plaza abierta. Preguntas rápidas, ideas sueltas y conversación sin categoría.",
@@ -87,33 +87,74 @@ export const PROFILE_AREA: Area = {
 /** Barra inferior móvil: cinco destinos. */
 export const MOBILE_NAV = [AREAS[0], AREAS[1], AREAS[2], AREAS[5], PROFILE_AREA];
 
-/** Carácter epistémico de una aportación. */
+/** Clasificación epistémica de una aportación (lo que se ofrece al publicar). */
 export const EPISTEMIC_KINDS = [
   {
     key: "documented",
-    name: "Documentado",
+    name: "Hecho documentado",
+    short: "Documentado",
     mark: "D",
     description: "Se apoya en fuentes verificables que se citan.",
   },
   {
     key: "hypothesis",
     name: "Hipótesis",
+    short: "Hipótesis",
     mark: "H",
-    description: "Una idea por explorar. Se presenta como posibilidad, no como hecho.",
+    description: "Una posibilidad por explorar; no se presenta como hecho.",
+  },
+  {
+    key: "interpretation",
+    name: "Interpretación",
+    short: "Interpretación",
+    mark: "I",
+    description: "Una lectura argumentada de hechos o fuentes.",
   },
   {
     key: "opinion",
     name: "Opinión",
+    short: "Opinión",
     mark: "O",
     description: "Una postura personal argumentada.",
   },
   {
-    key: "experience",
-    name: "Experiencia",
-    mark: "E",
-    description: "Algo vivido en primera persona.",
+    key: "open_question",
+    name: "Pregunta abierta",
+    short: "Pregunta abierta",
+    mark: "?",
+    description: "Una duda sin respuesta establecida.",
   },
 ] as const;
+
+/** Valor heredado (antes de la v2): solo para mostrar publicaciones antiguas. */
+const LEGACY_EXPERIENCE = {
+  key: "experience",
+  name: "Experiencia",
+  short: "Experiencia",
+  mark: "E",
+  description: "Algo vivido en primera persona.",
+} as const;
+
+/** Tipos de publicación. */
+export const POST_TYPES = [
+  { key: "debate", name: "Debate", description: "Una cuestión para discutir con argumentos." },
+  { key: "question", name: "Pregunta", description: "Buscas respuesta o ayuda de la comunidad." },
+  { key: "research", name: "Investigación", description: "Un trabajo en curso o terminado, con método y fuentes." },
+  { key: "discovery", name: "Descubrimiento", description: "Algo que has encontrado y merece atención." },
+  { key: "experience", name: "Experiencia personal", description: "Algo vivido en primera persona." },
+  { key: "resource", name: "Recurso", description: "Un libro, enlace, herramienta o guía útil." },
+  { key: "poll", name: "Encuesta", description: "Una pregunta con opciones para votar." },
+  { key: "idea", name: "Idea", description: "Una propuesta para desarrollar entre varias personas." },
+] as const;
+export type PostTypeKey = (typeof POST_TYPES)[number]["key"];
+export const TYPE_BY_KEY = Object.fromEntries(POST_TYPES.map((t) => [t.key, t])) as Record<PostTypeKey, (typeof POST_TYPES)[number]>;
+
+/** Clasificación que se propone por defecto para cada tipo. */
+export const DEFAULT_KIND_FOR_TYPE: Partial<Record<PostTypeKey, (typeof EPISTEMIC_KINDS)[number]["key"]>> = {
+  question: "open_question",
+  research: "interpretation",
+  poll: "open_question",
+};
 
 export const AVAILABILITY_LABELS = {
   open: "Disponible para conversar",
@@ -133,27 +174,25 @@ export const LANGUAGES = [
   "Galego",
 ] as const;
 
-/** Los doce territorios del foro (espejo de la tabla `categories`). */
-export const TERRITORIES = [
-  ["universo", "Universo y astronomía"],
-  ["ciencia", "Ciencia y física cuántica"],
-  ["conciencia", "Conciencia y filosofía"],
-  ["historia", "Historia y civilizaciones"],
-  ["misterios", "Misterios y fenómenos inexplicados"],
-  ["simbolismo", "Sociedades y simbolismo"],
-  ["tecnologia", "Tecnología e inteligencia artificial"],
-  ["autosuficiencia", "Autosuficiencia"],
-  ["bioconstruccion", "Bioconstrucción"],
-  ["vida-rural", "Naturaleza y vida rural"],
-  ["supervivencia", "Supervivencia y conocimientos prácticos"],
-  ["debate", "Debate libre"],
+/** Los siete foros (espejo editorial de la tabla `forums`, para la portada pública). */
+export const FORUMS = [
+  ["universo", "Universo", "Cosmos, astronomía, exploración espacial y fenómenos sin explicar."],
+  ["ciencia", "Ciencia", "Física, química, biología y salud, con método."],
+  ["historia", "Historia y culturas", "Civilizaciones, arqueología, tradiciones y símbolos."],
+  ["conciencia", "Conciencia y pensamiento", "Mente, percepción, filosofía y ética."],
+  ["tecnologia", "Tecnología y futuro", "Inteligencia artificial, software libre y sociedad."],
+  ["naturaleza", "Naturaleza y vida práctica", "Huerta, bioconstrucción, autosuficiencia y oficios."],
+  ["agora", "Ágora", "La plaza abierta: presentaciones, ideas y conversación libre."],
 ] as const;
 
+/** Clasificaciones que se pueden elegir al publicar. */
 export type PostKind = (typeof EPISTEMIC_KINDS)[number]["key"];
-export const KIND_BY_KEY = Object.fromEntries(EPISTEMIC_KINDS.map((k) => [k.key, k])) as Record<
-  PostKind,
-  (typeof EPISTEMIC_KINDS)[number]
->;
+/** Cualquier valor guardado (incluido el heredado «experience»). */
+export type AnyPostKind = PostKind | "experience";
+type KindInfo = { key: AnyPostKind; name: string; short: string; mark: string; description: string };
+export const KIND_BY_KEY = Object.fromEntries(
+  [...EPISTEMIC_KINDS, LEGACY_EXPERIENCE].map((k) => [k.key, k]),
+) as Record<AnyPostKind, KindInfo>;
 
 /** Reacciones propias de la comunidad (no «me gusta»). */
 export const REACTIONS = [

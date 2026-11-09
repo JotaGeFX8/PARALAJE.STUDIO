@@ -73,9 +73,19 @@ export async function recentComments(limit = 30) {
   return data ?? [];
 }
 
-export async function allCategories() {
+export async function allForums() {
   const supabase = await createClient();
-  const { data } = await supabase.from("categories").select("slug, name, description, position, is_archived").order("position");
+  const [{ data: forums }, { data: cats }] = await Promise.all([
+    supabase.from("forums").select("slug, name, description, rules, position, is_archived").order("position"),
+    supabase.from("categories").select("slug, name, description, position, is_archived, forum_slug").order("position"),
+  ]);
+  return (forums ?? []).map((f) => ({ ...f, categories: (cats ?? []).filter((c) => c.forum_slug === f.slug) }));
+}
+
+export async function adminTags(q: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_tag_list", { p_query: q || undefined, p_limit: 150 });
+  if (error) console.error("admin_tag_list", error.message);
   return data ?? [];
 }
 

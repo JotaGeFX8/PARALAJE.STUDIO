@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireOnboardedMember } from "@/lib/auth";
-import { getCategories } from "@/lib/data/posts";
+import { getForums } from "@/lib/data/posts";
 import { PageHeader } from "@/components/ui/page-header";
 import { Composer } from "@/components/posts/composer";
 import { oneParam } from "@/lib/format";
@@ -15,9 +15,12 @@ export default async function PublicarPage({
 }) {
   const { profile } = await requireOnboardedMember();
   const sp = await searchParams;
-  const categories = await getCategories();
-  const territorio = oneParam(sp.territorio);
-  const initialCategory = categories.some((c) => c.slug === territorio) ? territorio : "";
+  const forums = await getForums();
+  // ?foro=…&sub=… (y la dirección antigua ?territorio=…, que es una subcategoría)
+  const subParam = oneParam(sp.sub) || oneParam(sp.territorio);
+  const fromSub = forums.find((f) => f.categories.some((c) => c.slug === subParam));
+  const forum = forums.find((f) => f.slug === oneParam(sp.foro)) ?? fromSub ?? forums.find((f) => f.slug === "agora");
+  const initialCategory = forum?.categories.some((c) => c.slug === subParam) ? subParam : "";
 
   if (profile.role === "restricted") {
     return (
@@ -37,15 +40,21 @@ export default async function PublicarPage({
     return (
       <div className="max-w-3xl">
         <PageHeader eyebrow={`Círculo · ${circle.name}`} title="Publicar en el círculo" lead="Lo verán los miembros del círculo (y, si es público, cualquier miembro de la comunidad)." />
-        <Composer mode="create" circle={circle.id} />
+        <Composer mode="create" userId={profile.id} circle={circle.id} />
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl">
-      <PageHeader eyebrow="Nueva publicación" title="Comparte algo" lead="Una idea, un hallazgo, una pregunta o una experiencia. Lo que aportes, decláralo con honestidad." />
-      <Composer mode="create" categories={categories} initial={{ category: initialCategory }} />
+      <PageHeader eyebrow="Nueva publicación" title="Comparte algo" lead="Un debate, una pregunta, una investigación, un recurso o una encuesta. Lo que aportes, clasifícalo con honestidad." />
+      {forum?.rules && (
+        <details className="mb-8 rounded-sm bg-surface-2 p-4 text-sm text-ink-2">
+          <summary className="cursor-pointer font-medium text-ink">Normas de {forum.name}</summary>
+          <p className="mt-2 whitespace-pre-line leading-relaxed">{forum.rules}</p>
+        </details>
+      )}
+      <Composer mode="create" userId={profile.id} forums={forums} initial={{ forum: forum?.slug ?? "agora", category: initialCategory }} />
     </div>
   );
 }

@@ -121,29 +121,30 @@ await runSuite("Administración y moderación", async (browser) => {
   await item.getByRole("button", { name: "Reabrir" }).waitFor();
   await item.getByRole("button", { name: "Fijar" }).click();
   await item.getByRole("button", { name: "Desfijar" }).waitFor();
-  await item.getByLabel("Tipo").selectOption("hypothesis");
+  await item.getByLabel("Clasificación").selectOption("hypothesis");
   await item.getByRole("button", { name: "Reclasificar" }).click();
   await item.getByLabel("Motivo").fill("Es una hipótesis, no un hecho.");
   await item.getByRole("button", { name: "Aplicar" }).click();
-  await item.locator('span[title^="Una idea por explorar"]').waitFor();
+  await item.locator('span[title^="Una posibilidad por explorar"]').waitFor();
   await hugo.page.goto(theoryUrl);
   await hugo.page.getByText("Conversación cerrada").waitFor();
-  await hugo.page.locator('span[title^="Una idea por explorar"]').first().waitFor();
+  await hugo.page.locator('span[title^="Una posibilidad por explorar"]').first().waitFor();
   assert.equal(await hugo.page.getByLabel("Tu comentario").count(), 0);
   step("conversación cerrada, fijada y reclasificada como hipótesis");
 
-  // 6. Territorios
+  // 6. Foros: subcategoría nueva en el Ágora
   const slug = `arte-${RUN}`.slice(0, 30);
-  await gema.page.goto(`${APP}/admin/territorios`);
-  const form = gema.page.locator("form").last();
-  await form.getByLabel("Id").fill(slug);
-  await form.getByLabel("Nombre").fill(`Arte y creatividad ${RUN}`);
-  await form.getByLabel("Descripción").fill("Pintura, música y procesos creativos.");
+  await gema.page.goto(`${APP}/admin/foros`);
+  const agora = gema.page.locator("section", { has: gema.page.getByRole("heading", { name: "Subcategorías de Ágora" }) });
+  const form = agora.locator("form").last();
+  await form.getByLabel("Id", { exact: true }).fill(slug);
+  await form.getByLabel("Nombre", { exact: true }).fill(`Arte y creatividad ${RUN}`);
+  await form.getByLabel("Descripción", { exact: true }).fill("Pintura, música y procesos creativos.");
   await form.getByRole("button", { name: "Crear" }).click();
-  await form.getByText("Territorio guardado.").waitFor();
-  await hugo.page.goto(`${APP}/comunidad`);
-  await hugo.page.getByText(`Arte y creatividad ${RUN}`).waitFor();
-  step("nuevo territorio creado desde el panel");
+  await form.getByText("Subcategoría guardada.").waitFor();
+  await hugo.page.goto(`${APP}/comunidad/agora`);
+  await hugo.page.getByRole("link", { name: `Arte y creatividad ${RUN}` }).first().waitFor();
+  step("subcategoría nueva creada en un foro desde el panel");
 
   // 7. Registro cerrado
   await gema.page.goto(`${APP}/admin/configuracion`);

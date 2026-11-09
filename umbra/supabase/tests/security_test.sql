@@ -178,11 +178,12 @@ do $$ begin
   raise exception 'FALLO: documentado sin fuentes';
 exception when check_violation then raise notice 'OK lo documentado exige fuentes'; end $$;
 do $$ begin
-  perform public.create_post('Imagen ajena', 'Texto', 'opinion', 'ciencia', false, '{}', '{}',
-    array['a0000000-0000-4000-8000-000000000002/robada.webp']);
+  perform public.create_post(p_title => 'Imagen ajena', p_body => 'Texto', p_kind => 'opinion', p_forum => 'ciencia',
+    p_image_paths => array['a0000000-0000-4000-8000-000000000002/robada.webp']);
   raise exception 'FALLO: imagen de otra carpeta';
 exception when invalid_parameter_value then raise notice 'OK imágenes solo de la carpeta propia'; end $$;
-select public.create_post('Hilo de prueba', 'Hola @bea_seg, ¿qué opinas?', 'opinion', 'ciencia', false, '{}', array['prueba','seguridad']) as post_id \gset
+select public.create_post(p_title => 'Hilo de prueba', p_body => 'Hola @bea_seg, ¿qué opinas?', p_kind => 'opinion',
+  p_forum => 'ciencia', p_tags => array['prueba','seguridad']) as post_id \gset
 reset role;
 set local request.jwt.claim.sub = '';
 
@@ -243,12 +244,117 @@ exception when insufficient_privilege then raise notice 'OK conversación cerrad
 reset role;
 set local request.jwt.claim.sub = '';
 
+-- ============================================================ V2: foros, encuestas, adjuntos y etiquetas
+set local role authenticated;
+set local request.jwt.claim.sub = :ana;
+do $$ begin
+  perform public.create_post(p_title => null, p_body => 'Sin título', p_kind => 'opinion', p_forum => 'ciencia');
+  raise exception 'FALLO: foro sin título';
+exception when check_violation then raise notice 'OK fuera del Ágora el título es obligatorio'; end $$;
+do $$ begin
+  perform public.create_post(p_title => 'Mal sitio', p_body => 'Texto', p_kind => 'opinion', p_forum => 'ciencia', p_category => 'bioconstruccion');
+  raise exception 'FALLO: subcategoría de otro foro';
+exception when invalid_parameter_value then raise notice 'OK la subcategoría pertenece a su foro'; end $$;
+do $$ declare v uuid; begin
+  v := public.create_post(p_title => 'Sobre adobe', p_body => 'Muros de tierra cruda', p_kind => 'opinion', p_category => 'bioconstruccion');
+  if (select forum_slug from public.posts where id = v) <> 'naturaleza' then
+    raise exception 'FALLO: foro deducido';
+  end if;
+  raise notice 'OK el foro se deduce de la subcategoría';
+end $$;
+select public.create_post(p_title => '¿Qué observamos?', p_body => 'Elige una', p_kind => 'open_question', p_forum => 'universo',
+  p_type => 'poll', p_poll_options => array['Luna', 'Saturno', 'Luna']) as poll_post \gset
+do $$ begin
+  if (select count(*) from public.poll_options o join public.posts p on p.id = o.post_id where p.title = '¿Qué observamos?') <> 2 then
+    raise exception 'FALLO: opciones duplicadas';
+  end if;
+  raise notice 'OK las opciones repetidas de una encuesta se unifican';
+end $$;
+insert into public.post_attachments (post_id, author_id, path, name, mime, size)
+values (:'poll_post', :ana, 'a0000000-0000-4000-8000-000000000001/a0000000-0000-4000-8000-0000000000aa.pdf', 'carta.pdf', 'application/pdf', 1000);
+do $$ begin
+  insert into public.post_attachments (post_id, author_id, path, name, mime, size)
+  select id, auth.uid(), 'a0000000-0000-4000-8000-000000000002/a0000000-0000-4000-8000-0000000000bb.pdf', 'x.pdf', 'application/pdf', 10
+  from public.posts where title = '¿Qué observamos?';
+  raise exception 'FALLO: adjunto de carpeta ajena';
+exception when invalid_parameter_value then raise notice 'OK los adjuntos solo pueden ser archivos propios'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :bea;
+do $$ begin
+  perform public.vote_poll((select id from public.posts where title = '¿Qué observamos?'),
+    (select array_agg(id) from public.poll_options o where o.post_id = (select id from public.posts where title = '¿Qué observamos?')));
+  raise exception 'FALLO: dos votos en respuesta única';
+exception when invalid_parameter_value then raise notice 'OK una encuesta de respuesta única admite un solo voto'; end $$;
+select public.vote_poll(:'poll_post', array[(select min(id) from public.poll_options where post_id = :'poll_post')]);
+do $$ begin
+  insert into public.post_attachments (post_id, author_id, path, name, mime, size)
+  select id, auth.uid(), 'a0000000-0000-4000-8000-000000000002/a0000000-0000-4000-8000-0000000000cc.pdf', 'y.pdf', 'application/pdf', 10
+  from public.posts where title = '¿Qué observamos?';
+  raise exception 'FALLO: adjunto en publicación ajena';
+exception when insufficient_privilege then raise notice 'OK nadie adjunta archivos a publicaciones ajenas'; end $$;
+do $$ begin
+  insert into storage.objects (bucket_id, name) values ('post-files', 'a0000000-0000-4000-8000-000000000001/z.pdf');
+  raise exception 'FALLO: archivo en carpeta ajena';
+exception when insufficient_privilege then raise notice 'OK archivos aislados por carpeta'; end $$;
+do $$ begin
+  if (select count(*) from public.post_attachments a join public.posts p on p.id = a.post_id where p.title = '¿Qué observamos?') <> 1 then
+    raise exception 'FALLO: adjunto no visible';
+  end if;
+  raise notice 'OK quien lee la publicación ve sus adjuntos';
+end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :ana;
+do $$ begin
+  if exists (select 1 from public.poll_votes) then raise exception 'FALLO: votos ajenos visibles'; end if;
+  if (select sum(votes) from public.poll_results((select id from public.posts where title = '¿Qué observamos?'))) <> 1 then
+    raise exception 'FALLO: recuento';
+  end if;
+  raise notice 'OK votos anónimos: solo se ven los totales';
+end $$;
+select public.close_poll(:'poll_post');
+do $$ begin
+  perform public.admin_update_tag('prueba', 'prueba', 'blocked');
+  raise exception 'FALLO: miembro modera etiquetas';
+exception when insufficient_privilege then raise notice 'OK solo el equipo modera etiquetas'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :bea;
+do $$ begin
+  perform public.vote_poll((select id from public.posts where title = '¿Qué observamos?'), '{}');
+  raise exception 'FALLO: vota en encuesta cerrada';
+exception when invalid_parameter_value then raise notice 'OK no se vota en una encuesta cerrada'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :mod;
+select public.admin_update_tag('seguridad', 'seguridad', 'blocked');
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :ana;
+do $$ begin
+  perform public.create_post(p_title => 'Con etiqueta bloqueada', p_body => 'Probando etiquetas', p_kind => 'opinion', p_forum => 'agora', p_tags => array['Seguridad']);
+  raise exception 'FALLO: etiqueta bloqueada aceptada';
+exception when check_violation then raise notice 'OK una etiqueta bloqueada no se puede usar'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
 -- Miembro restringido: lee y reacciona, no publica
 update public.profiles set role = 'restricted' where id = :carlos;
 set local role authenticated;
 set local request.jwt.claim.sub = :carlos;
 do $$ begin
-  perform public.create_post('No debería', 'Texto', 'opinion', 'debate');
+  perform public.create_post(p_title => 'No debería', p_body => 'Texto', p_kind => 'opinion', p_forum => 'agora');
   raise exception 'FALLO: restringido publica';
 exception when insufficient_privilege then raise notice 'OK miembro restringido no publica'; end $$;
 insert into public.post_reactions (post_id, user_id, type) values (:'post_id', :carlos, 'curious');
@@ -320,7 +426,7 @@ set local role authenticated;
 set local request.jwt.claim.sub = :ana;
 select public.create_circle('Círculo privado de prueba', 'Solo miembros', 'private') as private_circle \gset
 select public.create_circle('Círculo secreto de prueba', 'Por invitación', 'invite') as secret_circle \gset
-select public.create_post('En el círculo', 'Contenido interno', 'opinion', null, false, '{}', '{}', '{}', :'private_circle') as circle_post \gset
+select public.create_post(p_title => 'En el círculo', p_body => 'Contenido interno', p_kind => 'opinion', p_circle => :'private_circle') as circle_post \gset
 insert into public.circle_messages (circle_id, sender_id, body) values (:'private_circle', :ana, 'Chat interno');
 select public.create_project('Proyecto de prueba', 'Resumen', 'Descripción', array['Objetivo'], 'Ayuda', 'active', 'España', 'Asturias',
   'arquitectura', array[(select id from public.topics where slug = 'bioconstruccion')]) as project_id \gset
@@ -343,8 +449,8 @@ do $$ begin
   raise notice 'OK unirse a un círculo privado crea una solicitud';
 end $$;
 do $$ begin
-  perform public.create_post('Intruso', 'Texto', 'opinion', null, false, '{}', '{}', '{}',
-    (select id from public.circles where name = 'Círculo privado de prueba'));
+  perform public.create_post(p_title => 'Intruso', p_body => 'Texto', p_kind => 'opinion',
+    p_circle => (select id from public.circles where name = 'Círculo privado de prueba'));
   raise exception 'FALLO: publica sin ser miembro';
 exception when insufficient_privilege then raise notice 'OK solo los miembros publican en un círculo'; end $$;
 do $$ begin

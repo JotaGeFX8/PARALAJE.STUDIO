@@ -10,7 +10,8 @@ const TABS = [
   { href: "/admin/contenido", label: "Contenido" },
   { href: "/admin/grupos", label: "Círculos y proyectos" },
   { href: "/admin/temas", label: "Temas" },
-  { href: "/admin/territorios", label: "Territorios", adminOnly: true },
+  { href: "/admin/etiquetas", label: "Etiquetas" },
+  { href: "/admin/foros", label: "Foros", adminOnly: true },
   { href: "/admin/configuracion", label: "Configuración", adminOnly: true },
 ];
 

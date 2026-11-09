@@ -51,7 +51,7 @@ await runSuite("Círculos, proyectos y Ágora", async (browser) => {
   await felix.page.getByRole("link", { name: "Publicar en el círculo" }).click();
   await felix.page.getByLabel(/^Título/).fill(`Saturno visible esta semana ${RUN}`);
   await felix.page.getByLabel("Texto").fill("A simple vista se ve hacia el sureste después de las 22:00.");
-  await felix.page.getByText("Experiencia", { exact: true }).click();
+  await felix.page.locator('input[name="type_choice"][value="experience"]').check();
   await felix.page.getByRole("button", { name: "Publicar" }).click();
   await felix.page.waitForURL(/\/p\/[0-9a-f-]{36}$/);
   await felix.page.getByRole("link", { name: "← Círculo" }).waitFor();
@@ -158,17 +158,20 @@ await runSuite("Círculos, proyectos y Ágora", async (browser) => {
   await shot(felix.page, "proyecto-movil", true);
   step("solicitud de colaboración, aceptación, conversación y novedades con aviso");
 
-  // 5. Ágora: publicación rápida y filtro de preguntas
+  // 5. Ágora (uno de los siete foros): publicación rápida y filtros
   await felix.page.goto(`${APP}/agora`);
+  await felix.page.waitForURL(`${APP}/comunidad/agora`);
   await felix.page.getByLabel("Publicación rápida").fill(`¿Qué libro de divulgación recomendaríais para empezar? ${RUN}`);
   await felix.page.getByText("Es una pregunta").click();
   await felix.page.getByRole("button", { name: "Publicar" }).click();
   await felix.page.getByText("Publicado en el Ágora.").waitFor();
   await felix.page.getByText(`¿Qué libro de divulgación recomendaríais para empezar? ${RUN}`).waitFor();
-  await felix.page.goto(`${APP}/agora?preguntas=1`);
+  await felix.page.goto(`${APP}/comunidad/agora?tipo=question&sin_responder=1`);
   await felix.page.getByText(`¿Qué libro de divulgación recomendaríais para empezar? ${RUN}`).waitFor();
+  await felix.page.goto(`${APP}/comunidad/agora?tipo=poll`);
+  assert.equal(await felix.page.getByText(`¿Qué libro de divulgación recomendaríais para empezar? ${RUN}`).count(), 0);
   await shot(felix.page, "agora-movil");
-  step("Ágora: publicación rápida y filtro «Solo preguntas»");
+  step("Ágora: publicación rápida, filtros «Preguntas» y «Sin responder»");
 
   // 6. Explorar y búsqueda reflejan círculos y proyectos
   await elena.page.goto(`${APP}/explorar`);

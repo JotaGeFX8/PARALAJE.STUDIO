@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import {
   reclassifyPostAction,
   saveCategoryAction,
+  saveForumAction,
   saveSettingsAction,
   setPostFlagsAction,
   setRoleAction,
@@ -150,7 +151,7 @@ export function Reclassify({ postId, kind }: { postId: string; kind: Enums<"post
   const [value, setValue] = useState(kind);
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
-      <select aria-label="Tipo" value={value} onChange={(e) => setValue(e.target.value as Enums<"post_kind">)} className="field !w-auto !py-1 !text-sm">
+      <select aria-label="Clasificación" value={value} onChange={(e) => setValue(e.target.value as Enums<"post_kind">)} className="field !w-auto !py-1 !text-sm">
         {EPISTEMIC_KINDS.map((k) => (
           <option key={k.key} value={k.key}>
             {k.name}
@@ -166,15 +167,19 @@ export function Reclassify({ postId, kind }: { postId: string; kind: Enums<"post
 
 export function CategoryForm({
   initial,
+  forums,
+  forum,
 }: {
   initial?: { slug: string; name: string; description: string; position: number; is_archived: boolean };
+  forums: { slug: string; name: string }[];
+  forum: string;
 }) {
   const [state, action] = useActionState(saveCategoryAction, initialFormState);
   return (
-    <form action={action} className="grid gap-3 border-b hairline py-5 md:grid-cols-[8rem_14rem_1fr_4rem_auto_auto] md:items-end">
+    <form action={action} className="grid gap-3 border-b hairline py-5 md:grid-cols-[8rem_12rem_1fr_9rem_4rem_auto_auto] md:items-end">
       <label className="block">
         <span className="label block">Id</span>
-        <input name="slug" defaultValue={initial?.slug} readOnly={Boolean(initial)} className="field !text-sm" placeholder="nuevo-territorio" />
+        <input name="slug" defaultValue={initial?.slug} readOnly={Boolean(initial)} className="field !text-sm" placeholder="nueva-subcategoria" />
       </label>
       <label className="block">
         <span className="label block">Nombre</span>
@@ -185,15 +190,75 @@ export function CategoryForm({
         <input name="description" defaultValue={initial?.description} maxLength={400} className="field !text-sm" />
       </label>
       <label className="block">
+        <span className="label block">Foro</span>
+        <select name="forum" defaultValue={forum} className="field !text-sm">
+          {forums.map((f) => (
+            <option key={f.slug} value={f.slug}>
+              {f.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="block">
         <span className="label block">Orden</span>
         <input name="position" type="number" defaultValue={initial?.position ?? 99} className="field !text-sm" />
       </label>
       <label className="flex items-center gap-2 text-sm text-ink-2">
-        <input type="checkbox" name="archived" defaultChecked={initial?.is_archived} /> Archivado
+        <input type="checkbox" name="archived" defaultChecked={initial?.is_archived} /> Archivada
       </label>
       <div className="flex items-center gap-2">
         <SubmitButton className="btn btn-ghost btn-sm" pendingLabel="…">
           {initial ? "Guardar" : "Crear"}
+        </SubmitButton>
+        {(state.message || state.errors) && (
+          <span className={`text-xs ${state.ok ? "text-accent" : "text-danger"}`}>
+            {state.message ?? state.errors?.name ?? state.errors?.slug}
+          </span>
+        )}
+      </div>
+    </form>
+  );
+}
+
+/** Edición de un foro: nombre, descripción, normas (una por línea), orden y archivo. */
+export function ForumForm({
+  initial,
+}: {
+  initial?: { slug: string; name: string; description: string; rules: string; position: number; is_archived: boolean };
+}) {
+  const [state, action] = useActionState(saveForumAction, initialFormState);
+  return (
+    <form action={action} className="grid gap-4 md:grid-cols-[8rem_1fr_5rem] md:items-start">
+      <label className="block">
+        <span className="label block">Id</span>
+        <input name="slug" defaultValue={initial?.slug} readOnly={Boolean(initial)} className="field !text-sm" placeholder="nuevo-foro" />
+      </label>
+      <div className="grid gap-4">
+        <label className="block">
+          <span className="label block">Nombre</span>
+          <input name="name" defaultValue={initial?.name} maxLength={80} className="field font-serif !text-lg" />
+        </label>
+        <label className="block">
+          <span className="label block">Descripción</span>
+          <input name="description" defaultValue={initial?.description} maxLength={400} className="field !text-sm" />
+        </label>
+        <label className="block">
+          <span className="label block">Normas · una por línea</span>
+          <textarea name="rules" defaultValue={initial?.rules} maxLength={4000} rows={4} className="field !text-sm" />
+        </label>
+      </div>
+      <div className="grid gap-4">
+        <label className="block">
+          <span className="label block">Orden</span>
+          <input name="position" type="number" defaultValue={initial?.position ?? 99} className="field !text-sm" />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink-2">
+          <input type="checkbox" name="archived" defaultChecked={initial?.is_archived} disabled={initial?.slug === "agora"} /> Archivado
+        </label>
+      </div>
+      <div className="flex items-center gap-3 md:col-start-2">
+        <SubmitButton className="btn btn-ghost btn-sm" pendingLabel="…">
+          {initial ? "Guardar foro" : "Crear foro"}
         </SubmitButton>
         {(state.message || state.errors) && (
           <span className={`text-xs ${state.ok ? "text-accent" : "text-danger"}`}>

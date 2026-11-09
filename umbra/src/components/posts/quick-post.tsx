@@ -23,7 +23,7 @@ export function QuickPost({ name }: { name: string }) {
 
   return (
     <form ref={ref} action={action} className="boxed p-4" onFocus={() => setOpen(true)}>
-      <input type="hidden" name="category" value="" />
+      <input type="hidden" name="forum" value="agora" />
       <input type="hidden" name="return_to" value="agora" />
       <label htmlFor="agora-body" className="sr-only">
         Publicación rápida
@@ -44,16 +44,16 @@ export function QuickPost({ name }: { name: string }) {
             {EPISTEMIC_KINDS.map((k) => (
               <label key={k.key} className="chip !min-h-8 cursor-pointer !px-3 !text-[0.8125rem]" title={k.description}>
                 <input type="radio" name="kind" value={k.key} defaultChecked={k.key === "opinion"} className="sr-only" />
-                {k.name}
+                {k.short}
               </label>
             ))}
             <label className="ml-1 flex cursor-pointer items-center gap-2 text-sm text-ink-2">
-              <input type="checkbox" name="is_question" /> Es una pregunta
+              <input type="checkbox" name="type" value="question" /> Es una pregunta
             </label>
           </div>
           <p className="text-xs text-muted">
-            Si eliges «Documentado», añade fuentes desde el{" "}
-            <a href="/publicar" className="link">
+            Para encuestas, archivos o fuentes, usa el{" "}
+            <a href="/publicar?foro=agora" className="link">
               editor completo
             </a>
             .

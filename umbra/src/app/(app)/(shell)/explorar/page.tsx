@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
 import { getAffinityMembers, getNewMembers } from "@/lib/data/members";
-import { getCategories, getFeed, getTrendingTags } from "@/lib/data/posts";
+import { getFeed, getForums, getTrendingTags } from "@/lib/data/posts";
 import { activeCircles } from "@/lib/data/circles";
 import { listProjects } from "@/lib/data/projects";
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +14,6 @@ import { NavTabs, Pagination, hrefWith } from "@/components/ui/nav-tabs";
 import { SectionTitle } from "@/components/ui/section";
 import { Avatar } from "@/components/ui/avatar";
 import { PostList } from "@/components/posts/post-row";
-import { KindBadge } from "@/components/posts/kind-badge";
 import { MemberRow } from "@/components/profile/member-row";
 import { StatusBadge } from "@/components/groups/cards";
 import { IconArrow, IconSearch } from "@/components/ui/icons";
@@ -31,15 +30,15 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
   const welcome = oneParam(sp.bienvenida) === "1";
   const supabase = await createClient();
 
-  const [feed, debates, affinity, newcomers, circles, projects, categories, tags, { data: myInterests }, { data: activity }, settings] =
+  const [feed, unanswered, affinity, newcomers, circles, projects, forums, tags, { data: myInterests }, { data: activity }, settings] =
     await Promise.all([
       getFeed({ scope: "all", sort, page, limit: 12 }),
-      getFeed({ scope: "forum", kind: "hypothesis", sort: "trending", limit: 3 }),
+      getFeed({ unanswered: true, type: "question", sort: "recent", limit: 3 }),
       getAffinityMembers(4),
       getNewMembers(5),
       activeCircles(3),
       listProjects({}, "active", 3),
-      getCategories(),
+      getForums(),
       getTrendingTags(10),
       supabase.from("profile_topics").select("is_primary, topics(area_slug)").eq("profile_id", profile.id),
       supabase.rpc("community_activity", { p_limit: 10 }),
@@ -51,10 +50,11 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
     .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
     .map((t) => t.topics?.area_slug)
     .filter((a): a is string => Boolean(a));
+  const categories = forums.flatMap((f) => f.categories);
   const recommended = Array.from(new Set(myAreas.flatMap((a) => AREA_TO_CATEGORIES[a] ?? [])))
     .map((slug) => categories.find((c) => c.slug === slug))
-    .filter(Boolean)
-    .slice(0, 6) as { slug: string; name: string }[];
+    .filter((c): c is (typeof categories)[number] => Boolean(c))
+    .slice(0, 6);
 
   const first = (profile.display_name ?? profile.username ?? "").split(" ")[0];
   const current = { orden: sort === "recent" ? undefined : sort };
@@ -149,7 +149,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
               <SectionTitle eyebrow="Para ti" title="Temáticas recomendadas" />
               <div className="flex flex-wrap gap-2">
                 {recommended.map((c) => (
-                  <Link key={c.slug} href={`/comunidad/${c.slug}`} className="chip !min-h-9">
+                  <Link key={c.slug} href={`/comunidad/${c.forum_slug}/${c.slug}`} className="chip !min-h-9">
                     {c.name}
                   </Link>
                 ))}
@@ -166,16 +166,16 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
             </section>
           )}
 
-          {debates.items.length > 0 && (
+          {unanswered.items.length > 0 && (
             <section>
-              <SectionTitle eyebrow="Hipótesis en discusión" title="Debates abiertos" href="/comunidad" />
+              <SectionTitle eyebrow="Puedes ayudar" title="Preguntas sin responder" href="/comunidad/agora?tipo=question&sin_responder=1" />
               <ul className="space-y-4 border-t hairline pt-4">
-                {debates.items.map((d) => (
+                {unanswered.items.map((d) => (
                   <li key={d.id}>
                     <Link href={`/p/${d.id}`} className="group block">
-                      <KindBadge kind={d.kind} />
-                      <span className="mt-2 block font-serif text-[1.0625rem] leading-snug text-ink group-hover:text-accent">{d.title ?? d.excerpt}</span>
-                      <span className="mt-1 block text-xs text-muted">{plural(d.comment_count, "comentario", "comentarios")}</span>
+                      <span className="text-xs text-muted">{d.forum_name}</span>
+                      <span className="mt-1 block font-serif text-[1.0625rem] leading-snug text-ink group-hover:text-accent">{d.title ?? d.excerpt}</span>
+                      <span className="mt-1 block text-xs text-muted">{timeAgo(d.created_at)}</span>
                     </Link>
                   </li>
                 ))}

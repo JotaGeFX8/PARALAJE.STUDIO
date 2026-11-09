@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
-import { getCategories, getCategoryStats, getTrendingTags } from "@/lib/data/posts";
+import { getForums, getForumStats, getTrendingTags } from "@/lib/data/posts";
 import { PageHeader } from "@/components/ui/page-header";
 import { IconPlus } from "@/components/ui/icons";
 import { AREAS } from "@/lib/content";
@@ -11,11 +11,11 @@ export const metadata: Metadata = { title: "Comunidad" };
 
 export default async function ComunidadPage() {
   await requireOnboardedMember();
-  const [categories, stats, tags] = await Promise.all([getCategories(), getCategoryStats(), getTrendingTags(16)]);
+  const [forums, stats, tags] = await Promise.all([getForums(), getForumStats(), getTrendingTags(16)]);
 
   return (
     <>
-      <PageHeader eyebrow="Comunidad · Foros" title="Territorios" lead={AREAS[1].description}>
+      <PageHeader eyebrow="Comunidad" title="Los siete foros" lead={AREAS[1].description}>
         <Link href="/publicar" className="btn btn-primary">
           <IconPlus size={18} /> Publicar
         </Link>
@@ -23,26 +23,41 @@ export default async function ComunidadPage() {
 
       <div className="grid gap-14 xl:grid-cols-[1fr_18rem]">
         <ol className="border-t hairline">
-          {categories.map((c, i) => {
-            const s = stats.get(c.slug);
+          {forums.map((f, i) => {
+            const s = stats.byForum.get(f.slug);
             return (
-              <li key={c.slug}>
-                <Link
-                  href={`/comunidad/${c.slug}`}
-                  className="group grid grid-cols-[2.25rem_1fr] gap-x-3 border-b hairline py-6 transition-colors md:grid-cols-[3rem_1fr_11rem] md:items-center md:gap-6"
-                >
-                  <span className="font-mono text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
-                  <span>
-                    <span className="block font-serif text-xl text-ink transition-colors group-hover:text-accent md:text-2xl">
-                      {c.name}
-                    </span>
-                    <span className="mt-1 block text-[0.9375rem] leading-relaxed text-muted">{c.description}</span>
-                  </span>
-                  <span className="col-start-2 mt-3 text-[0.8125rem] text-muted md:col-start-auto md:mt-0 md:text-right">
+              <li key={f.slug} className="border-b hairline py-7">
+                <div className="grid grid-cols-[2.25rem_1fr] gap-x-3 md:grid-cols-[3rem_1fr_11rem] md:items-start md:gap-6">
+                  <span className="pt-1.5 font-mono text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="min-w-0">
+                    <Link href={`/comunidad/${f.slug}`} className="group block">
+                      <span className="block font-serif text-2xl text-ink transition-colors group-hover:text-accent md:text-[1.75rem]">
+                        {f.name}
+                      </span>
+                      <span className="mt-1 block text-[0.9375rem] leading-relaxed text-muted">{f.description}</span>
+                    </Link>
+                    {f.categories.length > 0 && (
+                      <ul className="mt-3 flex flex-wrap gap-1.5">
+                        {f.categories.map((c) => {
+                          const cs = stats.byCategory.get(c.slug);
+                          return (
+                            <li key={c.slug}>
+                              <Link href={`/comunidad/${f.slug}/${c.slug}`} className="tag">
+                                {c.name}
+                                {cs?.count ? <span className="ml-1 text-muted">{cs.count}</span> : null}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                  <span className="col-start-2 mt-3 text-[0.8125rem] text-muted md:col-start-auto md:mt-1 md:text-right">
                     <span className="block text-ink-2">{plural(s?.count ?? 0, "publicación", "publicaciones")}</span>
+                    {s?.unanswered ? <span className="block">{s.unanswered} sin responder</span> : null}
                     {s?.last && <span className="block">actividad {timeAgo(s.last)}</span>}
                   </span>
-                </Link>
+                </div>
               </li>
             );
           })}
@@ -66,8 +81,8 @@ export default async function ComunidadPage() {
           <div className="rounded-sm bg-surface-2 p-5 text-sm leading-relaxed text-ink-2">
             <p className="font-medium text-ink">Antes de publicar</p>
             <p className="mt-2">
-              Indica si tu aportación es documentada, una hipótesis, una opinión o una experiencia. Lo documentado
-              necesita fuentes.
+              Elige el tipo (debate, pregunta, investigación, recurso, encuesta…) y clasifica tu aportación: hecho
+              documentado, hipótesis, interpretación, opinión o pregunta abierta. Lo documentado necesita fuentes.
             </p>
             <Link href="/normas" className="link mt-3 inline-block">
               Normas de la comunidad

@@ -38,6 +38,26 @@ function imageFiles(fd: FormData) {
 
 // ---------------------------------------------------------------- Publicaciones
 
+type AttachmentInput = { path: string; name: string; mime: string; size: number };
+
+/** Registra los adjuntos (ya subidos por el navegador a la carpeta propia). Si falla, borra los archivos. */
+async function attachFiles(supabase: Supa, userId: string, postId: string, files: AttachmentInput[]) {
+  if (!files.length) return null;
+  const own = files.filter((f) => f.path.startsWith(`${userId}/`));
+  const { error } = await supabase
+    .from("post_attachments")
+    .insert(own.map((f) => ({ post_id: postId, author_id: userId, path: f.path, name: f.name, mime: f.mime, size: f.size })));
+  if (error) {
+    await supabase.storage.from("post-files").remove(own.map((f) => f.path));
+    return dbErrorMessage(error, "No se pudieron adjuntar los archivos.");
+  }
+  return null;
+}
+
+function pollCloses(days: string) {
+  return days ? new Date(Date.now() + Number(days) * 86_400_000).toISOString() : undefined;
+}
+
 export async function createPostAction(_: FormState, fd: FormData): Promise<FormState> {
   const raw = readPostForm(fd);
   const parsed = postSchema.safeParse(raw);
@@ -47,7 +67,10 @@ export async function createPostAction(_: FormState, fd: FormData): Promise<Form
   const { supabase, userId } = await getActionContext();
   if (!userId) return { message: SESSION_EXPIRED, values };
 
-  const circle = String(fd.get("circle") ?? "") || null;
+  const d = parsed.data;
+  if (d.type === "poll" && d.poll_options.length < 2) {
+    return { errors: { poll_options: "Una encuesta necesita al menos dos opciones." }, values };
+  }
   const files = imageFiles(fd);
   if (files.length > MAX_IMAGES) return { errors: { images: `Máximo ${MAX_IMAGES} imágenes.` }, values };
 
@@ -58,28 +81,34 @@ export async function createPostAction(_: FormState, fd: FormData): Promise<Form
     return { errors: { images: (e as Error).message }, values };
   }
 
-  const d = parsed.data;
   const { data: id, error } = await supabase.rpc("create_post", {
     p_title: d.title ?? "",
     p_body: d.body,
     p_kind: d.kind,
-    p_category: d.category ?? undefined,
-    p_is_question: d.is_question,
+    p_forum: d.circle ? undefined : (d.forum ?? undefined),
+    p_category: d.circle ? undefined : (d.category ?? undefined),
+    p_type: d.type,
     p_sources: d.sources,
     p_tags: d.tags,
     p_image_paths: paths,
-    p_circle: circle ?? undefined,
+    p_circle: d.circle ?? undefined,
+    p_poll_options: d.type === "poll" ? d.poll_options : undefined,
+    p_poll_multiple: d.poll_multiple,
+    p_poll_closes: d.type === "poll" ? pollCloses(d.poll_days) : undefined,
   });
 
   if (error || !id) {
     if (paths.length) await supabase.storage.from("post-images").remove(paths);
+    if (d.attachments.length) await supabase.storage.from("post-files").remove(d.attachments.map((a) => a.path));
     return { message: dbErrorMessage(error, "No se ha podido publicar."), values };
   }
+  const attachError = await attachFiles(supabase, userId, id, d.attachments);
   if (fd.get("return_to") === "agora") {
     // Publicación rápida: se queda en el Ágora y el listado se actualiza.
     refresh();
     return { ok: true, message: "Publicado en el Ágora." };
   }
+  if (attachError) redirect(`/p/${id}?aviso=adjuntos`);
   redirect(`/p/${id}`);
 }
 
@@ -95,14 +124,20 @@ export async function updatePostAction(_: FormState, fd: FormData): Promise<Form
 
   const { data: current } = await supabase
     .from("posts")
-    .select("image_paths, author_id")
+    .select("image_paths, author_id, post_attachments(id, path)")
     .eq("id", postId)
     .maybeSingle();
   if (!current || current.author_id !== userId) return { message: "No puedes editar esta publicación." };
 
+  const d = parsed.data;
   const keep = fd.getAll("keep_images").map(String).filter((p) => current.image_paths.includes(p));
   const files = imageFiles(fd);
   if (keep.length + files.length > MAX_IMAGES) return { errors: { images: `Máximo ${MAX_IMAGES} imágenes.` }, values };
+  const keepFiles = fd.getAll("keep_attachments").map(String);
+  const dropFiles = current.post_attachments.filter((a) => !keepFiles.includes(a.id));
+  if (current.post_attachments.length - dropFiles.length + d.attachments.length > 3) {
+    return { errors: { attachments: "Máximo 3 archivos por publicación." }, values };
+  }
 
   let added: string[] = [];
   try {
@@ -111,24 +146,72 @@ export async function updatePostAction(_: FormState, fd: FormData): Promise<Form
     return { errors: { images: (e as Error).message }, values };
   }
 
-  const d = parsed.data;
   const { error } = await supabase.rpc("update_post", {
     p_id: postId,
     p_title: d.title ?? "",
     p_body: d.body,
     p_kind: d.kind,
-    p_is_question: d.is_question,
+    p_type: d.type,
+    p_category: d.category ?? "",
     p_sources: d.sources,
     p_tags: d.tags,
     p_image_paths: [...keep, ...added],
   });
   if (error) {
     if (added.length) await supabase.storage.from("post-images").remove(added);
+    if (d.attachments.length) await supabase.storage.from("post-files").remove(d.attachments.map((a) => a.path));
     return { message: dbErrorMessage(error, "No se han podido guardar los cambios."), values };
   }
   const removed = current.image_paths.filter((p) => !keep.includes(p));
   if (removed.length) await supabase.storage.from("post-images").remove(removed);
-  redirect(`/p/${postId}`);
+  if (dropFiles.length) {
+    await supabase.from("post_attachments").delete().in("id", dropFiles.map((a) => a.id));
+    await supabase.storage.from("post-files").remove(dropFiles.map((a) => a.path));
+  }
+  const attachError = await attachFiles(supabase, userId, postId, d.attachments);
+  redirect(attachError ? `/p/${postId}?aviso=adjuntos` : `/p/${postId}`);
+}
+
+/** Borra un archivo subido que al final no se adjuntó (el navegador avisa al quitarlo del editor). */
+export async function discardUploadAction(path: string) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId || !path.startsWith(`${userId}/`)) return { ok: false };
+  const { data: used } = await supabase.from("post_attachments").select("id").eq("path", path).maybeSingle();
+  if (used) return { ok: false };
+  await supabase.storage.from("post-files").remove([path]);
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------- Encuestas
+
+export async function votePollAction(postId: string, optionIds: number[]) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const ids = optionIds.filter((n) => Number.isInteger(n) && n > 0).slice(0, 10);
+  const { error } = await supabase.rpc("vote_poll", { p_post: postId, p_options: ids });
+  if (error) return { ok: false, message: dbErrorMessage(error, "No se pudo registrar el voto.") };
+  refresh();
+  return { ok: true };
+}
+
+export async function closePollAction(postId: string) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { error } = await supabase.rpc("close_poll", { p_post: postId });
+  if (error) return { ok: false, message: dbErrorMessage(error, "No se pudo cerrar la encuesta.") };
+  refresh();
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------- Etiquetas
+
+export async function suggestTagsAction(q: string) {
+  const query = String(q ?? "").trim().slice(0, 32);
+  if (!query) return [];
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return [];
+  const { data } = await supabase.rpc("suggest_tags", { p_query: query, p_limit: 8 });
+  return (data ?? []).map((t) => ({ slug: t.slug, name: t.name, uses: Number(t.uses), fromCatalog: t.source === "topic" }));
 }
 
 export async function deletePostAction(postId: string): Promise<{ ok: boolean; message?: string }> {
@@ -136,7 +219,7 @@ export async function deletePostAction(postId: string): Promise<{ ok: boolean; m
   if (!userId) return { ok: false, message: SESSION_EXPIRED };
   const { data: post } = await supabase
     .from("posts")
-    .select("author_id, image_paths, category_slug, circle_id")
+    .select("author_id, image_paths, forum_slug, category_slug, circle_id, post_attachments(path)")
     .eq("id", postId)
     .maybeSingle();
   const { error } = await supabase.rpc("delete_post", { p_id: postId });
@@ -144,12 +227,13 @@ export async function deletePostAction(postId: string): Promise<{ ok: boolean; m
   if (post && post.author_id === userId && post.image_paths.length) {
     await supabase.storage.from("post-images").remove(post.image_paths);
   }
+  if (post && post.author_id === userId && post.post_attachments.length) {
+    await supabase.storage.from("post-files").remove(post.post_attachments.map((a) => a.path));
+  }
   redirect(
     post?.circle_id
       ? `/circulos/${post.circle_id}`
-      : post?.category_slug
-        ? `/comunidad/${post.category_slug}`
-        : "/agora",
+      : `/comunidad/${post?.forum_slug ?? "agora"}${post?.category_slug ? `/${post.category_slug}` : ""}`,
   );
 }
 

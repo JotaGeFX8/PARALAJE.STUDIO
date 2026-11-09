@@ -17,6 +17,7 @@ export type UserRole = Enums<"user_role">;
 export type AccountStatus = Enums<"account_status">;
 export type ChatAvailability = Enums<"chat_availability">;
 export type PostKindDb = Enums<"post_kind">;
+export type PostTypeDb = Enums<"post_type">;
 export type ReactionType = Enums<"reaction_type">;
 export type ReportTarget = Enums<"report_target">;
 export type TopicRelation = Enums<"topic_relation">;
@@ -29,6 +30,8 @@ export type PostItem = { [K in keyof RawPostItem]-?: NonNullable<RawPostItem[K]>
   title: string | null;
   category_slug: string | null;
   category_name: string | null;
+  forum_slug: string | null;
+  forum_name: string | null;
   circle_id: string | null;
   author_avatar: string | null;
 };

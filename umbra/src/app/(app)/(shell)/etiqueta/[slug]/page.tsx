@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireOnboardedMember } from "@/lib/auth";
 import { getFeed, getTag } from "@/lib/data/posts";
 import { PageHeader } from "@/components/ui/page-header";
@@ -22,7 +22,8 @@ export default async function EtiquetaPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
   const tag = await getTag(slug);
-  if (!tag) notFound();
+  if (!tag || tag.status === "blocked") notFound();
+  if (tag.merged_into) redirect(`/etiqueta/${tag.merged_into}`);
   const sort = parseSort(oneParam(sp.orden));
   const page = pageParam(sp.pagina);
   const base = `/etiqueta/${slug}`;

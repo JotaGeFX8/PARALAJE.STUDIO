@@ -2,11 +2,11 @@ import Link from "next/link";
 import { KnowledgeAtlas } from "@/components/ui/knowledge-atlas";
 import { BRAND } from "@/config/brand";
 import { IconArrow } from "@/components/ui/icons";
-import { AREAS, EPISTEMIC_KINDS, TERRITORIES } from "@/lib/content";
+import { AREAS, EPISTEMIC_KINDS, FORUMS } from "@/lib/content";
 
 const JOURNEY = [
   { label: "Llega por", text: "una pregunta sobre física cuántica" },
-  { label: "Conversa en", text: "Conciencia y filosofía" },
+  { label: "Conversa en", text: "Conciencia y pensamiento" },
   { label: "Conecta con", text: "tres personas que viven en el campo" },
   { label: "Termina en", text: "un proyecto de vivienda autosuficiente" },
 ];
@@ -113,24 +113,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------- Territorios */}
+      {/* ------------------------------------------------------------ Foros */}
       <section className="border-t hairline bg-surface-2 px-5 py-24 sm:px-8 md:py-36">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-12">
           <div className="md:col-span-4">
-            <p className="label">03 — Territorios</p>
-            <h2 className="display mt-6 text-[clamp(2rem,4.2vw,3.25rem)] text-ink">
-              Doce territorios de conversación.
-            </h2>
+            <p className="label">03 — Foros</p>
+            <h2 className="display mt-6 text-[clamp(2rem,4.2vw,3.25rem)] text-ink">Siete foros de conversación.</h2>
             <p className="mt-6 max-w-sm text-[0.9375rem] leading-relaxed text-muted">
-              Cada foro tiene su propio ritmo, etiquetas y moderación. Ninguno impone una única forma de
-              pensar.
+              Cada foro tiene sus normas, sus subcategorías y su moderación. Ninguno impone una única forma de pensar.
             </p>
           </div>
           <ul className="grid content-start gap-x-10 sm:grid-cols-2 md:col-span-8">
-            {TERRITORIES.map(([slug, name], i) => (
-              <li key={slug} className="flex items-baseline gap-4 border-b hairline py-4">
-                <span className="w-6 font-mono text-[0.6875rem] text-muted">{String(i + 1).padStart(2, "0")}</span>
-                <span className="font-serif text-lg text-ink">{name}</span>
+            {FORUMS.map(([slug, name, description], i) => (
+              <li key={slug} className="grid grid-cols-[1.5rem_1fr] items-baseline gap-x-4 border-b hairline py-4">
+                <span className="font-mono text-[0.6875rem] text-muted">{String(i + 1).padStart(2, "0")}</span>
+                <span>
+                  <span className="block font-serif text-lg text-ink">{name}</span>
+                  <span className="mt-0.5 block text-sm text-muted">{description}</span>
+                </span>
               </li>
             ))}
           </ul>
@@ -154,9 +154,9 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <dl className="mt-16 grid gap-px overflow-hidden border hairline bg-line sm:grid-cols-2 lg:grid-cols-4">
+          <dl className="mt-16 grid gap-px overflow-hidden border hairline bg-line sm:grid-cols-2 lg:grid-cols-5">
             {EPISTEMIC_KINDS.map((k) => (
-              <div key={k.key} className="bg-canvas p-7 md:p-8">
+              <div key={k.key} className="bg-canvas p-7 sm:last:col-span-2 md:p-8 lg:last:col-span-1">
                 <span className="grid h-10 w-10 place-items-center border border-line-2 font-mono text-sm text-accent">
                   {k.mark}
                 </span>

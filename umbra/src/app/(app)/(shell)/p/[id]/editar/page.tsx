@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { requireOnboardedMember } from "@/lib/auth";
-import { getCategories, getPost } from "@/lib/data/posts";
+import { getForums, getPost } from "@/lib/data/posts";
 import { PageHeader } from "@/components/ui/page-header";
 import { Composer } from "@/components/posts/composer";
 
@@ -14,26 +14,30 @@ export default async function EditarPublicacionPage({ params }: { params: Promis
   const post = await getPost(id, profile.id);
   if (!post) notFound();
   if (post.author_id !== profile.id || post.is_locked) redirect(`/p/${id}`);
-  const categories = await getCategories();
+  const forums = await getForums();
 
   return (
     <div className="max-w-3xl">
       <PageHeader eyebrow="Editar" title="Editar publicación" />
       <Composer
         mode="edit"
-        categories={post.circle_id ? undefined : categories}
-        lockCategory
+        userId={profile.id}
+        forums={post.circle_id ? undefined : forums}
+        lockForum
         circle={post.circle_id ?? undefined}
         initial={{
           postId: post.id,
+          forum: post.forum_slug,
           category: post.category_slug,
           title: post.title,
           body: post.body,
-          kind: post.kind,
-          is_question: post.is_question,
+          type: post.post_type,
+          kind: post.kind === "experience" ? "opinion" : post.kind,
           sources: post.sources,
           tags: post.tags,
           images: post.images,
+          attachments: post.attachments.map((a) => ({ id: a.id, name: a.name, size: a.size })),
+          hasPoll: Boolean(post.poll),
         }}
       />
     </div>

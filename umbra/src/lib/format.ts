@@ -53,3 +53,8 @@ export function pageParam(value: string | string[] | undefined) {
 export function oneParam(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value[0] : value) ?? "";
 }
+
+/** Tamaño de archivo legible (KB o MB). */
+export function fileSize(bytes: number) {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}

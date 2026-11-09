@@ -33,17 +33,23 @@ isOneToOne: false
                   ]
                 },"categories": {
                   Row: {
-                    "created_at": string,"description": string,"is_archived": boolean,"name": string,"position": number,"slug": string
+                    "created_at": string,"description": string,"forum_slug": string,"is_archived": boolean,"name": string,"position": number,"slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"description"?: string,"is_archived"?: boolean,"name": string,"position"?: number,"slug": string
+                    "created_at"?: string,"description"?: string,"forum_slug": string,"is_archived"?: boolean,"name": string,"position"?: number,"slug": string
                   }
                   Update: {
-                    "created_at"?: string,"description"?: string,"is_archived"?: boolean,"name"?: string,"position"?: number,"slug"?: string
+                    "created_at"?: string,"description"?: string,"forum_slug"?: string,"is_archived"?: boolean,"name"?: string,"position"?: number,"slug"?: string
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "categories_forum_slug_fkey"
+      columns: ["forum_slug"]
+isOneToOne: false
+      referencedRelation: "forums"
+      referencedColumns: ["slug"]
+    }
                   ]
                 },"circle_invites": {
                   Row: {
@@ -291,6 +297,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"forums": {
+                  Row: {
+                    "created_at": string,"description": string,"is_archived": boolean,"name": string,"position": number,"rules": string,"slug": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"description"?: string,"is_archived"?: boolean,"name": string,"position"?: number,"rules"?: string,"slug": string
+                  }
+                  Update: {
+                    "created_at"?: string,"description"?: string,"is_archived"?: boolean,"name"?: string,"position"?: number,"rules"?: string,"slug"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"interest_areas": {
                   Row: {
                     "description": string,"name": string,"position": number,"slug": string
@@ -453,6 +473,104 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"poll_options": {
+                  Row: {
+                    "id": number,"label": string,"position": number,"post_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: never,"label": string,"position": number,"post_id": string
+                  }
+                  Update: {
+                    "id"?: never,"label"?: string,"position"?: number,"post_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "poll_options_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "polls"
+      referencedColumns: ["post_id"]
+    }
+                  ]
+                },"poll_votes": {
+                  Row: {
+                    "created_at": string,"option_id": number,"post_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"option_id": number,"post_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"option_id"?: number,"post_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "poll_votes_option_id_fkey"
+      columns: ["option_id"]
+isOneToOne: false
+      referencedRelation: "poll_options"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "poll_votes_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "polls"
+      referencedColumns: ["post_id"]
+    },{
+      foreignKeyName: "poll_votes_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"polls": {
+                  Row: {
+                    "closes_at": string | null,"created_at": string,"multiple": boolean,"post_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "closes_at"?: string | null,"created_at"?: string,"multiple"?: boolean,"post_id": string
+                  }
+                  Update: {
+                    "closes_at"?: string | null,"created_at"?: string,"multiple"?: boolean,"post_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "polls_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: true
+      referencedRelation: "posts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"post_attachments": {
+                  Row: {
+                    "author_id": string,"created_at": string,"id": string,"mime": string,"name": string,"path": string,"post_id": string,"size": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"created_at"?: string,"id"?: string,"mime": string,"name": string,"path": string,"post_id": string,"size": number
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string,"id"?: string,"mime"?: string,"name"?: string,"path"?: string,"post_id"?: string,"size"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "post_attachments_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "post_attachments_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "posts"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"post_follows": {
                   Row: {
                     "created_at": string,"post_id": string,"user_id": string
@@ -533,14 +651,14 @@ isOneToOne: false
                   ]
                 },"posts": {
                   Row: {
-                    "author_id": string,"body": string,"category_slug": string | null,"circle_id": string | null,"comment_count": number,"created_at": string,"deleted_at": string | null,"deleted_by": string | null,"edited_at": string | null,"id": string,"image_paths": (string)[],"is_locked": boolean,"is_pinned": boolean,"is_question": boolean,"kind": Database["public"]['Enums']["post_kind"],"last_activity_at": string,"reaction_count": number,"search": unknown,"sources": (string)[],"title": string | null
+                    "author_id": string,"body": string,"category_slug": string | null,"circle_id": string | null,"comment_count": number,"created_at": string,"deleted_at": string | null,"deleted_by": string | null,"edited_at": string | null,"forum_slug": string | null,"id": string,"image_paths": (string)[],"is_locked": boolean,"is_pinned": boolean,"is_question": boolean,"kind": Database["public"]['Enums']["post_kind"],"last_activity_at": string,"post_type": Database["public"]['Enums']["post_type"],"reaction_count": number,"search": unknown,"sources": (string)[],"title": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id": string,"body": string,"category_slug"?: string | null,"circle_id"?: string | null,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"edited_at"?: string | null,"id"?: string,"image_paths"?: (string)[],"is_locked"?: boolean,"is_pinned"?: boolean,"is_question"?: boolean,"kind"?: Database["public"]['Enums']["post_kind"],"last_activity_at"?: string,"reaction_count"?: number,"search"?: never,"sources"?: (string)[],"title"?: string | null
+                    "author_id": string,"body": string,"category_slug"?: string | null,"circle_id"?: string | null,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"edited_at"?: string | null,"forum_slug"?: string | null,"id"?: string,"image_paths"?: (string)[],"is_locked"?: boolean,"is_pinned"?: boolean,"is_question"?: boolean,"kind"?: Database["public"]['Enums']["post_kind"],"last_activity_at"?: string,"post_type"?: Database["public"]['Enums']["post_type"],"reaction_count"?: number,"search"?: never,"sources"?: (string)[],"title"?: string | null
                   }
                   Update: {
-                    "author_id"?: string,"body"?: string,"category_slug"?: string | null,"circle_id"?: string | null,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"edited_at"?: string | null,"id"?: string,"image_paths"?: (string)[],"is_locked"?: boolean,"is_pinned"?: boolean,"is_question"?: boolean,"kind"?: Database["public"]['Enums']["post_kind"],"last_activity_at"?: string,"reaction_count"?: number,"search"?: never,"sources"?: (string)[],"title"?: string | null
+                    "author_id"?: string,"body"?: string,"category_slug"?: string | null,"circle_id"?: string | null,"comment_count"?: number,"created_at"?: string,"deleted_at"?: string | null,"deleted_by"?: string | null,"edited_at"?: string | null,"forum_slug"?: string | null,"id"?: string,"image_paths"?: (string)[],"is_locked"?: boolean,"is_pinned"?: boolean,"is_question"?: boolean,"kind"?: Database["public"]['Enums']["post_kind"],"last_activity_at"?: string,"post_type"?: Database["public"]['Enums']["post_type"],"reaction_count"?: number,"search"?: never,"sources"?: (string)[],"title"?: string | null
                   }
                   Relationships: [
                     {
@@ -567,6 +685,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "posts_forum_slug_fkey"
+      columns: ["forum_slug"]
+isOneToOne: false
+      referencedRelation: "forums"
+      referencedColumns: ["slug"]
     }
                   ]
                 },"profile_goals": {
@@ -853,14 +977,14 @@ isOneToOne: false
                   ]
                 },"tags": {
                   Row: {
-                    "created_at": string,"created_by": string | null,"name": string,"slug": string
+                    "created_at": string,"created_by": string | null,"merged_into": string | null,"name": string,"slug": string,"status": string,"topic_id": number | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"created_by"?: string | null,"name": string,"slug": string
+                    "created_at"?: string,"created_by"?: string | null,"merged_into"?: string | null,"name": string,"slug": string,"status"?: string,"topic_id"?: number | null
                   }
                   Update: {
-                    "created_at"?: string,"created_by"?: string | null,"name"?: string,"slug"?: string
+                    "created_at"?: string,"created_by"?: string | null,"merged_into"?: string | null,"name"?: string,"slug"?: string,"status"?: string,"topic_id"?: number | null
                   }
                   Relationships: [
                     {
@@ -868,6 +992,18 @@ isOneToOne: false
       columns: ["created_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tags_merged_into_fkey"
+      columns: ["merged_into"]
+isOneToOne: false
+      referencedRelation: "tags"
+      referencedColumns: ["slug"]
+    },{
+      foreignKeyName: "tags_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
       referencedColumns: ["id"]
     }
                   ]
@@ -983,6 +1119,9 @@ isOneToOne: true
               "avatar_url": string,"created_at": string,"display_name": string,"email": string,"id": string,"onboarded_at": string,"posts": number,"reports_against": number,"role": Database["public"]['Enums']["user_role"],"status": Database["public"]['Enums']["account_status"],"username": string
             }[]
                            },
+"admin_merge_tags":
+{ Args: { "p_from": string,"p_into": string }; Returns: undefined
+                           },
 "admin_merge_topics":
 { Args: { "p_from": number,"p_into": number }; Returns: undefined
                            },
@@ -990,7 +1129,10 @@ isOneToOne: true
 { Args: { "p_approve": boolean,"p_area"?: string,"p_topic": number }; Returns: undefined
                            },
 "admin_save_category":
-{ Args: { "p_archived": boolean,"p_description": string,"p_name": string,"p_position": number,"p_slug": string }; Returns: undefined
+{ Args: { "p_archived": boolean,"p_description": string,"p_forum": string,"p_name": string,"p_position": number,"p_slug": string }; Returns: undefined
+                           },
+"admin_save_forum":
+{ Args: { "p_archived": boolean,"p_description": string,"p_name": string,"p_position": number,"p_rules": string,"p_slug": string }; Returns: undefined
                            },
 "admin_set_role":
 { Args: { "p_role": Database["public"]['Enums']["user_role"],"p_user": string }; Returns: undefined
@@ -1003,8 +1145,16 @@ isOneToOne: true
               "circles": number,"comments": number,"members": number,"members_week": number,"open_reports": number,"posts": number,"posts_week": number,"projects": number,"suspended": number
             }[]
                            },
+"admin_tag_list":
+{ Args: { "p_limit"?: number,"p_query"?: string }; Returns: {
+              "created_at": string,"merged_into": string,"name": string,"slug": string,"status": string,"topic_id": number,"topic_name": string,"uses": number
+            }[]
+                           },
 "admin_update_settings":
 { Args: { "p_registration_open": boolean,"p_welcome": string }; Returns: undefined
+                           },
+"admin_update_tag":
+{ Args: { "p_name": string,"p_slug": string,"p_status": string,"p_topic"?: number }; Returns: undefined
                            },
 "affinity_members":
 { Args: { "p_limit"?: number }; Returns: Database["public"]['CompositeTypes']["member_card"][]
@@ -1034,6 +1184,9 @@ isOneToOne: true
 "circle_role_of":
 { Args: { "p_circle": string }; Returns: Database["public"]['Enums']["circle_role"]
                            },
+"close_poll":
+{ Args: { "p_post": string }; Returns: undefined
+                           },
 "community_activity":
 { Args: { "p_limit"?: number }; Returns: {
               "actor_avatar": string,"actor_name": string,"actor_username": string,"at": string,"kind": string,"ref": string,"title": string
@@ -1043,7 +1196,7 @@ isOneToOne: true
 { Args: { "p_description": string,"p_image_path"?: string,"p_name": string,"p_visibility": Database["public"]['Enums']["circle_visibility"] }; Returns: string
                            },
 "create_post":
-{ Args: { "p_body": string,"p_category"?: string,"p_circle"?: string,"p_image_paths"?: (string)[],"p_is_question"?: boolean,"p_kind": Database["public"]['Enums']["post_kind"],"p_sources"?: (string)[],"p_tags"?: (string)[],"p_title": string }; Returns: string
+{ Args: { "p_body": string,"p_category"?: string,"p_circle"?: string,"p_forum"?: string,"p_image_paths"?: (string)[],"p_kind": Database["public"]['Enums']["post_kind"],"p_poll_closes"?: string,"p_poll_multiple"?: boolean,"p_poll_options"?: (string)[],"p_sources"?: (string)[],"p_tags"?: (string)[],"p_title": string,"p_type"?: Database["public"]['Enums']["post_type"] }; Returns: string
                            },
 "create_project":
 { Args: { "p_area"?: string,"p_country": string,"p_cover_path"?: string,"p_description": string,"p_objectives": (string)[],"p_region": string,"p_seeking": string,"p_skills"?: (number)[],"p_status": Database["public"]['Enums']["project_status"],"p_summary": string,"p_title": string,"p_topics"?: (number)[] }; Returns: string
@@ -1078,13 +1231,18 @@ isOneToOne: true
         isSetofReturn: true
       } },
 "feed_posts":
-{ Args: { "p_author"?: string,"p_category"?: string,"p_circle"?: string,"p_kind"?: Database["public"]['Enums']["post_kind"],"p_limit"?: number,"p_offset"?: number,"p_questions_only"?: boolean,"p_saved_only"?: boolean,"p_scope"?: string,"p_sort"?: string,"p_tag"?: string }; Returns: Database["public"]['CompositeTypes']["post_list_item"][]
+{ Args: { "p_author"?: string,"p_category"?: string,"p_circle"?: string,"p_forum"?: string,"p_kind"?: Database["public"]['Enums']["post_kind"],"p_limit"?: number,"p_offset"?: number,"p_saved_only"?: boolean,"p_scope"?: string,"p_sort"?: string,"p_tag"?: string,"p_type"?: Database["public"]['Enums']["post_type"],"p_unanswered"?: boolean }; Returns: Database["public"]['CompositeTypes']["post_list_item"][]
                           SetofOptions: {
         from: "*"
         to: "post_list_item"
         isOneToOne: false
         isSetofReturn: true
       } },
+"forum_stats":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "category_slug": string,"forum_slug": string,"last_activity_at": string,"post_count": number,"unanswered": number
+            }[]
+                           },
 "immutable_unaccent":
 { Args: { "": string }; Returns: string
                            },
@@ -1221,6 +1379,11 @@ isOneToOne: true
 "notify_mentions":
 { Args: { "p_actor": string,"p_body": string,"p_comment": string,"p_post": string,"p_text": string }; Returns: undefined
                            },
+"poll_results":
+{ Args: { "p_post": string }; Returns: {
+              "closed": boolean,"closes_at": string,"label": string,"mine": boolean,"multiple": boolean,"option_id": number,"pos": number,"voters": number,"votes": number
+            }[]
+                           },
 "post_excerpt":
 { Args: { "p_body": string }; Returns: string
                            },
@@ -1301,6 +1464,9 @@ isOneToOne: true
 "set_my_topics":
 { Args: { "p_items": Json }; Returns: undefined
                            },
+"set_post_poll":
+{ Args: { "p_closes": string,"p_multiple": boolean,"p_options": (string)[],"p_post": string }; Returns: undefined
+                           },
 "set_post_tags":
 { Args: { "p_post": string,"p_tags": (string)[] }; Returns: undefined
                            },
@@ -1312,6 +1478,11 @@ isOneToOne: true
                            },
 "start_conversation":
 { Args: { "p_other": string }; Returns: string
+                           },
+"suggest_tags":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "name": string,"slug": string,"source": string,"uses": number
+            }[]
                            },
 "touch_last_seen":
 { Args: Record<PropertyKey, never>; Returns: undefined
@@ -1325,20 +1496,23 @@ isOneToOne: true
 { Args: { "p_base": string,"p_table": string }; Returns: string
                            },
 "update_post":
-{ Args: { "p_body": string,"p_id": string,"p_image_paths": (string)[],"p_is_question": boolean,"p_kind": Database["public"]['Enums']["post_kind"],"p_sources": (string)[],"p_tags": (string)[],"p_title": string }; Returns: undefined
+{ Args: { "p_body": string,"p_category": string,"p_id": string,"p_image_paths": (string)[],"p_kind": Database["public"]['Enums']["post_kind"],"p_sources": (string)[],"p_tags": (string)[],"p_title": string,"p_type": Database["public"]['Enums']["post_type"] }; Returns: undefined
                            },
 "user_can_read_post":
 { Args: { "p_post": string,"p_user": string }; Returns: boolean
+                           },
+"vote_poll":
+{ Args: { "p_options": (number)[],"p_post": string }; Returns: undefined
                            }
           }
           Enums: {
-            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","project_topic_kind": "theme"|"skill","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","request_status": "pending"|"accepted"|"declined","topic_relation": "interested"|"learning"|"knowledgeable"|"experienced"|"can_teach"|"seeking_collaborators","topic_status": "approved"|"pending"|"rejected","user_goal": "learn"|"research"|"debate"|"share"|"meet_people"|"friendship"|"find_collaborators"|"join_projects"|"create_circles"|"join_communities"|"organize_meetups"|"share_experiences","user_role": "admin"|"moderator"|"member"|"restricted","visibility": "public"|"connections"|"private"
+            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience"|"interpretation"|"open_question","post_type": "debate"|"question"|"research"|"discovery"|"experience"|"resource"|"poll"|"idea","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","project_topic_kind": "theme"|"skill","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","request_status": "pending"|"accepted"|"declined","topic_relation": "interested"|"learning"|"knowledgeable"|"experienced"|"can_teach"|"seeking_collaborators","topic_status": "approved"|"pending"|"rejected","user_goal": "learn"|"research"|"debate"|"share"|"meet_people"|"friendship"|"find_collaborators"|"join_projects"|"create_circles"|"join_communities"|"organize_meetups"|"share_experiences","user_role": "admin"|"moderator"|"member"|"restricted","visibility": "public"|"connections"|"private"
           }
           CompositeTypes: {
             "member_card": {
                         "id": string | null,"username": string | null,"display_name": string | null,"avatar_url": string | null,"bio": string | null,"looking_for": string | null,"country": string | null,"region": string | null,"availability": Database["public"]['Enums']["chat_availability"] | null,"languages": (string)[] | null,"shared_count": number | null,"shared_topics": (string)[] | null,"topics": (string)[] | null,"reasons": (string)[] | null,"connection": string | null
                       },"post_list_item": {
-                        "id": string | null,"title": string | null,"excerpt": string | null,"kind": Database["public"]['Enums']["post_kind"] | null,"is_question": boolean | null,"category_slug": string | null,"category_name": string | null,"circle_id": string | null,"author_id": string | null,"author_username": string | null,"author_name": string | null,"author_avatar": string | null,"tags": (string)[] | null,"comment_count": number | null,"reaction_count": number | null,"image_count": number | null,"is_pinned": boolean | null,"is_locked": boolean | null,"created_at": string | null,"last_activity_at": string | null
+                        "id": string | null,"title": string | null,"excerpt": string | null,"kind": Database["public"]['Enums']["post_kind"] | null,"is_question": boolean | null,"category_slug": string | null,"category_name": string | null,"circle_id": string | null,"author_id": string | null,"author_username": string | null,"author_name": string | null,"author_avatar": string | null,"tags": (string)[] | null,"comment_count": number | null,"reaction_count": number | null,"image_count": number | null,"is_pinned": boolean | null,"is_locked": boolean | null,"created_at": string | null,"last_activity_at": string | null,"forum_slug": string | null,"forum_name": string | null,"post_type": Database["public"]['Enums']["post_type"] | null,"has_poll": boolean | null,"attachment_count": number | null
                       }
           }
         }
@@ -1452,7 +1626,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"project_topic_kind": ["theme", "skill"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"request_status": ["pending", "accepted", "declined"],"topic_relation": ["interested", "learning", "knowledgeable", "experienced", "can_teach", "seeking_collaborators"],"topic_status": ["approved", "pending", "rejected"],"user_goal": ["learn", "research", "debate", "share", "meet_people", "friendship", "find_collaborators", "join_projects", "create_circles", "join_communities", "organize_meetups", "share_experiences"],"user_role": ["admin", "moderator", "member", "restricted"],"visibility": ["public", "connections", "private"]
+            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience", "interpretation", "open_question"],"post_type": ["debate", "question", "research", "discovery", "experience", "resource", "poll", "idea"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"project_topic_kind": ["theme", "skill"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"request_status": ["pending", "accepted", "declined"],"topic_relation": ["interested", "learning", "knowledgeable", "experienced", "can_teach", "seeking_collaborators"],"topic_status": ["approved", "pending", "rejected"],"user_goal": ["learn", "research", "debate", "share", "meet_people", "friendship", "find_collaborators", "join_projects", "create_circles", "join_communities", "organize_meetups", "share_experiences"],"user_role": ["admin", "moderator", "member", "restricted"],"visibility": ["public", "connections", "private"]
           }
         }
 } as const

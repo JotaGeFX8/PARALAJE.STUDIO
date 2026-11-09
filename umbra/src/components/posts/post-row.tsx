@@ -1,21 +1,26 @@
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
-import { IconComment, IconImage, IconLock, IconPin, IconSpark } from "@/components/ui/icons";
-import { KindBadge, QuestionBadge } from "./kind-badge";
+import { IconComment, IconFile, IconImage, IconLock, IconPin, IconPoll, IconSpark } from "@/components/ui/icons";
+import { KindBadge, TypeBadge } from "./kind-badge";
 import { timeAgo } from "@/lib/format";
 import type { PostItem } from "@/lib/supabase/types";
 
-/** Publicación en un listado: tipo, territorio, título, extracto y actividad. */
+/** Publicación en un listado: tipo, clasificación, foro › subcategoría, título, extracto y actividad. */
 export function PostRow({ p, showCategory = true }: { p: PostItem; showCategory?: boolean }) {
   const href = `/p/${p.id}`;
+  const where = p.forum_slug
+    ? p.category_slug
+      ? { href: `/comunidad/${p.forum_slug}/${p.category_slug}`, label: `${p.forum_name} › ${p.category_name}` }
+      : { href: `/comunidad/${p.forum_slug}`, label: p.forum_name }
+    : null;
   return (
     <li className="group border-b hairline py-6 first:pt-5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.8125rem] text-muted">
+        <TypeBadge type={p.post_type} />
         <KindBadge kind={p.kind} />
-        {p.is_question && <QuestionBadge />}
-        {showCategory && (
-          <Link href={p.category_slug ? `/comunidad/${p.category_slug}` : "/agora"} className="hover:text-accent">
-            {p.category_name ?? "Ágora"}
+        {showCategory && where && (
+          <Link href={where.href} className="hover:text-accent">
+            {where.label}
           </Link>
         )}
         <span aria-hidden="true">·</span>
@@ -50,6 +55,16 @@ export function PostRow({ p, showCategory = true }: { p: PostItem; showCategory?
         <span className="flex items-center gap-1.5" title="Reacciones">
           <IconSpark size={16} /> {p.reaction_count}
         </span>
+        {p.has_poll && (
+          <span className="flex items-center gap-1.5" title="Encuesta">
+            <IconPoll size={16} />
+          </span>
+        )}
+        {p.attachment_count > 0 && (
+          <span className="flex items-center gap-1.5" title="Archivos adjuntos">
+            <IconFile size={16} /> {p.attachment_count}
+          </span>
+        )}
         {p.image_count > 0 && (
           <span className="flex items-center gap-1.5" title="Imágenes">
             <IconImage size={16} /> {p.image_count}

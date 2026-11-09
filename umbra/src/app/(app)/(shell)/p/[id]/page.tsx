@@ -5,14 +5,15 @@ import { requireOnboardedMember } from "@/lib/auth";
 import { getCommentTree, getPost, getReactions } from "@/lib/data/posts";
 import { Avatar } from "@/components/ui/avatar";
 import { RichText } from "@/components/ui/rich-text";
-import { KindBadge, QuestionBadge } from "@/components/posts/kind-badge";
+import { KindBadge, TypeBadge } from "@/components/posts/kind-badge";
+import { PollWidget } from "@/components/posts/poll-widget";
 import { ReactionBar } from "@/components/posts/reaction-bar";
 import { PostActions } from "@/components/posts/post-actions";
 import { CommentThread } from "@/components/posts/comment-thread";
 import { CommentForm } from "@/components/posts/comment-client";
 import { NavTabs } from "@/components/ui/nav-tabs";
-import { IconLock, IconPin } from "@/components/ui/icons";
-import { formatDate, oneParam, plural, timeAgo } from "@/lib/format";
+import { IconDownload, IconFile, IconLock, IconPin } from "@/components/ui/icons";
+import { fileSize, formatDate, oneParam, plural, timeAgo } from "@/lib/format";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -42,24 +43,37 @@ export default async function PostPage({ params, searchParams }: Props) {
   const mine = post.author_id === profile.id;
   const author = post.author;
   const authorName = author?.display_name ?? author?.username ?? "Miembro";
-  const where = post.category
-    ? { href: `/comunidad/${post.category.slug}`, label: post.category.name }
-    : post.circle_id
-      ? { href: `/circulos/${post.circle_id}`, label: "Círculo" }
-      : { href: "/agora", label: "Ágora" };
+  const crumbs = post.circle_id
+    ? [{ href: `/circulos/${post.circle_id}`, label: "Círculo" }]
+    : [
+        { href: `/comunidad/${post.forum?.slug ?? "agora"}`, label: post.forum?.name ?? "Ágora" },
+        ...(post.category ? [{ href: `/comunidad/${post.forum?.slug}/${post.category.slug}`, label: post.category.name }] : []),
+      ];
+  const notice = oneParam(sp.aviso) === "adjuntos";
 
   return (
     <article className="max-w-3xl">
-      <p className="mb-6 text-sm">
-        <Link href={where.href} className="link-draw text-muted hover:text-accent">
-          ← {where.label}
-        </Link>
-      </p>
+      <nav aria-label="Ubicación" className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted">
+        {crumbs.map((c, i) => (
+          <span key={c.href} className="flex items-center gap-2">
+            {i > 0 && <span aria-hidden="true">›</span>}
+            <Link href={c.href} className="link-draw hover:text-accent">
+              {i === 0 && "← "}
+              {c.label}
+            </Link>
+          </span>
+        ))}
+      </nav>
+      {notice && (
+        <p role="alert" className="mb-6 border-l-2 border-danger bg-danger-soft px-4 py-3 text-sm text-ink">
+          La publicación se guardó, pero algún archivo no se pudo adjuntar. Puedes intentarlo de nuevo desde «Editar».
+        </p>
+      )}
 
       <header>
         <div className="flex flex-wrap items-center gap-2">
+          <TypeBadge type={post.post_type} />
           <KindBadge kind={post.kind} />
-          {post.is_question && <QuestionBadge />}
           {post.is_pinned && (
             <span className="flex items-center gap-1 text-xs text-accent">
               <IconPin size={14} /> Fijada
@@ -103,6 +117,37 @@ export default async function PostPage({ params, searchParams }: Props) {
             </a>
           ))}
         </div>
+      )}
+
+      {post.poll && (
+        <PollWidget
+          postId={post.id}
+          poll={post.poll}
+          canVote={!post.is_locked}
+          canClose={mine || isStaff}
+        />
+      )}
+
+      {post.attachments.length > 0 && (
+        <section className="mt-9">
+          <h2 className="label mb-3">Archivos</h2>
+          <ul className="space-y-2">
+            {post.attachments.map((a) => (
+              <li key={a.id}>
+                <a
+                  href={a.url ?? undefined}
+                  rel="noopener nofollow"
+                  className="flex items-center gap-3 rounded-sm border border-line px-3.5 py-3 transition-colors hover:border-accent-mid"
+                >
+                  <IconFile size={20} className="shrink-0 text-muted" />
+                  <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-ink">{a.name}</span>
+                  <span className="shrink-0 font-mono text-xs text-muted">{fileSize(a.size)}</span>
+                  <IconDownload size={18} className="shrink-0 text-accent" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {post.sources.length > 0 && (

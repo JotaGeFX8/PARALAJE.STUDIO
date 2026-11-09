@@ -70,9 +70,28 @@ export async function saveCategoryAction(_: FormState, fd: FormData): Promise<Fo
       p_description: String(fd.get("description") ?? "").slice(0, 400),
       p_position: Number(fd.get("position") ?? 99) || 99,
       p_archived: fd.get("archived") === "on",
+      p_forum: String(fd.get("forum") ?? ""),
     }),
   );
-  return r.ok ? { ok: true, message: "Territorio guardado." } : { message: r.message };
+  return r.ok ? { ok: true, message: "Subcategoría guardada." } : { message: r.message };
+}
+
+export async function saveForumAction(_: FormState, fd: FormData): Promise<FormState> {
+  const slug = String(fd.get("slug") ?? "").trim();
+  const name = String(fd.get("name") ?? "").trim();
+  if (name.length < 2 || name.length > 80) return { errors: { name: "Nombre de 2 a 80 caracteres." } };
+  if (!slug) return { errors: { slug: "Indica un identificador." } };
+  const r = await call((s) =>
+    s.rpc("admin_save_forum", {
+      p_slug: slug,
+      p_name: name,
+      p_description: String(fd.get("description") ?? "").slice(0, 400),
+      p_rules: String(fd.get("rules") ?? "").slice(0, 4000),
+      p_position: Number(fd.get("position") ?? 99) || 99,
+      p_archived: fd.get("archived") === "on",
+    }),
+  );
+  return r.ok ? { ok: true, message: "Foro guardado." } : { message: r.message };
 }
 
 export async function saveSettingsAction(_: FormState, fd: FormData): Promise<FormState> {
@@ -104,4 +123,16 @@ export async function addSynonymAction(topic: number, term: string) {
   const t = String(term ?? "").trim().slice(0, 60);
   if (t.length < 2) return { ok: false, message: "El sinónimo necesita 2 caracteres o más." };
   return call((s) => s.rpc("admin_add_synonym", { p_topic: topicId(topic), p_term: t }));
+}
+
+// ------------------------------------------------------------ Etiquetas
+
+export async function updateTagAction(slug: string, name: string, status: "active" | "blocked", topic: number | null) {
+  return call((s) =>
+    s.rpc("admin_update_tag", { p_slug: slug, p_name: String(name).slice(0, 32), p_status: status, p_topic: topic ?? undefined }),
+  );
+}
+
+export async function mergeTagAction(from: string, into: string) {
+  return call((s) => s.rpc("admin_merge_tags", { p_from: from, p_into: String(into).trim().replace(/^#/, "") }));
 }
