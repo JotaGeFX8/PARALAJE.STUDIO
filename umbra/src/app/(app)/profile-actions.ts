@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { SUPABASE_URL } from "@/lib/env";
 import { fieldErrors, type FormState } from "@/lib/form-state";
 import { profileSchema, readProfileForm } from "@/lib/validation/profile";
 
@@ -54,22 +53,48 @@ export async function saveProfileAction(_: FormState, formData: FormData): Promi
   return { ok: true, message: "Perfil actualizado." };
 }
 
-/** Registra (o elimina) la URL del avatar ya subido a Storage. */
-export async function setAvatarAction(url: string | null): Promise<{ ok: boolean; message?: string }> {
+const AVATAR_TYPES = /^image\/(webp|jpeg|png)$/;
+
+/** Sube el avatar (ya reducido en el navegador) a la carpeta propia y lo asigna al perfil. */
+export async function uploadAvatarAction(fd: FormData): Promise<{ ok: boolean; url?: string; message?: string }> {
+  const file = fd.get("avatar");
+  if (!(file instanceof File) || !AVATAR_TYPES.test(file.type) || file.size > 2 * 1024 * 1024) {
+    return { ok: false, message: "Imagen no válida (máx. 2 MB)." };
+  }
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, message: "Sesión caducada." };
-
-  if (url !== null) {
-    // Solo se aceptan archivos de la carpeta propia del bucket de avatares.
-    const prefix = `${SUPABASE_URL}/storage/v1/object/public/avatars/${auth.user.id}/`;
-    if (!url.startsWith(prefix) || !/^[\w./-]+$/.test(url.slice(prefix.length))) {
-      return { ok: false, message: "Imagen no válida." };
-    }
+  const uid = auth.user.id;
+  const path = `${uid}/${Date.now()}.webp`;
+  const { error: upErr } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, { contentType: file.type, cacheControl: "31536000", upsert: false });
+  if (upErr) return { ok: false, message: "No se pudo subir la imagen." };
+  const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", uid);
+  if (error) {
+    await supabase.storage.from("avatars").remove([path]);
+    return { ok: false, message: "No se pudo guardar la imagen." };
   }
+  await cleanupAvatars(supabase, uid, path);
+  revalidatePath("/", "layout");
+  return { ok: true, url };
+}
 
-  const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", auth.user.id);
-  if (error) return { ok: false, message: "No se pudo guardar la imagen." };
+export async function removeAvatarAction(): Promise<{ ok: boolean; message?: string }> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { ok: false, message: "Sesión caducada." };
+  const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", auth.user.id);
+  if (error) return { ok: false, message: "No se pudo quitar la imagen." };
+  await cleanupAvatars(supabase, auth.user.id, null);
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+/** Borra avatares antiguos para no acumular almacenamiento. */
+async function cleanupAvatars(supabase: Awaited<ReturnType<typeof createClient>>, uid: string, keep: string | null) {
+  const { data } = await supabase.storage.from("avatars").list(uid, { limit: 100 });
+  const stale = (data ?? []).map((f) => `${uid}/${f.name}`).filter((p) => p !== keep);
+  if (stale.length) await supabase.storage.from("avatars").remove(stale);
 }

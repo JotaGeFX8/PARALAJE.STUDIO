@@ -208,3 +208,17 @@ export const INTEREST_TO_CATEGORIES: Record<string, string[]> = {
   proyectos: ["bioconstruccion", "tecnologia"],
   amistad: ["debate"],
 };
+
+export const VISIBILITY = {
+  public: { label: "Público", hint: "Cualquier miembro puede ver su contenido y unirse." },
+  private: { label: "Privado", hint: "Visible en el listado; el contenido es solo para miembros. Se entra por solicitud." },
+  invite: { label: "Por invitación", hint: "Oculto para quien no es miembro. Solo se entra por invitación." },
+} as const;
+
+export const PROJECT_STATUS = {
+  idea: "Idea",
+  planning: "En preparación",
+  active: "En marcha",
+  paused: "En pausa",
+  completed: "Completado",
+} as const;

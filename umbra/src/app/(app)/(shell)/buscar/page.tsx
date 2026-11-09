@@ -10,12 +10,17 @@ import { NavTabs, Pagination, hrefWith } from "@/components/ui/nav-tabs";
 import { EmptyState } from "@/components/ui/section";
 import { IconSearch } from "@/components/ui/icons";
 import { oneParam, pageParam } from "@/lib/format";
+import { discoverCircles } from "@/lib/data/circles";
+import { listProjects } from "@/lib/data/projects";
+import { CircleCard, ProjectCard } from "@/components/groups/cards";
 
 export const metadata: Metadata = { title: "Buscar" };
 
 const TABS = [
   { key: "publicaciones", label: "Publicaciones" },
   { key: "personas", label: "Personas" },
+  { key: "circulos", label: "Círculos" },
+  { key: "proyectos", label: "Proyectos" },
   { key: "etiquetas", label: "Etiquetas" },
 ] as const;
 
@@ -61,7 +66,7 @@ export default async function BuscarPage({
           </div>
         </>
       ) : (
-        <EmptyState>Busca en publicaciones, personas y etiquetas. La búsqueda ignora tildes y encuentra palabras incompletas.</EmptyState>
+        <EmptyState>Busca en publicaciones, personas, círculos, proyectos y etiquetas. La búsqueda de publicaciones ignora tildes y encuentra palabras incompletas.</EmptyState>
       )}
     </div>
   );
@@ -74,6 +79,30 @@ async function Results({ tab, q, page, userId }: { tab: string; q: string; page:
       <ul className="border-t hairline">{members.map((m) => <MemberRow key={m.id} m={m} />)}</ul>
     ) : (
       <EmptyState>Ningún miembro coincide con «{q}».</EmptyState>
+    );
+  }
+  if (tab === "circulos") {
+    const circles = await discoverCircles(userId, q);
+    return circles.length ? (
+      <ul className="grid gap-x-8 gap-y-10 border-t hairline pt-6 sm:grid-cols-2">
+        {circles.map((c) => (
+          <CircleCard key={c.id} c={c} note={c.joined ? "Eres miembro" : undefined} />
+        ))}
+      </ul>
+    ) : (
+      <EmptyState>Ningún círculo coincide con «{q}».</EmptyState>
+    );
+  }
+  if (tab === "proyectos") {
+    const projects = await listProjects({ q }, "active", 30);
+    return projects.length ? (
+      <ul className="grid gap-x-8 gap-y-10 border-t hairline pt-6 sm:grid-cols-2">
+        {projects.map((p) => (
+          <ProjectCard key={p.id} p={p} />
+        ))}
+      </ul>
+    ) : (
+      <EmptyState>Ningún proyecto coincide con «{q}».</EmptyState>
     );
   }
   if (tab === "etiquetas") {

@@ -1,3 +1,5 @@
+import { mediaUrl } from "@/lib/media";
+
 /** Avatar: fotografía o monograma. Sin dependencias de optimización de imágenes. */
 export function Avatar({
   url,
@@ -22,7 +24,7 @@ export function Avatar({
     return (
       // eslint-disable-next-line @next/next/no-img-element -- avatares pequeños, sin optimizador (coste 0)
       <img
-        src={url}
+        src={mediaUrl(url)}
         alt=""
         width={size}
         height={size}

@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { mediaUrl } from "@/lib/media";
 import { toPostItems, type PostItem, type PostKindDb, type ReactionType } from "@/lib/supabase/types";
 import type { SortKey } from "@/lib/content";
 
@@ -14,6 +15,7 @@ export type FeedParams = {
   author?: string | null;
   sort?: SortKey;
   savedOnly?: boolean;
+  questionsOnly?: boolean;
   page?: number;
   limit?: number;
 };
@@ -34,6 +36,7 @@ export async function getFeed(p: FeedParams): Promise<{ items: PostItem[]; hasMo
     p_saved_only: p.savedOnly ?? false,
     p_limit: limit + 1,
     p_offset: (page - 1) * limit,
+    p_questions_only: p.questionsOnly ?? false,
   });
   if (error) console.error("feed_posts", error.code, error.message);
   const items = toPostItems(data);
@@ -129,7 +132,7 @@ export async function signImages(paths: string[]) {
   if (!paths.length) return [];
   const supabase = await createClient();
   const { data } = await supabase.storage.from("post-images").createSignedUrls(paths, 3600);
-  return (data ?? []).flatMap((d) => (d.signedUrl ? [{ path: d.path ?? "", url: d.signedUrl as string }] : []));
+  return (data ?? []).flatMap((d) => (d.signedUrl ? [{ path: d.path ?? "", url: mediaUrl(d.signedUrl as string) }] : []));
 }
 
 export type CommentNode = {

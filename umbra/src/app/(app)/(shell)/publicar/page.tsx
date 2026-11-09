@@ -4,6 +4,7 @@ import { getCategories } from "@/lib/data/posts";
 import { PageHeader } from "@/components/ui/page-header";
 import { Composer } from "@/components/posts/composer";
 import { oneParam } from "@/lib/format";
+import { circleStatus, getCircle } from "@/lib/data/circles";
 
 export const metadata: Metadata = { title: "Publicar" };
 
@@ -22,6 +23,21 @@ export default async function PublicarPage({
     return (
       <div className="max-w-2xl">
         <PageHeader eyebrow="Publicar" title="Publicación restringida" lead="Tu cuenta puede leer y reaccionar, pero no publicar por ahora. Si crees que es un error, contacta con el equipo de moderación." />
+      </div>
+    );
+  }
+
+  const circleRef = oneParam(sp.circulo);
+  if (circleRef) {
+    const circle = await getCircle(circleRef);
+    const status = circle ? await circleStatus(circle.id, profile.id) : null;
+    if (!circle || !status?.role) {
+      return <PageHeader eyebrow="Publicar" title="No puedes publicar aquí" lead="Solo los miembros de un círculo pueden publicar en él." />;
+    }
+    return (
+      <div className="max-w-3xl">
+        <PageHeader eyebrow={`Círculo · ${circle.name}`} title="Publicar en el círculo" lead="Lo verán los miembros del círculo (y, si es público, cualquier miembro de la comunidad)." />
+        <Composer mode="create" circle={circle.id} />
       </div>
     );
   }

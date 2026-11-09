@@ -75,6 +75,11 @@ export async function createPostAction(_: FormState, fd: FormData): Promise<Form
     if (paths.length) await supabase.storage.from("post-images").remove(paths);
     return { message: dbErrorMessage(error, "No se ha podido publicar."), values };
   }
+  if (fd.get("return_to") === "agora") {
+    // Publicación rápida: se queda en el Ágora y el listado se actualiza.
+    refresh();
+    return { ok: true, message: "Publicado en el Ágora." };
+  }
   redirect(`/p/${id}`);
 }
 

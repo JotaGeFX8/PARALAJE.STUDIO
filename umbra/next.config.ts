@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // Imágenes de Supabase Storage servidas desde el mismo dominio (ver src/lib/media.ts).
+  async rewrites() {
+    const supabase = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/$/, "");
+    return supabase ? [{ source: "/media/:path*", destination: `${supabase}/storage/v1/object/:path*` }] : [];
+  },
 };
 
 export default nextConfig;
