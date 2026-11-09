@@ -18,6 +18,12 @@ export async function signUpAction(_: FormState, formData: FormData): Promise<Fo
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values: { email: raw.email ?? "" } };
 
   const supabase = await createClient();
+  const { data: settings } = await supabase.from("site_settings").select("registration_open").maybeSingle();
+  if (settings && !settings.registration_open) {
+    return { message: "El registro está cerrado temporalmente. Vuelve a intentarlo más adelante.", values: { email: raw.email ?? "" } };
+  }
+  // Campo trampa invisible: si un bot lo rellena, fingimos éxito sin crear nada.
+  if (raw.website) return { ok: true, values: { email: parsed.data.email } };
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,

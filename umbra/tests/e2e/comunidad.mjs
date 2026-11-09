@@ -147,8 +147,8 @@ await runSuite("Comunidad", async (browser) => {
   await ana.page.getByRole("button", { name: "Eliminar" }).first().click();
   await ana.page.getByRole("button", { name: "Eliminar definitivamente" }).click();
   await ana.page.waitForURL(`${APP}/comunidad/ciencia`);
-  const gone = await bruno.page.goto(postUrl);
-  assert.equal(gone?.status(), 404);
+  await bruno.page.goto(postUrl);
+  await bruno.page.getByText("Aquí no hay nada.").waitFor();
   step("edición propia y borrado (desaparece para los demás)");
 
   // 9. Ágora: publicación rápida sin título

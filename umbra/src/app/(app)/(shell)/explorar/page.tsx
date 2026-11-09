@@ -6,6 +6,7 @@ import { getCategories, getFeed, getTrendingTags } from "@/lib/data/posts";
 import { activeCircles } from "@/lib/data/circles";
 import { listProjects } from "@/lib/data/projects";
 import { createClient } from "@/lib/supabase/server";
+import { siteSettings } from "@/lib/data/admin";
 import { BRAND } from "@/config/brand";
 import { AREAS, INTEREST_TO_CATEGORIES, PROFILE_AREA, SORTS, parseSort } from "@/lib/content";
 import { oneParam, pageParam, plural, timeAgo } from "@/lib/format";
@@ -30,7 +31,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
   const welcome = oneParam(sp.bienvenida) === "1";
   const supabase = await createClient();
 
-  const [feed, debates, affinity, newcomers, circles, projects, categories, tags, { data: myInterests }, { data: activity }] =
+  const [feed, debates, affinity, newcomers, circles, projects, categories, tags, { data: myInterests }, { data: activity }, settings] =
     await Promise.all([
       getFeed({ scope: "all", sort, page, limit: 12 }),
       getFeed({ scope: "forum", kind: "hypothesis", sort: "trending", limit: 3 }),
@@ -42,6 +43,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
       getTrendingTags(10),
       supabase.from("profile_interests").select("interest_slug").eq("profile_id", profile.id),
       supabase.rpc("community_activity", { p_limit: 10 }),
+      siteSettings(),
     ]);
 
   const recommended = Array.from(
@@ -71,6 +73,11 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
 
       {welcome && (
         <section className="mb-10 rounded-sm bg-surface-2 p-6 md:p-8">
+          {settings.welcome_message && (
+            <p className="mb-5 whitespace-pre-line border-l-2 border-accent pl-4 font-serif text-lg leading-relaxed text-ink-2">
+              {settings.welcome_message}
+            </p>
+          )}
           <p className="font-serif text-xl text-ink">Tu perfil está listo. Tres buenos primeros pasos:</p>
           <ol className="mt-4 grid gap-3 text-[0.9375rem] sm:grid-cols-3">
             {[

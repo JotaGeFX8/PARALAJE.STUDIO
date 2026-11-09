@@ -35,6 +35,13 @@ export function SignUpForm() {
   return (
     <form action={action} noValidate className="space-y-8">
       <FormMessage message={state.message} />
+      {/* Campo trampa para bots: invisible para personas y lectores de pantalla */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label>
+          Sitio web
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       <Field
         label="Correo electrónico"
         name="email"

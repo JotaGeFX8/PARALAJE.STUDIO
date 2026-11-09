@@ -357,6 +357,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"moderation_actions": {
+                  Row: {
+                    "action": string,"actor_id": string | null,"created_at": string,"id": string,"note": string,"target_id": string,"target_type": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id"?: string | null,"created_at"?: string,"id"?: string,"note"?: string,"target_id": string,"target_type": string
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string | null,"created_at"?: string,"id"?: string,"note"?: string,"target_id"?: string,"target_type"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "moderation_actions_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_prefs": {
                   Row: {
                     "circles": boolean,"comments": boolean,"connections": boolean,"mentions": boolean,"messages": boolean,"projects": boolean,"replies": boolean,"updated_at": string,"user_id": string
@@ -739,6 +759,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"site_settings": {
+                  Row: {
+                    "id": boolean,"registration_open": boolean,"updated_at": string,"updated_by": string | null,"welcome_message": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: boolean,"registration_open"?: boolean,"updated_at"?: string,"updated_by"?: string | null,"welcome_message"?: string
+                  }
+                  Update: {
+                    "id"?: boolean,"registration_open"?: boolean,"updated_at"?: string,"updated_by"?: string | null,"welcome_message"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "site_settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "created_at": string,"created_by": string | null,"name": string,"slug": string
@@ -765,7 +805,29 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "can_message":
+            "admin_list_members":
+{ Args: { "p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_role"?: Database["public"]['Enums']["user_role"],"p_status"?: Database["public"]['Enums']["account_status"] }; Returns: {
+              "avatar_url": string,"created_at": string,"display_name": string,"email": string,"id": string,"onboarded_at": string,"posts": number,"reports_against": number,"role": Database["public"]['Enums']["user_role"],"status": Database["public"]['Enums']["account_status"],"username": string
+            }[]
+                           },
+"admin_save_category":
+{ Args: { "p_archived": boolean,"p_description": string,"p_name": string,"p_position": number,"p_slug": string }; Returns: undefined
+                           },
+"admin_set_role":
+{ Args: { "p_role": Database["public"]['Enums']["user_role"],"p_user": string }; Returns: undefined
+                           },
+"admin_set_status":
+{ Args: { "p_reason"?: string,"p_status": Database["public"]['Enums']["account_status"],"p_user": string }; Returns: undefined
+                           },
+"admin_stats":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "circles": number,"comments": number,"members": number,"members_week": number,"open_reports": number,"posts": number,"posts_week": number,"projects": number,"suspended": number
+            }[]
+                           },
+"admin_update_settings":
+{ Args: { "p_registration_open": boolean,"p_welcome": string }; Returns: undefined
+                           },
+"can_message":
 { Args: { "p_conversation": string }; Returns: boolean
                            },
 "can_read_circle":
@@ -875,6 +937,9 @@ isOneToOne: false
 "join_circle":
 { Args: { "p_circle": string,"p_message"?: string }; Returns: string
                            },
+"log_moderation":
+{ Args: { "p_action": string,"p_id": string,"p_note"?: string,"p_type": string }; Returns: undefined
+                           },
 "mark_conversation_read":
 { Args: { "p_conversation": string }; Returns: undefined
                            },
@@ -890,6 +955,30 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "country": string,"members": number
             }[]
+                           },
+"mod_delete_circle":
+{ Args: { "p_circle": string,"p_note"?: string }; Returns: undefined
+                           },
+"mod_delete_comment":
+{ Args: { "p_comment": string,"p_note"?: string }; Returns: undefined
+                           },
+"mod_delete_message":
+{ Args: { "p_message": string,"p_note"?: string }; Returns: undefined
+                           },
+"mod_delete_post":
+{ Args: { "p_note"?: string,"p_post": string }; Returns: undefined
+                           },
+"mod_delete_project":
+{ Args: { "p_note"?: string,"p_project": string }; Returns: undefined
+                           },
+"mod_reclassify_post":
+{ Args: { "p_kind": Database["public"]['Enums']["post_kind"],"p_note"?: string,"p_post": string }; Returns: undefined
+                           },
+"mod_resolve_report":
+{ Args: { "p_note"?: string,"p_report": string,"p_status": Database["public"]['Enums']["report_status"] }; Returns: undefined
+                           },
+"mod_set_post_flags":
+{ Args: { "p_locked": boolean,"p_pinned": boolean,"p_post": string }; Returns: undefined
                            },
 "my_conversations":
 { Args: Record<PropertyKey, never>; Returns: {
@@ -907,10 +996,27 @@ isOneToOne: false
 "notify_mentions":
 { Args: { "p_actor": string,"p_body": string,"p_comment": string,"p_post": string,"p_text": string }; Returns: undefined
                            },
+"post_excerpt":
+{ Args: { "p_body": string }; Returns: string
+                           },
+"rate_check":
+{ Args: { "p_count": number,"p_max": number,"p_message": string }; Returns: undefined
+                           },
 "reaction_summary":
 { Args: { "p_post": string }; Returns: {
               "mine": boolean,"target": string,"target_id": string,"total": number,"type": Database["public"]['Enums']["reaction_type"]
             }[]
+                           },
+"report_target_preview":
+{ Args: { "p_report": string }; Returns: {
+              "author_id": string,"author_username": string,"body": string,"link": string,"title": string
+            }[]
+                           },
+"require_admin":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"require_staff":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "respond_circle_invite":
 { Args: { "p_accept": boolean,"p_invite": string }; Returns: undefined
