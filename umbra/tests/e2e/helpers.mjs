@@ -65,7 +65,7 @@ export async function registerMember(browser, { key, name, interests, ctx = {}, 
   await page.getByLabel("A quién te gustaría conocer").fill("Gente con huerta y telescopio.");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByText("Español", { exact: true }).click();
-  await page.getByText("Abierta a conversar").click();
+  await page.getByText("Disponible para conversar").click();
   if (country) await page.getByLabel("País").fill(country);
   if (region) await page.getByLabel("Región o ciudad").fill(region);
   await page.getByRole("button", { name: /^Entrar en / }).click();

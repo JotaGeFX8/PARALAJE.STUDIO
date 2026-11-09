@@ -109,6 +109,58 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"connections": {
+                  Row: {
+                    "addressee_id": string,"created_at": string,"id": string,"message": string,"pair_high": string | null,"pair_low": string | null,"requester_id": string,"responded_at": string | null,"status": Database["public"]['Enums']["connection_status"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "addressee_id": string,"created_at"?: string,"id"?: string,"message"?: string,"pair_high"?: never,"pair_low"?: never,"requester_id": string,"responded_at"?: string | null,"status"?: Database["public"]['Enums']["connection_status"]
+                  }
+                  Update: {
+                    "addressee_id"?: string,"created_at"?: string,"id"?: string,"message"?: string,"pair_high"?: never,"pair_low"?: never,"requester_id"?: string,"responded_at"?: string | null,"status"?: Database["public"]['Enums']["connection_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "connections_addressee_id_fkey"
+      columns: ["addressee_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "connections_requester_id_fkey"
+      columns: ["requester_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"conversations": {
+                  Row: {
+                    "created_at": string,"high_read_at": string,"id": string,"last_message_at": string,"low_read_at": string,"user_high": string,"user_low": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"high_read_at"?: string,"id"?: string,"last_message_at"?: string,"low_read_at"?: string,"user_high": string,"user_low": string
+                  }
+                  Update: {
+                    "created_at"?: string,"high_read_at"?: string,"id"?: string,"last_message_at"?: string,"low_read_at"?: string,"user_high"?: string,"user_low"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "conversations_user_high_fkey"
+      columns: ["user_high"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "conversations_user_low_fkey"
+      columns: ["user_low"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"interests": {
                   Row: {
                     "created_at": string,"name": string,"position": number,"slug": string
@@ -122,6 +174,122 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"member_skips": {
+                  Row: {
+                    "created_at": string,"skipped_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"skipped_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"skipped_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "member_skips_skipped_id_fkey"
+      columns: ["skipped_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "member_skips_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"messages": {
+                  Row: {
+                    "body": string,"conversation_id": string,"created_at": string,"deleted_at": string | null,"id": string,"sender_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"conversation_id": string,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"sender_id": string
+                  }
+                  Update: {
+                    "body"?: string,"conversation_id"?: string,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"sender_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "messages_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "conversations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "messages_sender_id_fkey"
+      columns: ["sender_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notification_prefs": {
+                  Row: {
+                    "circles": boolean,"comments": boolean,"connections": boolean,"mentions": boolean,"messages": boolean,"projects": boolean,"replies": boolean,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "circles"?: boolean,"comments"?: boolean,"connections"?: boolean,"mentions"?: boolean,"messages"?: boolean,"projects"?: boolean,"replies"?: boolean,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "circles"?: boolean,"comments"?: boolean,"connections"?: boolean,"mentions"?: boolean,"messages"?: boolean,"projects"?: boolean,"replies"?: boolean,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notification_prefs_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"notifications": {
+                  Row: {
+                    "actor_id": string | null,"body": string,"circle_id": string | null,"comment_id": string | null,"conversation_id": string | null,"created_at": string,"id": string,"post_id": string | null,"project_id": string | null,"read_at": string | null,"type": Database["public"]['Enums']["notification_type"],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"body"?: string,"circle_id"?: string | null,"comment_id"?: string | null,"conversation_id"?: string | null,"created_at"?: string,"id"?: string,"post_id"?: string | null,"project_id"?: string | null,"read_at"?: string | null,"type": Database["public"]['Enums']["notification_type"],"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"body"?: string,"circle_id"?: string | null,"comment_id"?: string | null,"conversation_id"?: string | null,"created_at"?: string,"id"?: string,"post_id"?: string | null,"project_id"?: string | null,"read_at"?: string | null,"type"?: Database["public"]['Enums']["notification_type"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "notifications_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_comment_id_fkey"
+      columns: ["comment_id"]
+isOneToOne: false
+      referencedRelation: "comments"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "conversations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_post_id_fkey"
+      columns: ["post_id"]
+isOneToOne: false
+      referencedRelation: "posts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "notifications_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"post_follows": {
                   Row: {
@@ -351,7 +519,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "can_write":
+            "can_message":
+{ Args: { "p_conversation": string }; Returns: boolean
+                           },
+"can_write":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "category_stats":
@@ -368,12 +539,23 @@ isOneToOne: false
 "delete_comment":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"delete_message":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "delete_my_account":
 { Args: { "p_confirm_username": string }; Returns: undefined
                            },
 "delete_post":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"discover_members":
+{ Args: { "p_limit"?: number }; Returns: Database["public"]['CompositeTypes']["member_card"][]
+                          SetofOptions: {
+        from: "*"
+        to: "member_card"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "feed_posts":
 { Args: { "p_author"?: string,"p_category"?: string,"p_circle"?: string,"p_kind"?: Database["public"]['Enums']["post_kind"],"p_limit"?: number,"p_offset"?: number,"p_saved_only"?: boolean,"p_scope"?: string,"p_sort"?: string,"p_tag"?: string }; Returns: Database["public"]['CompositeTypes']["post_list_item"][]
                           SetofOptions: {
@@ -394,14 +576,60 @@ isOneToOne: false
 "is_blocked_with":
 { Args: { "p_other": string }; Returns: boolean
                            },
+"is_connected_with":
+{ Args: { "p_other": string }; Returns: boolean
+                           },
+"is_conversation_member":
+{ Args: { "p_conversation": string }; Returns: boolean
+                           },
 "is_staff":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"mark_conversation_read":
+{ Args: { "p_conversation": string }; Returns: undefined
+                           },
+"member_card_for":
+{ Args: { "p_id": string }; Returns: Database["public"]['CompositeTypes']["member_card"]
+                          SetofOptions: {
+        from: "*"
+        to: "member_card"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"member_countries":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "country": string,"members": number
+            }[]
+                           },
+"my_conversations":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "can_write": boolean,"id": string,"last_body": string,"last_message_at": string,"last_sender": string,"other_avatar": string,"other_id": string,"other_name": string,"other_username": string,"unread": number
+            }[]
+                           },
+"my_unread_counts":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "messages": number,"notifications": number,"requests": number
+            }[]
+                           },
+"notify":
+{ Args: { "p_actor": string,"p_body"?: string,"p_circle"?: string,"p_comment"?: string,"p_conversation"?: string,"p_post"?: string,"p_project"?: string,"p_type": Database["public"]['Enums']["notification_type"],"p_user": string }; Returns: undefined
+                           },
+"notify_mentions":
+{ Args: { "p_actor": string,"p_body": string,"p_comment": string,"p_post": string,"p_text": string }; Returns: undefined
                            },
 "reaction_summary":
 { Args: { "p_post": string }; Returns: {
               "mine": boolean,"target": string,"target_id": string,"total": number,"type": Database["public"]['Enums']["reaction_type"]
             }[]
                            },
+"search_members":
+{ Args: { "p_availability"?: Database["public"]['Enums']["chat_availability"],"p_country"?: string,"p_interests"?: (string)[],"p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_region"?: string,"p_with_projects"?: boolean }; Returns: Database["public"]['CompositeTypes']["member_card"][]
+                          SetofOptions: {
+        from: "*"
+        to: "member_card"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "search_posts":
 { Args: { "p_limit"?: number,"p_offset"?: number,"p_query": string }; Returns: Database["public"]['CompositeTypes']["post_list_item"][]
                           SetofOptions: {
@@ -419,6 +647,9 @@ isOneToOne: false
 "slugify":
 { Args: { "p": string }; Returns: string
                            },
+"start_conversation":
+{ Args: { "p_other": string }; Returns: string
+                           },
 "trending_tags":
 { Args: { "p_limit"?: number }; Returns: {
               "name": string,"slug": string,"uses": number
@@ -429,10 +660,12 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","post_kind": "documented"|"hypothesis"|"opinion"|"experience","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","user_role": "admin"|"moderator"|"member"|"restricted"
+            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","user_role": "admin"|"moderator"|"member"|"restricted"
           }
           CompositeTypes: {
-            "post_list_item": {
+            "member_card": {
+                        "id": string | null,"username": string | null,"display_name": string | null,"avatar_url": string | null,"bio": string | null,"looking_for": string | null,"country": string | null,"region": string | null,"availability": Database["public"]['Enums']["chat_availability"] | null,"personal_projects": string | null,"shared_count": number | null,"shared_interests": (string)[] | null,"interests": (string)[] | null,"connection": string | null
+                      },"post_list_item": {
                         "id": string | null,"title": string | null,"excerpt": string | null,"kind": Database["public"]['Enums']["post_kind"] | null,"is_question": boolean | null,"category_slug": string | null,"category_name": string | null,"circle_id": string | null,"author_id": string | null,"author_username": string | null,"author_name": string | null,"author_avatar": string | null,"tags": (string)[] | null,"comment_count": number | null,"reaction_count": number | null,"image_count": number | null,"is_pinned": boolean | null,"is_locked": boolean | null,"created_at": string | null,"last_activity_at": string | null
                       }
           }
@@ -547,7 +780,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"post_kind": ["documented", "hypothesis", "opinion", "experience"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"user_role": ["admin", "moderator", "member", "restricted"]
+            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"user_role": ["admin", "moderator", "member", "restricted"]
           }
         }
 } as const

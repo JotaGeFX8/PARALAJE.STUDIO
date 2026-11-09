@@ -4,11 +4,15 @@ import { requireOnboardedMember } from "@/lib/auth";
 import { PageHeader } from "@/components/ui/page-header";
 import { ChangePasswordForm, DeleteAccountForm } from "@/components/profile/account-forms";
 import { SignOutButton } from "@/components/shell/sign-out";
+import { NotificationPrefsForm } from "@/components/notifications/prefs-form";
+import { BlockedList } from "@/components/social/blocked-list";
+import { blockedMembers, notificationPrefs } from "@/lib/data/social";
 
 export const metadata: Metadata = { title: "Ajustes" };
 
 export default async function AjustesPage() {
   const { email, profile } = await requireOnboardedMember();
+  const [prefs, blocked] = await Promise.all([notificationPrefs(profile.id), blockedMembers(profile.id)]);
   return (
     <div className="max-w-4xl">
       <PageHeader eyebrow="Cuenta" title="Ajustes" />
@@ -32,10 +36,11 @@ export default async function AjustesPage() {
         <Row title="Contraseña">
           <ChangePasswordForm />
         </Row>
-        <Row title="Notificaciones">
-          <p className="text-[0.9375rem] leading-relaxed text-muted">
-            Las preferencias de notificación llegarán junto con la mensajería y las conexiones (fase 4).
-          </p>
+        <Row title="Avisos" id="avisos">
+          <NotificationPrefsForm prefs={prefs} />
+        </Row>
+        <Row title="Bloqueos">
+          <BlockedList rows={blocked} />
         </Row>
         <Row title="Privacidad">
           <p className="text-[0.9375rem] leading-relaxed text-muted">
@@ -55,9 +60,9 @@ export default async function AjustesPage() {
   );
 }
 
-function Row({ title, danger, children }: { title: string; danger?: boolean; children: React.ReactNode }) {
+function Row({ title, danger, id, children }: { title: string; danger?: boolean; id?: string; children: React.ReactNode }) {
   return (
-    <section className="grid gap-6 border-t hairline py-10 md:grid-cols-[12rem_1fr] md:gap-10">
+    <section id={id} className="grid scroll-mt-20 gap-6 border-t hairline py-10 md:grid-cols-[12rem_1fr] md:gap-10">
       <h2 className={`font-serif text-xl ${danger ? "text-danger" : "text-ink"}`}>{title}</h2>
       <div className="max-w-md">{children}</div>
     </section>

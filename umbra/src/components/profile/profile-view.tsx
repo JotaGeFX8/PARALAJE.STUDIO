@@ -19,7 +19,17 @@ export type ProfileViewData = {
 
 const fmt = new Intl.DateTimeFormat("es", { month: "long", year: "numeric" });
 
-export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: React.ReactNode }) {
+export function ProfileView({
+  p,
+  actions,
+  footer,
+  shared,
+}: {
+  p: ProfileViewData;
+  actions?: React.ReactNode;
+  footer?: React.ReactNode;
+  shared?: string[];
+}) {
   const name = p.display_name ?? p.username ?? "";
   const place = [p.region, p.country].filter(Boolean).join(", ");
   const favs = p.interests.filter((i) => i.is_favorite);
@@ -38,8 +48,18 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
             <span>Miembro desde {fmt.format(new Date(p.created_at))}</span>
           </p>
         </div>
-        {actions && <div className="flex gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
+      {shared && shared.length > 0 && (
+        <p className="flex flex-wrap items-center gap-2 border-b hairline py-4 text-sm text-muted">
+          <span className="label mr-1">Compartís</span>
+          {shared.map((i) => (
+            <span key={i} className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs text-accent-strong">
+              {i}
+            </span>
+          ))}
+        </p>
+      )}
 
       <div className="grid gap-12 pt-12 md:grid-cols-[1.4fr_1fr] md:gap-16">
         <div className="space-y-12">
@@ -79,6 +99,7 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
           )}
         </aside>
       </div>
+      {footer && <div className="mt-12 border-t hairline pt-4">{footer}</div>}
     </article>
   );
 }

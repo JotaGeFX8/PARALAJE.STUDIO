@@ -116,7 +116,7 @@ export const EPISTEMIC_KINDS = [
 ] as const;
 
 export const AVAILABILITY_LABELS = {
-  open: "Abierta a conversar",
+  open: "Disponible para conversar",
   sometimes: "Conversa a veces",
   closed: "Ahora no disponible",
 } as const;
