@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KnowledgeMap } from "@/components/ui/knowledge-map";
+import { KnowledgeAtlas } from "@/components/ui/knowledge-atlas";
 import { BRAND } from "@/config/brand";
 import { Wordmark } from "@/components/ui/logo";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" aria-label={`${BRAND.name}, inicio`} className="text-ink">
             <Wordmark />
           </Link>
-          <KnowledgeMap className="mx-auto w-full max-w-[520px] py-8" />
+          <KnowledgeAtlas className="mx-auto w-full max-w-[460px] py-6" />
           <p className="display max-w-md text-[2.6rem] text-ink">
             Pensar en compañía <span className="italic text-accent">cambia</span> lo que pensamos.
           </p>

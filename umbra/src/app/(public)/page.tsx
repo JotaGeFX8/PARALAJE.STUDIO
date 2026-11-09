@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KnowledgeMap } from "@/components/ui/knowledge-map";
+import { KnowledgeAtlas } from "@/components/ui/knowledge-atlas";
 import { BRAND } from "@/config/brand";
 import { IconArrow } from "@/components/ui/icons";
 import { AREAS, EPISTEMIC_KINDS, TERRITORIES } from "@/lib/content";
@@ -40,10 +40,10 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <figure className="animate-fade [animation-delay:200ms]">
-            <KnowledgeMap className="mx-auto w-full max-w-[640px]" />
-            <figcaption className="label mt-4 text-center md:text-right">
-              Un recorrido posible · de la física cuántica a una vivienda autosuficiente
+          <figure className="animate-fade [animation-delay:150ms]">
+            <KnowledgeAtlas className="mx-auto w-full max-w-[600px]" />
+            <figcaption className="label mt-5 text-center">
+              22 áreas de conocimiento · en verde, un recorrido posible
             </figcaption>
           </figure>
         </div>

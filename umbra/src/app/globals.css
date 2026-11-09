@@ -47,6 +47,9 @@
   --animate-fade: fade 1.2s var(--ease-calm) both;
   --animate-draw: draw 2.6s var(--ease-calm) 0.4s both;
   --animate-breathe: breathe 6s ease-in-out infinite;
+  --animate-orbit: orbit 160s linear infinite;
+  --animate-orbit-rev: orbit 220s linear infinite reverse;
+  --animate-orbit-slow: orbit 600s linear infinite;
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(12px); }
@@ -59,6 +62,9 @@
   @keyframes draw {
     from { stroke-dashoffset: var(--len, 1200); }
     to   { stroke-dashoffset: 0; }
+  }
+  @keyframes orbit {
+    to { transform: rotate(360deg); }
   }
   @keyframes breathe {
     0%, 100% { opacity: 1; }
