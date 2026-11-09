@@ -84,3 +84,24 @@ export async function saveSettingsAction(_: FormState, fd: FormData): Promise<Fo
   );
   return r.ok ? { ok: true, message: "Configuración guardada." } : { message: r.message };
 }
+
+// ------------------------------------------------------------ Catálogo de temas
+
+const topicId = (v: unknown) => {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n : 0;
+};
+
+export async function reviewTopicAction(topic: number, approve: boolean, area: string) {
+  return call((s) => s.rpc("admin_review_topic", { p_topic: topicId(topic), p_approve: approve, p_area: String(area ?? "").slice(0, 40) || undefined }));
+}
+
+export async function mergeTopicAction(from: number, into: number) {
+  return call((s) => s.rpc("admin_merge_topics", { p_from: topicId(from), p_into: topicId(into) }));
+}
+
+export async function addSynonymAction(topic: number, term: string) {
+  const t = String(term ?? "").trim().slice(0, 60);
+  if (t.length < 2) return { ok: false, message: "El sinónimo necesita 2 caracteres o más." };
+  return call((s) => s.rpc("admin_add_synonym", { p_topic: topicId(topic), p_term: t }));
+}

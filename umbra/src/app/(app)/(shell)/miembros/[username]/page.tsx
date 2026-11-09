@@ -30,15 +30,17 @@ export default async function MiembroPage({ params }: Props) {
   const [card, blocked, { items }] = await Promise.all([
     memberCard(member.id),
     isBlockedByMe(profile.id, member.id),
-    getFeed({ scope: "all", author: member.id, limit: 5 }),
+    // La actividad en el perfil respeta la privacidad elegida (las publicaciones siguen en sus foros).
+    member.visible.activity ? getFeed({ scope: "all", author: member.id, limit: 5 }) : Promise.resolve({ items: [], hasMore: false }),
   ]);
-  const name = member.display_name ?? member.username ?? "";
+  const name = member.display_name || member.username;
 
   return (
     <>
       <ProfileView
         p={member}
-        shared={card?.shared_interests}
+        shared={card?.shared_topics}
+        reasons={card?.reasons}
         actions={
           blocked ? (
             <span className="label">Has bloqueado a esta persona</span>

@@ -180,7 +180,9 @@ const projectSchema = z.object({
   status: z.enum(STATUS, { error: "Elige un estado." }),
   country: z.string().trim().max(60),
   region: z.string().trim().max(80),
-  interests: z.array(z.string().regex(/^[a-z0-9-]{2,40}$/)).max(6, "Máximo 6 temáticas."),
+  area: z.string().regex(/^[a-z0-9-]{2,40}$/, "Elige un área.").or(z.literal("")),
+  topics: z.array(z.coerce.number().int().positive()).max(8, "Máximo 8 temáticas."),
+  skills: z.array(z.coerce.number().int().positive()).max(12, "Máximo 12 conocimientos."),
 });
 
 function readProject(fd: FormData) {
@@ -196,7 +198,9 @@ function readProject(fd: FormData) {
     status: String(fd.get("status") ?? "idea"),
     country: String(fd.get("country") ?? ""),
     region: String(fd.get("region") ?? ""),
-    interests: fd.getAll("interests").map(String),
+    area: String(fd.get("area") ?? ""),
+    topics: fd.getAll("topics").map(String),
+    skills: fd.getAll("skills").map(String),
   };
 }
 
@@ -225,7 +229,9 @@ export async function saveProjectAction(_: FormState, fd: FormData): Promise<For
       p_status: d.status,
       p_country: d.country,
       p_region: d.region,
-      p_interests: d.interests,
+      p_area: d.area || undefined,
+      p_topics: d.topics,
+      p_skills: d.skills,
       p_cover_path: cover ?? undefined,
     });
     if (error || !id) {
@@ -246,13 +252,15 @@ export async function saveProjectAction(_: FormState, fd: FormData): Promise<For
         status: d.status,
         country: d.country || null,
         region: d.region || null,
-        interests: d.interests,
+        area_slug: d.area || null,
         ...(cover ? { cover_path: cover } : {}),
       },
       { count: "exact" },
     )
     .eq("id", projectId);
   if (error || !count) return { message: dbErrorMessage(error, "No tienes permiso para editar este proyecto."), values };
+  const { error: topicsErr } = await supabase.rpc("set_project_topics", { p_project: projectId, p_topics: d.topics, p_skills: d.skills });
+  if (topicsErr) return { message: dbErrorMessage(topicsErr, "Se guardó el proyecto, pero no sus temáticas."), values };
   redirect(`/proyectos/${projectId}`);
 }
 

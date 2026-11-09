@@ -21,22 +21,26 @@ export function MemberRow({ m }: { m: MemberCard }) {
               <span className="label !text-[0.625rem] text-accent">{AVAILABILITY_LABELS.open}</span>
             )}
           </div>
-          {(place || m.shared) && (
+          {(place || m.shared_count > 0) && (
             <p className="mt-1 text-sm text-muted">
-              {[place, m.shared ? `${m.shared} ${m.shared === 1 ? "interés" : "intereses"} en común` : ""]
+              {[place, m.shared_count ? `${m.shared_count} ${m.shared_count === 1 ? "tema" : "temas"} en común` : ""]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
           )}
-          {m.interests.length > 0 && (
-            <p className="mt-2 truncate text-sm text-ink-2">
-              {m.interests.slice(0, 4).map((i, idx) => (
-                <span key={i.slug}>
-                  {idx > 0 && <span className="px-1.5 text-muted/60">/</span>}
-                  <span className={i.is_favorite ? "text-ink" : ""}>{i.name}</span>
-                </span>
-              ))}
-            </p>
+          {m.reasons[0] ? (
+            <p className="mt-1.5 text-sm text-accent-strong">{m.reasons[0]}</p>
+          ) : (
+            m.topics.length > 0 && (
+              <p className="mt-2 truncate text-sm text-ink-2">
+                {m.topics.slice(0, 4).map((name, idx) => (
+                  <span key={name}>
+                    {idx > 0 && <span className="px-1.5 text-muted/60">/</span>}
+                    {name}
+                  </span>
+                ))}
+              </p>
+            )
           )}
         </div>
       </Link>

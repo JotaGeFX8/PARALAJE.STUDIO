@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboardedMember } from "@/lib/auth";
-import { getProject, projectMessages, projectParticipants, projectRequests, projectStatusFor } from "@/lib/data/projects";
-import { createClient } from "@/lib/supabase/server";
+import { getProject, projectMessages, projectParticipants, projectRequests, projectStatusFor, projectTopics } from "@/lib/data/projects";
+import { getAreas } from "@/lib/data/catalog";
 import { coverUrl } from "@/lib/media";
 import { formatDate, plural, timeAgo } from "@/lib/format";
 import { Avatar } from "@/components/ui/avatar";
@@ -29,13 +29,14 @@ export default async function ProyectoPage({ params }: Props) {
   const project = await getProject((await params).ref);
   if (!project) notFound();
 
-  const supabase = await createClient();
-  const [status, participants, messages, { data: interestRows }] = await Promise.all([
+  const [status, participants, messages, topics, areas] = await Promise.all([
     projectStatusFor(project.id, profile.id),
     projectParticipants(project.id),
     projectMessages(project.id),
-    supabase.from("interests").select("slug, name").in("slug", project.interests.length ? project.interests : ["-"]),
+    projectTopics(project.id),
+    getAreas(),
   ]);
+  const area = areas.find((a) => a.slug === project.area_slug);
   const isOwner = project.owner_id === profile.id;
   const isStaff = profile.role === "admin" || profile.role === "moderator";
   const requests = isOwner ? await projectRequests(project.id) : [];
@@ -126,13 +127,33 @@ export default async function ProyectoPage({ params }: Props) {
         </div>
 
         <aside className="space-y-10">
-          {interestRows && interestRows.length > 0 && (
+          {area && (
+            <div>
+              <h2 className="label mb-3">Área</h2>
+              <Link href={`/proyectos?area=${area.slug}`} className="tag">
+                {area.name}
+              </Link>
+            </div>
+          )}
+          {topics.themes.length > 0 && (
             <div>
               <h2 className="label mb-3">Temáticas</h2>
               <div className="flex flex-wrap gap-1.5">
-                {interestRows.map((i) => (
-                  <Link key={i.slug} href={`/proyectos?tema=${i.slug}`} className="tag">
-                    {i.name}
+                {topics.themes.map((t) => (
+                  <Link key={t.id} href={`/proyectos?tema=${t.id}`} className="tag">
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {topics.skills.length > 0 && (
+            <div>
+              <h2 className="label mb-3">Conocimientos que necesitan</h2>
+              <div className="flex flex-wrap gap-1.5">
+                {topics.skills.map((t) => (
+                  <Link key={t.id} href={`/conexiones?ver=buscar&t=${t.id}&rel=can_teach`} className="tag" title="Buscar personas que puedan ayudar">
+                    {t.name}
                   </Link>
                 ))}
               </div>

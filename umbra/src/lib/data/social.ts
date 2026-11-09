@@ -1,28 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Database, Enums } from "@/lib/supabase/types";
-
-type RawCard = Database["public"]["CompositeTypes"]["member_card"];
-export type MemberCardFull = {
-  id: string;
-  username: string;
-  display_name: string;
-  avatar_url: string | null;
-  bio: string;
-  looking_for: string;
-  country: string | null;
-  region: string | null;
-  availability: Enums<"chat_availability">;
-  personal_projects: string;
-  shared_count: number;
-  shared_interests: string[];
-  interests: string[];
-  connection: "none" | "sent" | "received" | "connected";
-};
-
-function toCards(rows: RawCard[] | null | undefined): MemberCardFull[] {
-  return (rows ?? []).filter((r) => r.id).map((r) => r as MemberCardFull);
-}
+import type { Enums, TopicRelation, UserGoal } from "@/lib/supabase/types";
+import { toCards } from "./members";
 
 export async function discoverMembers(limit = 12) {
   const supabase = await createClient();
@@ -33,11 +12,16 @@ export async function discoverMembers(limit = 12) {
 
 export type MemberFilters = {
   q?: string;
-  interests?: string[];
+  areas?: string[];
+  topics?: number[];
+  relation?: TopicRelation | null;
+  goals?: UserGoal[];
+  languages?: string[];
   country?: string;
   region?: string;
   availability?: Enums<"chat_availability"> | null;
   withProjects?: boolean;
+  inMyCircles?: boolean;
   page?: number;
 };
 
@@ -46,11 +30,16 @@ export async function searchMembers(f: MemberFilters, pageSize = 20) {
   const page = f.page ?? 1;
   const { data, error } = await supabase.rpc("search_members", {
     p_query: f.q || undefined,
-    p_interests: f.interests?.length ? f.interests : undefined,
+    p_areas: f.areas?.length ? f.areas : undefined,
+    p_topics: f.topics?.length ? f.topics : undefined,
+    p_relation: f.relation ?? undefined,
+    p_goals: f.goals?.length ? f.goals : undefined,
+    p_languages: f.languages?.length ? f.languages : undefined,
     p_country: f.country || undefined,
     p_region: f.region || undefined,
     p_availability: f.availability ?? undefined,
     p_with_projects: f.withProjects ?? false,
+    p_in_my_circles: f.inMyCircles ?? false,
     p_limit: pageSize + 1,
     p_offset: (page - 1) * pageSize,
   });
@@ -62,16 +51,18 @@ export async function searchMembers(f: MemberFilters, pageSize = 20) {
 export async function memberCard(id: string) {
   const supabase = await createClient();
   const { data } = await supabase.rpc("member_card_for", { p_id: id });
-  return data && (data as RawCard).id ? (data as MemberCardFull) : null;
+  return toCards(data)[0] ?? null;
 }
 
+/** Países con miembros que muestran su ubicación (para el filtro). */
 export async function memberCountries() {
   const supabase = await createClient();
   const { data } = await supabase.rpc("member_countries");
   return (data ?? []).map((r) => r.country);
 }
 
-const PERSON = "id, username, display_name, avatar_url, country, region, availability";
+// Solo columnas públicas del perfil: la ubicación se rige por la privacidad de cada persona.
+const PERSON = "id, username, display_name, avatar_url, availability";
 
 /** Conexiones aceptadas y solicitudes (recibidas y enviadas). */
 export async function myNetwork(userId: string) {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
 import { listProjects } from "@/lib/data/projects";
-import { createClient } from "@/lib/supabase/server";
+import { getAreas } from "@/lib/data/catalog";
 import { PageHeader } from "@/components/ui/page-header";
 import { NavTabs, hrefWith } from "@/components/ui/nav-tabs";
 import { EmptyState } from "@/components/ui/section";
@@ -25,18 +25,23 @@ export default async function ProyectosPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const statusRaw = oneParam(sp.estado);
   const status = (statusRaw in PROJECT_STATUS ? statusRaw : null) as Enums<"project_status"> | null;
-  const interest = oneParam(sp.tema) || null;
+  const areaRaw = oneParam(sp.area);
+  const topic = Number(oneParam(sp.tema)) || null;
   const q = oneParam(sp.q).slice(0, 80);
   const mine = oneParam(sp.mios) === "1";
   const sortRaw = oneParam(sp.orden);
   const sort = (SORTS.some((s) => s.key === sortRaw) ? sortRaw : "active") as (typeof SORTS)[number]["key"];
-  const current = { estado: status ?? undefined, tema: interest ?? undefined, q: q || undefined, mios: mine ? "1" : undefined, orden: sort === "active" ? undefined : sort };
-
-  const supabase = await createClient();
-  const [projects, { data: interests }] = await Promise.all([
-    listProjects({ status, interest, q, mine: mine ? profile.id : null }, sort),
-    supabase.from("interests").select("slug, name").order("position"),
-  ]);
+  const areas = await getAreas();
+  const area = areas.some((a) => a.slug === areaRaw) ? areaRaw : null;
+  const current = {
+    estado: status ?? undefined,
+    area: area ?? undefined,
+    tema: topic ? String(topic) : undefined,
+    q: q || undefined,
+    mios: mine ? "1" : undefined,
+    orden: sort === "active" ? undefined : sort,
+  };
+  const projects = await listProjects({ status, area, topic, q, mine: mine ? profile.id : null }, sort);
 
   return (
     <>
@@ -73,16 +78,17 @@ export default async function ProyectosPage({ searchParams }: { searchParams: Pr
         </div>
         <div>
           <label htmlFor="pt" className="label block">
-            Temática
+            Área
           </label>
-          <select id="pt" name="tema" defaultValue={interest ?? ""} className="field">
+          <select id="pt" name="area" defaultValue={area ?? ""} className="field">
             <option value="">Todas</option>
-            {(interests ?? []).map((i) => (
-              <option key={i.slug} value={i.slug}>
-                {i.name}
+            {areas.map((a) => (
+              <option key={a.slug} value={a.slug}>
+                {a.name}
               </option>
             ))}
           </select>
+          {topic && <input type="hidden" name="tema" value={topic} />}
         </div>
         <div className="flex items-center gap-4">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-2">
@@ -103,7 +109,7 @@ export default async function ProyectosPage({ searchParams }: { searchParams: Pr
           </ul>
         ) : (
           <EmptyState action={<Link href="/proyectos/nuevo" className="btn btn-primary">Publicar un proyecto</Link>}>
-            {q || status || interest || mine
+            {q || status || area || topic || mine
               ? "Ningún proyecto coincide con estos filtros."
               : "Todavía no hay proyectos. Convierte una conversación en una iniciativa real."}
           </EmptyState>

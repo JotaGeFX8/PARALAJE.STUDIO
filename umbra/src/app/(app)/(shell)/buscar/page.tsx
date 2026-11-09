@@ -74,7 +74,7 @@ export default async function BuscarPage({
 
 async function Results({ tab, q, page, userId }: { tab: string; q: string; page: number; userId: string }) {
   if (tab === "personas") {
-    const members = await searchMembersByName(q.replace(/^@/, ""), userId);
+    const members = await searchMembersByName(q.replace(/^@/, ""));
     return members.length ? (
       <ul className="border-t hairline">{members.map((m) => <MemberRow key={m.id} m={m} />)}</ul>
     ) : (

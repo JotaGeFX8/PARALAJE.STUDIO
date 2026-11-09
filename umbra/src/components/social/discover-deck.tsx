@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation";
 import { sendConnectionAction, skipMemberAction } from "@/app/(app)/actions/social";
 import { Avatar } from "@/components/ui/avatar";
 import { AVAILABILITY_LABELS } from "@/lib/content";
-import type { MemberCardFull } from "@/lib/data/social";
+import type { MemberCard } from "@/lib/data/members";
 import { IconArrow, IconConnections } from "@/components/ui/icons";
 
 /**
  * «Descubrir»: una persona afín cada vez, sin fotos de citas ni puntuaciones.
  * Conectar envía una solicitud (con nota opcional); Pasar no la vuelve a mostrar en 30 días.
  */
-export function DiscoverDeck({ cards }: { cards: MemberCardFull[] }) {
+export function DiscoverDeck({ cards }: { cards: MemberCard[] }) {
   const [index, setIndex] = useState(0);
   const [note, setNote] = useState("");
   const [composing, setComposing] = useState(false);
@@ -72,11 +72,25 @@ export function DiscoverDeck({ cards }: { cards: MemberCardFull[] }) {
           </div>
         </header>
 
-        {card.shared_interests.length > 0 && (
+        {card.reasons.length > 0 && (
           <div className="mt-6">
-            <p className="label mb-2.5">Compartís</p>
+            <p className="label mb-2.5">Por qué te lo proponemos</p>
+            <ul className="space-y-1.5 text-[0.9375rem] text-ink-2">
+              {card.reasons.map((r) => (
+                <li key={r} className="flex gap-2.5">
+                  <span aria-hidden="true" className="text-accent">✦</span>
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {(card.shared_topics.length > 0 || card.topics.length > 0) && (
+          <div className="mt-6">
+            <p className="label mb-2.5">{card.shared_topics.length > 0 ? "Compartís" : "Sus temas"}</p>
             <div className="flex flex-wrap gap-1.5">
-              {card.shared_interests.map((i) => (
+              {(card.shared_topics.length > 0 ? card.shared_topics : card.topics).map((i) => (
                 <span key={i} className="rounded-full bg-accent-soft px-3 py-1 text-[0.8125rem] text-accent-strong">
                   {i}
                 </span>
@@ -90,12 +104,6 @@ export function DiscoverDeck({ cards }: { cards: MemberCardFull[] }) {
           <p className="mt-4 text-[0.9375rem] leading-relaxed text-ink-2">
             <span className="label mr-2">Busca</span>
             {card.looking_for}
-          </p>
-        )}
-        {card.personal_projects && (
-          <p className="mt-3 line-clamp-3 text-[0.9375rem] leading-relaxed text-ink-2">
-            <span className="label mr-2">Proyectos</span>
-            {card.personal_projects}
           </p>
         )}
 

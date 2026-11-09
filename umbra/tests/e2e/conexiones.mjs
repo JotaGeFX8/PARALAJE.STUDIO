@@ -8,7 +8,7 @@ await runSuite("Conexiones y mensajería", async (browser) => {
   const carla = await registerMember(browser, {
     key: "carla",
     name: "Carla Ribera",
-    interests: ["Bioconstrucción y permacultura", "Autosuficiencia y supervivencia", "Agricultura y ganadería"],
+    topics: ["Bioconstrucción", "Vida off-grid", "Agricultura ecológica"],
     ctx: devices["iPhone 13"],
     country: "España",
     region: "Galicia",
@@ -16,7 +16,7 @@ await runSuite("Conexiones y mensajería", async (browser) => {
   const david = await registerMember(browser, {
     key: "david",
     name: "David Orce",
-    interests: ["Bioconstrucción y permacultura", "Autosuficiencia y supervivencia", "Energías alternativas"],
+    topics: ["Bioconstrucción", "Vida off-grid", "Energía solar"],
     ctx: { viewport: { width: 1360, height: 900 } },
     country: "Portugal",
     region: "Minho",
@@ -32,7 +32,7 @@ await runSuite("Conexiones y mensajería", async (browser) => {
     await carla.page.getByRole("button", { name: "Pasar" }).click();
     await carla.page.waitForTimeout(250);
   }
-  await davidCard.getByText("Bioconstrucción y permacultura").first().waitFor();
+  await davidCard.getByText("Bioconstrucción").first().waitFor();
   await shot(carla.page, "conexiones-descubrir-movil");
   await carla.page.getByRole("button", { name: "Conectar" }).click();
   await carla.page.getByLabel("¿Por qué te gustaría conectar? (opcional)").fill("Estoy levantando una casa de paja y vi que te interesa la autosuficiencia.");
@@ -57,7 +57,7 @@ await runSuite("Conexiones y mensajería", async (browser) => {
   await carla.page.goto(`${APP}/notificaciones`);
   await carla.page.getByText("David Orce aceptó tu solicitud de conexión").waitFor();
   await carla.page.goto(`${APP}/miembros/${david.username}`);
-  await carla.page.getByText("Compartís").waitFor();
+  await carla.page.getByText("Compartís 2 intereses").waitFor();
   await carla.page.getByRole("button", { name: "Mensaje" }).click();
   await carla.page.waitForURL(/\/mensajes\/[0-9a-f-]{36}$/);
   const convoUrl = carla.page.url();
@@ -85,13 +85,16 @@ await runSuite("Conexiones y mensajería", async (browser) => {
   step("no leídos, respuesta recibida en vivo y contador a cero tras leer");
 
   // 5. Buscador con filtros
-  await david.page.goto(`${APP}/conexiones?ver=buscar&i=agricultura&pais=España&region=galicia`);
+  await david.page.goto(`${APP}/conexiones?ver=buscar&a=agricultura&rel=can_teach&o=debate&l=Español&pais=España&region=galicia`);
   const carlaLink = david.page.locator(`a[href="/miembros/${carla.username}"]`);
   await carlaLink.first().waitFor();
+  await david.page.getByText(/Compartís \d intereses/).first().waitFor();
+  await david.page.goto(`${APP}/conexiones?ver=buscar&rel=learning`);
+  assert.equal(await carlaLink.count(), 0);
   await david.page.goto(`${APP}/conexiones?ver=buscar&pais=Francia`);
   assert.equal(await carlaLink.count(), 0);
   await shot(david.page, "conexiones-buscador");
-  step("buscador de miembros con filtros de interés, país y región");
+  step("buscador de miembros: área, conocimientos, objetivos, idioma, país y región, con razones");
 
   // 6. Menciones y comentarios generan avisos
   await carla.page.goto(`${APP}/publicar`);

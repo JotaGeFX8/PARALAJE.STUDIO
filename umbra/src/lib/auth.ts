@@ -18,8 +18,16 @@ export const getMember = cache(async (): Promise<Member | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+  // Los campos personales solo son legibles a través de my_profile() (privacidad en la base de datos).
+  const { data: rows } = await supabase.rpc("my_profile");
+  const profile = rows?.[0];
   if (!profile) return null;
+  // Actividad para la analítica agregada (una escritura cada 10 min como mucho). Sin esperar:
+  // .then() lanza la petición sin retrasar la página.
+  supabase.rpc("touch_last_seen").then(
+    () => undefined,
+    () => undefined,
+  );
   return { userId: data.user.id, email: data.user.email ?? "", profile };
 });
 

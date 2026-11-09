@@ -9,13 +9,13 @@ await runSuite("Círculos, proyectos y Ágora", async (browser) => {
   const elena = await registerMember(browser, {
     key: "elena",
     name: "Elena Vidal",
-    interests: ["Astronomía y universo", "Historia y arqueología", "Proyectos colaborativos"],
+    topics: ["Astronomía", "Arqueología", "Proyectos colectivos"],
     ctx: { viewport: { width: 1360, height: 900 } },
   });
   const felix = await registerMember(browser, {
     key: "felix",
     name: "Félix Ramos",
-    interests: ["Astronomía y universo", "Agricultura y ganadería", "Proyectos colaborativos"],
+    topics: ["Astronomía", "Agricultura ecológica", "Proyectos colectivos"],
     ctx: devices["iPhone 13"],
   });
   const cover = await elena.page.screenshot({ type: "png" });
@@ -115,13 +115,19 @@ await runSuite("Círculos, proyectos y Ágora", async (browser) => {
   await elena.page.getByLabel("Qué ayuda buscáis").fill("Personas con experiencia en compostaje.");
   await elena.page.getByLabel("Estado").selectOption("active");
   await elena.page.getByLabel("Región · opcional").fill("Zaragoza");
-  await elena.page.getByRole("button", { name: "Agricultura y ganadería" }).click();
+  await elena.page.getByLabel("Área principal").selectOption({ label: "Agricultura y autosuficiencia" });
+  await elena.page.getByLabel("Buscar tema para Temáticas").fill("Agricultura ecológica");
+  await elena.page.getByRole("button", { name: "Agricultura ecológica", exact: true }).click();
+  await elena.page.getByLabel("Buscar tema para Conocimientos que necesitáis").fill("compost");
+  await elena.page.getByRole("button", { name: "Compostaje", exact: true }).click();
   await elena.page.getByRole("button", { name: "Publicar proyecto" }).click();
   await elena.page.waitForURL(/\/proyectos\/[0-9a-f-]{36}$/);
   const projectUrl = elena.page.url();
   await elena.page.getByText("Montar bancales elevados").waitFor();
   await elena.page.getByText("En marcha").first().waitFor();
-  step("proyecto publicado con objetivos, estado y temática");
+  await elena.page.getByRole("link", { name: "Agricultura ecológica" }).waitFor();
+  await elena.page.getByRole("link", { name: "Compostaje" }).waitFor();
+  step("proyecto publicado con objetivos, estado, área, temática y conocimientos necesarios");
 
   await felix.page.goto(projectUrl);
   await felix.page.getByRole("button", { name: "Quiero colaborar" }).click();

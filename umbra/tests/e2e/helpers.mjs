@@ -38,10 +38,14 @@ export async function latestLink(to, subject) {
 }
 
 /**
- * Registra un miembro de prueba por el flujo real (registro → correo → bienvenida).
+ * Registra un miembro de prueba por el flujo real (registro → correo → bienvenida en 5 pasos).
+ * `topics`: nombres exactos del catálogo; el primero se marca como principal con la relación `relation`.
  * Devuelve el contexto y la página con la sesión iniciada.
  */
-export async function registerMember(browser, { key, name, interests, ctx = {}, country = "España", region = "Asturias" }) {
+export async function registerMember(
+  browser,
+  { key, name, topics, relation = "Puedo enseñar o ayudar", goals = ["Debatir"], ctx = {}, country = "España", region = "Asturias" },
+) {
   const email = `${key}.${RUN}@umbra.test`;
   const username = `${key}_${RUN}`;
   const context = await browser.newContext(ctx);
@@ -54,16 +58,32 @@ export async function registerMember(browser, { key, name, interests, ctx = {}, 
   await page.getByRole("heading", { name: "Revisa tu correo." }).waitFor();
   await page.goto(await latestLink(email, /Confirma/));
   await page.waitForURL("**/bienvenida");
+  // 1 · Identidad
   await page.getByLabel("Nombre visible").fill(name);
   await page.getByLabel("Nombre de usuario").fill(username);
+  await page.getByLabel("Sobre mí").fill(`Hola, soy ${name}. Me interesan las preguntas grandes.`);
   await page.getByRole("button", { name: "Continuar" }).click();
-  await page.getByRole("heading", { name: "¿Qué te mueve?" }).waitFor();
-  for (const i of interests) await page.getByRole("button", { name: i, exact: true }).first().click();
-  await page.locator("fieldset").nth(1).getByRole("button", { name: interests[0] }).click();
+  // 2 · Intereses (buscador del catálogo)
+  await page.getByRole("heading", { name: "¿Qué te interesa?" }).waitFor();
+  const search = page.getByLabel("Buscar un tema");
+  for (const t of topics) {
+    await search.fill(t);
+    await page.getByRole("button", { name: t, exact: true }).first().click();
+  }
+  await search.fill("");
   await page.getByRole("button", { name: "Continuar" }).click();
-  await page.getByLabel("Descripción").fill(`Hola, soy ${name}. Me interesan las preguntas grandes.`);
-  await page.getByLabel("A quién te gustaría conocer").fill("Gente con huerta y telescopio.");
+  // 3 · Conocimientos: relación con el primer tema y tema principal
+  await page.getByRole("heading", { name: "¿Qué sabes y qué aprendes?" }).waitFor();
+  await page.getByLabel(`Relación con ${topics[0]}`).selectOption({ label: relation });
+  await page.getByRole("button", { name: `Marcar ${topics[0]} como principal` }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
+  // 4 · Objetivos
+  await page.getByRole("heading", { name: "¿Qué vienes a hacer?" }).waitFor();
+  for (const g of goals) await page.getByText(g, { exact: true }).click();
+  await page.getByLabel("A quién me gustaría conocer").fill("Gente con huerta y telescopio.");
+  await page.getByRole("button", { name: "Continuar" }).click();
+  // 5 · Preferencias
+  await page.getByRole("heading", { name: "Tus preferencias." }).waitFor();
   await page.getByText("Español", { exact: true }).click();
   await page.getByText("Disponible para conversar").click();
   if (country) await page.getByLabel("País").fill(country);

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
 import { discoverMembers, memberCountries, myNetwork, searchMembers } from "@/lib/data/social";
-import { createClient } from "@/lib/supabase/server";
+import { getCatalog } from "@/lib/data/catalog";
 import { PageHeader } from "@/components/ui/page-header";
 import { NavTabs, Pagination, hrefWith } from "@/components/ui/nav-tabs";
 import { EmptyState } from "@/components/ui/section";
@@ -10,9 +10,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { DiscoverDeck } from "@/components/social/discover-deck";
 import { MemberResult } from "@/components/social/member-result";
 import { ConnectButton } from "@/components/social/connect-button";
-import { AREAS, AVAILABILITY_LABELS } from "@/lib/content";
+import { AREAS, AVAILABILITY_LABELS, GOALS, LANGUAGES, TOPIC_RELATIONS } from "@/lib/content";
 import { oneParam, pageParam, timeAgo } from "@/lib/format";
-import type { ChatAvailability } from "@/lib/supabase/types";
+import type { ChatAvailability, TopicRelation, UserGoal } from "@/lib/supabase/types";
 
 export const metadata: Metadata = { title: "Conexiones" };
 
@@ -62,7 +62,7 @@ async function Discover() {
       <aside className="hidden text-[0.9375rem] leading-relaxed text-ink-2 lg:block">
         <p className="label mb-3">Cómo funciona</p>
         <ul className="space-y-3">
-          <li>Te proponemos personas por intereses compartidos y disponibilidad para conversar.</li>
+          <li>Te proponemos personas por temas compartidos, por lo que podéis enseñaros o aprender juntos y por círculos en común. Cada propuesta explica por qué.</li>
           <li>«Conectar» envía una solicitud; si la acepta, podréis escribiros en privado.</li>
           <li>«Pasar» no avisa a nadie y no te volverá a mostrar ese perfil en 30 días.</li>
           <li>Esto no es una app de citas: aquí se conecta por ideas, oficios y proyectos.</li>
@@ -72,35 +72,62 @@ async function Discover() {
   );
 }
 
+const many = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
+
 async function Search({ sp }: { sp: SP }) {
-  const supabase = await createClient();
-  const [{ data: interests }, countries] = await Promise.all([
-    supabase.from("interests").select("slug, name").order("position"),
-    memberCountries(),
-  ]);
-  const chosen = (Array.isArray(sp.i) ? sp.i : sp.i ? [sp.i] : []).filter((x) => /^[a-z0-9-]{2,40}$/.test(x));
+  const [catalog, countries] = await Promise.all([getCatalog(), memberCountries()]);
+  const areaSlugs = new Set(catalog.areas.map((a) => a.slug));
+  const areas = many(sp.a).filter((x) => areaSlugs.has(x)).slice(0, 22);
+  const topicId = Number(oneParam(sp.t)) || null;
+  const topic = topicId ? catalog.topics.find((t) => t.id === topicId) ?? null : null;
+  const relRaw = oneParam(sp.rel);
+  const relation = (TOPIC_RELATIONS.some((r) => r.key === relRaw) ? relRaw : null) as TopicRelation | null;
+  const goals = many(sp.o).filter((g): g is UserGoal => GOALS.some((x) => x.key === g));
+  const languages = many(sp.l).filter((l) => (LANGUAGES as readonly string[]).includes(l));
   const q = oneParam(sp.q).slice(0, 80);
   const country = oneParam(sp.pais).slice(0, 60);
   const region = oneParam(sp.region).slice(0, 80);
   const dispRaw = oneParam(sp.disp);
   const availability = (["open", "sometimes", "closed"].includes(dispRaw) ? dispRaw : null) as ChatAvailability | null;
   const withProjects = oneParam(sp.proyectos) === "1";
+  const inMyCircles = oneParam(sp.circulos) === "1";
   const page = pageParam(sp.pagina);
-  const active = Boolean(q || chosen.length || country || region || availability || withProjects);
-  const { items, hasMore } = await searchMembers({ q, interests: chosen, country, region, availability, withProjects, page });
+  const advanced = Boolean(topic || relation || goals.length || languages.length || country || region || availability || withProjects || inMyCircles);
+  const active = Boolean(q || areas.length || advanced);
+  const { items, hasMore } = await searchMembers({
+    q,
+    areas,
+    topics: topic ? [topic.id] : [],
+    relation,
+    goals,
+    languages,
+    country,
+    region,
+    availability,
+    withProjects,
+    inMyCircles,
+    page,
+  });
   const current = {
     ver: "buscar",
     q: q || undefined,
+    t: topic ? String(topic.id) : undefined,
+    rel: relation ?? undefined,
     pais: country || undefined,
     region: region || undefined,
     disp: availability ?? undefined,
     proyectos: withProjects ? "1" : undefined,
+    circulos: inMyCircles ? "1" : undefined,
   };
-  const iParams = chosen.map((c) => `&i=${encodeURIComponent(c)}`).join("");
+  const multi = [
+    ...areas.map((x) => `&a=${encodeURIComponent(x)}`),
+    ...goals.map((x) => `&o=${encodeURIComponent(x)}`),
+    ...languages.map((x) => `&l=${encodeURIComponent(x)}`),
+  ].join("");
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[17rem_1fr]">
-      <form action="/conexiones" className="space-y-7 lg:sticky lg:top-8 lg:self-start">
+    <div className="grid gap-10 lg:grid-cols-[19rem_1fr]">
+      <form action="/conexiones" className="space-y-7 lg:sticky lg:top-8 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:pr-2">
         <input type="hidden" name="ver" value="buscar" />
         <div>
           <label htmlFor="mq" className="label block">
@@ -109,54 +136,123 @@ async function Search({ sp }: { sp: SP }) {
           <input id="mq" name="q" defaultValue={q} placeholder="huerta, telescopio, adobe…" className="field" />
         </div>
         <fieldset>
-          <legend className="label mb-3">Intereses</legend>
+          <legend className="label mb-3">Áreas</legend>
           <div className="flex flex-wrap gap-1.5">
-            {(interests ?? []).map((it) => (
-              <label key={it.slug} className="chip !min-h-8 cursor-pointer !px-3 !text-[0.8125rem]">
-                <input type="checkbox" name="i" value={it.slug} defaultChecked={chosen.includes(it.slug)} className="sr-only" />
-                {it.name}
+            {catalog.areas.map((a) => (
+              <label key={a.slug} className="chip !min-h-8 cursor-pointer !px-3 !text-[0.8125rem]">
+                <input type="checkbox" name="a" value={a.slug} defaultChecked={areas.includes(a.slug)} className="sr-only" />
+                {a.name.split(/,| y /)[0]}
               </label>
             ))}
           </div>
         </fieldset>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-          <div>
-            <label htmlFor="mpais" className="label block">
-              País
+        <details open={advanced} className="group">
+          <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between text-[0.9375rem] text-accent [&::-webkit-details-marker]:hidden">
+            Más filtros
+            <span aria-hidden="true" className="transition-transform group-open:rotate-45">
+              +
+            </span>
+          </summary>
+          <div className="mt-5 space-y-7">
+            <div>
+              <label htmlFor="mt" className="label block">
+                Tema concreto
+              </label>
+              <select id="mt" name="t" defaultValue={topic ? String(topic.id) : ""} className="field">
+                <option value="">Cualquiera</option>
+                {catalog.areas.map((a) => (
+                  <optgroup key={a.slug} label={a.name}>
+                    {catalog.topics
+                      .filter((t) => t.area === a.slug && !t.pending)
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="mrel" className="label block">
+                Conocimientos
+              </label>
+              <select id="mrel" name="rel" defaultValue={relation ?? ""} className="field">
+                <option value="">Cualquier relación</option>
+                {TOPIC_RELATIONS.map((r) => (
+                  <option key={r.key} value={r.key}>
+                    {RELATION_FILTER_LABEL[r.key]}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-xs text-muted">Se aplica al tema elegido o, si no eliges tema, a cualquiera.</p>
+            </div>
+            <fieldset>
+              <legend className="label mb-3">Objetivos</legend>
+              <div className="flex flex-wrap gap-1.5">
+                {GOALS.map((g) => (
+                  <label key={g.key} className="chip !min-h-8 cursor-pointer !px-3 !text-[0.8125rem]">
+                    <input type="checkbox" name="o" value={g.key} defaultChecked={goals.includes(g.key)} className="sr-only" />
+                    {g.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend className="label mb-3">Idiomas</legend>
+              <div className="flex flex-wrap gap-1.5">
+                {LANGUAGES.map((l) => (
+                  <label key={l} className="chip !min-h-8 cursor-pointer !px-3 !text-[0.8125rem]">
+                    <input type="checkbox" name="l" value={l} defaultChecked={languages.includes(l)} className="sr-only" />
+                    {l}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+              <div>
+                <label htmlFor="mpais" className="label block">
+                  País
+                </label>
+                <select id="mpais" name="pais" defaultValue={country} className="field">
+                  <option value="">Cualquiera</option>
+                  {countries.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="mregion" className="label block">
+                  Región o ciudad
+                </label>
+                <input id="mregion" name="region" defaultValue={region} className="field" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="mdisp" className="label block">
+                Disponibilidad
+              </label>
+              <select id="mdisp" name="disp" defaultValue={availability ?? ""} className="field">
+                <option value="">Cualquiera</option>
+                {(Object.keys(AVAILABILITY_LABELS) as ChatAvailability[]).map((k) => (
+                  <option key={k} value={k}>
+                    {AVAILABILITY_LABELS[k]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="flex cursor-pointer items-center gap-3 text-[0.9375rem] text-ink-2">
+              <input type="checkbox" name="proyectos" value="1" defaultChecked={withProjects} />
+              Participa en proyectos
             </label>
-            <select id="mpais" name="pais" defaultValue={country} className="field">
-              <option value="">Cualquiera</option>
-              {countries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="mregion" className="label block">
-              Región o ciudad
+            <label className="flex cursor-pointer items-center gap-3 text-[0.9375rem] text-ink-2">
+              <input type="checkbox" name="circulos" value="1" defaultChecked={inMyCircles} />
+              Coincide conmigo en algún círculo
             </label>
-            <input id="mregion" name="region" defaultValue={region} className="field" />
           </div>
-        </div>
-        <div>
-          <label htmlFor="mdisp" className="label block">
-            Disponibilidad
-          </label>
-          <select id="mdisp" name="disp" defaultValue={availability ?? ""} className="field">
-            <option value="">Cualquiera</option>
-            {(Object.keys(AVAILABILITY_LABELS) as ChatAvailability[]).map((k) => (
-              <option key={k} value={k}>
-                {AVAILABILITY_LABELS[k]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <label className="flex cursor-pointer items-center gap-3 text-[0.9375rem] text-ink-2">
-          <input type="checkbox" name="proyectos" value="1" defaultChecked={withProjects} />
-          Con proyectos personales
-        </label>
+        </details>
         <div className="flex gap-2">
           <button type="submit" className="btn btn-primary flex-1">
             Buscar
@@ -183,12 +279,22 @@ async function Search({ sp }: { sp: SP }) {
         <Pagination
           page={page}
           hasMore={hasMore}
-          hrefFor={(n) => hrefWith("/conexiones", current, { pagina: n > 1 ? String(n) : undefined }) + iParams}
+          hrefFor={(n) => hrefWith("/conexiones", current, { pagina: n > 1 ? String(n) : undefined }) + multi}
         />
       </div>
     </div>
   );
 }
+
+/** Cómo se lee cada relación como filtro de búsqueda. */
+const RELATION_FILTER_LABEL: Record<TopicRelation, string> = {
+  interested: "Le interesa",
+  learning: "Está aprendiendo",
+  knowledgeable: "Tiene conocimientos",
+  experienced: "Tiene experiencia",
+  can_teach: "Puede enseñar o ayudar",
+  seeking_collaborators: "Busca colaboradores",
+};
 
 type Network = Awaited<ReturnType<typeof myNetwork>>;
 
@@ -201,7 +307,7 @@ function PersonLine({ person, meta, children }: { person: Network["connected"][n
         <span className="min-w-0">
           <span className="block font-serif text-lg text-ink">{name}</span>
           <span className="block text-sm text-muted">
-            {[person?.region, person?.country].filter(Boolean).join(", ") || `@${person?.username}`}
+            @{person?.username}
           </span>
           {meta}
         </span>

@@ -5,9 +5,9 @@
  */
 import { APP, PASS, RUN as run, assert, chromium, devices, latestLink, registerMember, shot, step } from "./helpers.mjs";
 
-async function register(browser, { email, username, name, interests, ctx = {} }) {
+async function register(browser, { email, username, name, topics, ctx = {} }) {
   const key = username.split("_")[0];
-  const r = await registerMember(browser, { key, name, interests, ctx });
+  const r = await registerMember(browser, { key, name, topics, ctx });
   assert.equal(r.email, email);
   step(`registro, confirmación y bienvenida (${username})`);
   return r;
@@ -47,7 +47,7 @@ try {
     email: `ana.${run}@umbra.test`,
     username: `ana_${run}`,
     name: "Ana Lucero",
-    interests: ["Astronomía y universo", "Bioconstrucción y permacultura", "UAP"],
+    topics: ["Astronomía", "Bioconstrucción", "UAP"],
     ctx: devices["iPhone 13"],
   });
   await shot(ana.page, "explorar-movil-ana");
@@ -56,20 +56,32 @@ try {
     email: `bruno.${run}@umbra.test`,
     username: `bruno_${run}`,
     name: "Bruno Sela",
-    interests: ["Astronomía y universo", "Bioconstrucción y permacultura", "Energías alternativas"],
+    topics: ["Astronomía", "Bioconstrucción", "Energía solar"],
     ctx: { viewport: { width: 1440, height: 900 } },
   });
 
-  // 3. Bruno ve a Ana por afinidad (2 intereses en común)
-  const anaLink = bruno.page.getByRole("link", { name: new RegExp(`@ana_${run}.*2 intereses en común`) }).first();
+  // 3. Bruno ve a Ana por afinidad (2 temas en común)
+  const anaLink = bruno.page.getByRole("link", { name: new RegExp(`@ana_${run}.*2 temas en común`) }).first();
   await anaLink.waitFor();
   await shot(bruno.page, "explorar-escritorio-bruno");
-  step("afinidad: Bruno ve a Ana con 2 intereses en común");
+  step("afinidad: Bruno ve a Ana con 2 temas en común");
   await anaLink.click();
   await bruno.page.waitForURL(`**/miembros/ana_${run}`);
   await bruno.page.getByText("Asturias, España").waitFor();
+  await bruno.page.getByText("Compartís 2 intereses").waitFor();
+  await bruno.page.getByText("Puede enseñar o ayudar").waitFor();
   await shot(bruno.page, "perfil-ana-visto-por-bruno");
-  step("perfil de otro miembro visible");
+  step("perfil de otro miembro: ubicación, razones de afinidad y relación con los temas");
+
+  // 3b. Privacidad por apartado: Ana oculta su ubicación
+  await ana.page.goto(`${APP}/perfil/editar`);
+  await ana.page.getByRole("group", { name: "Quién ve: Ubicación" }).getByText("Solo yo").click();
+  await ana.page.getByRole("button", { name: "Guardar cambios" }).click();
+  await ana.page.getByText("Perfil actualizado.").waitFor();
+  await bruno.page.reload();
+  await bruno.page.getByText("Compartís 2 intereses").waitFor();
+  assert.equal(await bruno.page.getByText("Asturias, España").count(), 0);
+  step("privacidad por apartado: la ubicación «Solo yo» deja de verse");
 
   // 4. Nombre de usuario duplicado rechazado
   await bruno.page.goto(`${APP}/perfil/editar`);
@@ -81,14 +93,22 @@ try {
   // 5. Avatar
   const png = await bruno.page.screenshot({ type: "png" }); // imagen real de prueba
   await bruno.page.goto(`${APP}/perfil/editar`);
-  await bruno.page.setInputFiles('input[type="file"]', { name: "yo.png", mimeType: "image/png", buffer: png });
+  await bruno.page.getByLabel("Seleccionar foto de perfil").setInputFiles({ name: "yo.png", mimeType: "image/png", buffer: png });
   await bruno.page.getByRole("button", { name: "Cambiar foto" }).waitFor({ timeout: 15000 });
   await bruno.page.goto(`${APP}/perfil`);
   const src = await bruno.page.locator("article img").first().getAttribute("src");
   assert.match(src ?? "", /^\/media\/public\/avatars\//);
   assert.equal((await fetch(new URL(src, APP))).status, 200);
-  await shot(bruno.page, "perfil-propio-bruno");
   step("avatar subido a Storage y servido desde /media");
+  await bruno.page.goto(`${APP}/perfil/editar`);
+  await bruno.page.getByLabel("Seleccionar imagen de portada").setInputFiles({ name: "portada.png", mimeType: "image/png", buffer: png });
+  await bruno.page.getByRole("button", { name: "Cambiar portada" }).waitFor({ timeout: 15000 });
+  await bruno.page.goto(`${APP}/perfil`);
+  const cover = await bruno.page.locator("article img").first().getAttribute("src");
+  assert.match(cover ?? "", /^\/media\/public\/covers\/[0-9a-f-]{36}\/perfil-/);
+  assert.equal((await fetch(new URL(cover, APP))).status, 200);
+  await shot(bruno.page, "perfil-propio-bruno");
+  step("portada del perfil subida a la carpeta propia");
 
   // 6. Cierre de sesión
   await bruno.page.goto(`${APP}/ajustes`);

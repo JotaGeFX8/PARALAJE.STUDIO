@@ -5,7 +5,7 @@ import type { GroupMessage } from "./circles";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PROJECT_COLUMNS =
-  "id, slug, title, summary, description, objectives, seeking, status, country, region, interests, cover_path, owner_id, participant_count, last_activity_at, created_at, updated_at";
+  "id, slug, title, summary, description, objectives, seeking, status, country, region, area_slug, cover_path, owner_id, participant_count, last_activity_at, created_at, updated_at";
 
 export type ProjectRow = {
   id: string;
@@ -18,7 +18,7 @@ export type ProjectRow = {
   status: Enums<"project_status">;
   country: string | null;
   region: string | null;
-  interests: string[];
+  area_slug: string | null;
   cover_path: string | null;
   owner_id: string;
   participant_count: number;
@@ -34,13 +34,17 @@ export async function getProject(ref: string) {
   return data as ProjectRow | null;
 }
 
-export type ProjectFilters = { status?: Enums<"project_status"> | null; interest?: string | null; q?: string; mine?: string | null };
+export type ProjectFilters = { status?: Enums<"project_status"> | null; area?: string | null; topic?: number | null; q?: string; mine?: string | null };
 
 export async function listProjects(f: ProjectFilters = {}, sort: "recent" | "active" | "people" = "active", limit = 30) {
   const supabase = await createClient();
   let query = supabase.from("projects").select(PROJECT_COLUMNS);
   if (f.status) query = query.eq("status", f.status);
-  if (f.interest) query = query.contains("interests", [f.interest]);
+  if (f.area) query = query.eq("area_slug", f.area);
+  if (f.topic) {
+    const { data: ids } = await supabase.from("project_topics").select("project_id").eq("topic_id", f.topic).limit(500);
+    query = query.in("id", (ids ?? []).map((r) => r.project_id));
+  }
   const term = (f.q ?? "").replace(/[%_,()*]/g, " ").trim();
   if (term) query = query.or(`title.ilike.%${term}%,summary.ilike.%${term}%,region.ilike.%${term}%,description.ilike.%${term}%`);
   if (f.mine) {
@@ -55,6 +59,21 @@ export async function listProjects(f: ProjectFilters = {}, sort: "recent" | "act
         : query.order("last_activity_at", { ascending: false });
   const { data } = await query.limit(limit);
   return (data ?? []) as ProjectRow[];
+}
+
+export type ProjectTopic = { id: number; name: string; area: string };
+
+/** Temáticas y conocimientos que necesita el proyecto. */
+export async function projectTopics(projectId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("project_topics")
+    .select("kind, topics(id, name, area_slug)")
+    .eq("project_id", projectId);
+  const rows = (data ?? []).filter((r) => r.topics);
+  const map = (kind: "theme" | "skill") =>
+    rows.filter((r) => r.kind === kind).map((r) => ({ id: r.topics!.id, name: r.topics!.name, area: r.topics!.area_slug }));
+  return { themes: map("theme"), skills: map("skill") };
 }
 
 export async function projectParticipants(projectId: string) {

@@ -25,19 +25,19 @@ await runSuite("Administración y moderación", async (browser) => {
   const gema = await registerMember(browser, {
     key: "gema",
     name: "Gema Fundadora",
-    interests: ["Debates libres", "Conciencia y filosofía", "Proyectos colaborativos"],
+    topics: ["Debates", "Conciencia", "Proyectos colectivos"],
     ctx: { viewport: { width: 1360, height: 900 } },
   });
   const hugo = await registerMember(browser, {
     key: "hugo",
     name: "Hugo Prueba",
-    interests: ["Debates libres", "UAP", "Misterios y fenómenos inexplicados"],
+    topics: ["Debates", "UAP", "Enigmas históricos"],
     ctx: devices["iPhone 13"],
   });
   const ines = await registerMember(browser, {
     key: "ines",
     name: "Inés Moderadora",
-    interests: ["Debates libres", "Historia y arqueología", "Conciencia y filosofía"],
+    topics: ["Debates", "Arqueología", "Conciencia"],
   });
   sql(`update public.profiles set role = 'admin' where username = '${gema.username}'`);
   step("tres miembros; Gema pasa a administración (paso del SQL Editor)");

@@ -5,6 +5,8 @@ import { saveProjectAction } from "@/app/(app)/actions/groups";
 import { initialFormState } from "@/lib/form-state";
 import { PROJECT_STATUS } from "@/lib/content";
 import { FormMessage } from "@/components/forms/fields";
+import { TopicMultiSelect } from "@/components/forms/topic-multiselect";
+import type { Catalog } from "@/lib/data/catalog";
 import { CoverPicker } from "./cover-picker";
 
 type Initial = {
@@ -17,15 +19,17 @@ type Initial = {
   status?: keyof typeof PROJECT_STATUS;
   country?: string | null;
   region?: string | null;
-  interests?: string[];
+  area_slug?: string | null;
+  topics?: number[];
+  skills?: number[];
   coverUrl?: string | null;
 };
 
-export function ProjectForm({ interests, initial = {} }: { interests: { slug: string; name: string }[]; initial?: Initial }) {
+export function ProjectForm({ catalog, initial = {} }: { catalog: Catalog; initial?: Initial }) {
   const [state, formAction] = useActionState(saveProjectAction, initialFormState);
   const [cover, setCover] = useState<File | null>(null);
   const [pending, start] = useTransition();
-  const [chosen, setChosen] = useState<string[]>(initial.interests ?? []);
+  const [area, setArea] = useState(initial.area_slug ?? "");
   const e = state.errors ?? {};
   const v = state.values ?? {};
 
@@ -42,9 +46,6 @@ export function ProjectForm({ interests, initial = {} }: { interests: { slug: st
       }}
     >
       {initial.id && <input type="hidden" name="project_id" value={initial.id} />}
-      {chosen.map((c) => (
-        <input key={c} type="hidden" name="interests" value={c} />
-      ))}
       <FormMessage message={state.message} />
 
       <div>
@@ -139,24 +140,41 @@ export function ProjectForm({ interests, initial = {} }: { interests: { slug: st
         </div>
       </div>
       <p className="-mt-6 text-xs text-muted">Solo una localización aproximada: nunca direcciones ni coordenadas.</p>
-      <fieldset>
-        <legend className="label mb-3">Temáticas · hasta 6</legend>
-        <div className="flex flex-wrap gap-1.5">
-          {interests.map((it) => (
-            <button
-              key={it.slug}
-              type="button"
-              className="chip !min-h-8 !px-3 !text-[0.8125rem]"
-              aria-pressed={chosen.includes(it.slug)}
-              disabled={!chosen.includes(it.slug) && chosen.length >= 6}
-              onClick={() => setChosen((c) => (c.includes(it.slug) ? c.filter((x) => x !== it.slug) : [...c, it.slug]))}
-            >
-              {it.name}
-            </button>
+      <div>
+        <label htmlFor="p-area" className="label block">
+          Área principal
+        </label>
+        <select id="p-area" name="area" value={area} onChange={(ev) => setArea(ev.target.value)} className="field">
+          <option value="">Sin área</option>
+          {catalog.areas.map((a) => (
+            <option key={a.slug} value={a.slug}>
+              {a.name}
+            </option>
           ))}
-        </div>
-        {e.interests && <p className="mt-2 text-sm text-danger">{e.interests}</p>}
-      </fieldset>
+        </select>
+        {e.area && <p className="mt-2 text-sm text-danger">{e.area}</p>}
+      </div>
+      <TopicMultiSelect
+        name="topics"
+        label="Temáticas"
+        areas={catalog.areas}
+        topics={catalog.topics}
+        initial={initial.topics ?? []}
+        max={8}
+        preferArea={area || null}
+        hint="De qué trata el proyecto. Ayuda a que lo encuentren las personas interesadas."
+        error={e.topics}
+      />
+      <TopicMultiSelect
+        name="skills"
+        label="Conocimientos que necesitáis"
+        areas={catalog.areas}
+        topics={catalog.topics}
+        initial={initial.skills ?? []}
+        max={12}
+        hint="Se recomendará el proyecto a quien diga que puede enseñar o tiene experiencia en estos temas."
+        error={e.skills}
+      />
       <CoverPicker currentUrl={initial.coverUrl} onFile={setCover} error={e.cover} />
       <div className="flex justify-end border-t hairline pt-6">
         <button type="submit" className="btn btn-primary" disabled={pending}>

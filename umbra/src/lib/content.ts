@@ -187,27 +187,82 @@ export const REPORT_REASONS = [
 ] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number]["key"];
 
-/** Qué territorios recomendar según los intereses de cada persona. */
-export const INTEREST_TO_CATEGORIES: Record<string, string[]> = {
-  "fisica-cuantica": ["ciencia", "universo"],
-  astronomia: ["universo", "ciencia"],
-  conciencia: ["conciencia"],
-  civilizaciones: ["historia", "misterios"],
+/** Territorios relacionados con cada área del catálogo (para recomendaciones). */
+export const AREA_TO_CATEGORIES: Record<string, string[]> = {
+  cosmos: ["universo"],
+  fisica: ["ciencia"],
+  biologia: ["ciencia", "vida-rural"],
+  mente: ["conciencia"],
+  filosofia: ["conciencia", "debate"],
   historia: ["historia"],
-  "sociedades-discretas": ["simbolismo", "historia"],
-  misterios: ["misterios"],
-  uap: ["misterios", "universo"],
-  "ia-tecnologia": ["tecnologia"],
-  autosuficiencia: ["autosuficiencia", "supervivencia"],
-  bioconstruccion: ["bioconstruccion", "autosuficiencia"],
-  agricultura: ["vida-rural", "autosuficiencia"],
-  "energias-alternativas": ["autosuficiencia", "tecnologia"],
-  "vida-rural": ["vida-rural"],
-  psicologia: ["conciencia"],
-  debate: ["debate"],
-  proyectos: ["bioconstruccion", "tecnologia"],
-  amistad: ["debate"],
+  arqueologia: ["historia", "misterios"],
+  anomalias: ["misterios"],
+  tradiciones: ["simbolismo", "conciencia"],
+  tecnologia: ["tecnologia"],
+  naturaleza: ["vida-rural"],
+  agricultura: ["autosuficiencia", "vida-rural"],
+  arquitectura: ["bioconstruccion"],
+  exploracion: ["supervivencia"],
+  arte: ["debate"],
+  sociedad: ["debate"],
+  ingenieria: ["tecnologia", "supervivencia"],
+  emprendimiento: ["tecnologia"],
+  bienestar: ["conciencia"],
+  literatura: ["historia", "debate"],
+  relaciones: ["debate"],
+  agora: ["debate"],
 };
+
+/** Relación de una persona con un tema. */
+export const TOPIC_RELATIONS = [
+  { key: "interested", label: "Me interesa", short: "Interés" },
+  { key: "learning", label: "Estoy aprendiendo", short: "Aprendiendo" },
+  { key: "knowledgeable", label: "Tengo conocimientos", short: "Conocimientos" },
+  { key: "experienced", label: "Tengo experiencia", short: "Experiencia" },
+  { key: "can_teach", label: "Puedo enseñar o ayudar", short: "Puede enseñar" },
+  { key: "seeking_collaborators", label: "Busco colaboradores", short: "Busca colaborar" },
+] as const;
+export type TopicRelationKey = (typeof TOPIC_RELATIONS)[number]["key"];
+export const RELATION_LABEL = Object.fromEntries(TOPIC_RELATIONS.map((r) => [r.key, r])) as Record<
+  TopicRelationKey,
+  (typeof TOPIC_RELATIONS)[number]
+>;
+
+/** Objetivos dentro de la comunidad. */
+export const GOALS = [
+  { key: "learn", label: "Aprender" },
+  { key: "research", label: "Investigar" },
+  { key: "debate", label: "Debatir" },
+  { key: "share", label: "Compartir conocimientos" },
+  { key: "meet_people", label: "Encontrar personas" },
+  { key: "friendship", label: "Crear amistades" },
+  { key: "find_collaborators", label: "Encontrar colaboradores" },
+  { key: "join_projects", label: "Participar en proyectos" },
+  { key: "create_circles", label: "Crear círculos" },
+  { key: "join_communities", label: "Participar en comunidades" },
+  { key: "organize_meetups", label: "Organizar encuentros" },
+  { key: "share_experiences", label: "Compartir experiencias" },
+] as const;
+export type GoalKey = (typeof GOALS)[number]["key"];
+export const GOAL_LABEL = Object.fromEntries(GOALS.map((g) => [g.key, g.label])) as Record<GoalKey, string>;
+
+/** Visibilidad de cada apartado del perfil. */
+export const VISIBILITY_OPTIONS = [
+  { key: "public", label: "Miembros", hint: "Cualquier persona registrada" },
+  { key: "connections", label: "Conexiones", hint: "Solo tus conexiones" },
+  { key: "private", label: "Solo yo", hint: "Nadie más" },
+] as const;
+export type VisibilityKey = (typeof VISIBILITY_OPTIONS)[number]["key"];
+
+export const PRIVACY_SECTIONS = [
+  { key: "location", label: "Ubicación", hint: "País y región" },
+  { key: "about", label: "Presentación", hint: "Quién soy, qué exploro, qué aporto, habilidades" },
+  { key: "interests", label: "Intereses y objetivos", hint: "Temas, conocimientos y objetivos" },
+  { key: "activity", label: "Actividad", hint: "Publicaciones, círculos y proyectos en tu perfil" },
+  { key: "network", label: "Red", hint: "Tus conexiones" },
+] as const;
+export type PrivacySectionKey = (typeof PRIVACY_SECTIONS)[number]["key"];
+
 
 export const VISIBILITY = {
   public: { label: "Público", hint: "Cualquier miembro puede ver su contenido y unirse." },

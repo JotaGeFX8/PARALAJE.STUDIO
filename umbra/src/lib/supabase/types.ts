@@ -19,6 +19,9 @@ export type ChatAvailability = Enums<"chat_availability">;
 export type PostKindDb = Enums<"post_kind">;
 export type ReactionType = Enums<"reaction_type">;
 export type ReportTarget = Enums<"report_target">;
+export type TopicRelation = Enums<"topic_relation">;
+export type UserGoal = Enums<"user_goal">;
+export type Visibility = Enums<"visibility">;
 
 /** Elemento de listado de publicaciones (las columnas de tipos compuestos llegan como opcionales). */
 type RawPostItem = PublicSchema["CompositeTypes"]["post_list_item"];

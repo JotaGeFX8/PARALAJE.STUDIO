@@ -70,10 +70,103 @@ do $$ begin
   raise exception 'FALLO: avatar en carpeta ajena';
 exception when insufficient_privilege then raise notice 'OK avatares aislados por carpeta'; end $$;
 do $$ begin
-  perform public.set_my_interests(array['astronomia','uap','misterios'], array['uap','astronomia','misterios','debate']);
-  raise exception 'FALLO: más de 3 favoritos';
-exception when check_violation then raise notice 'OK límite de favoritos'; end $$;
-select public.set_my_interests(array['astronomia','uap','bioconstruccion'], array['uap']);
+  perform public.set_my_topics((select jsonb_agg(jsonb_build_object('topic_id', id, 'relation', 'interested', 'is_primary', true))
+    from (select id from public.topics where status = 'approved' order by id limit 6) t));
+  raise exception 'FALLO: más de 5 temas principales';
+exception when check_violation then raise notice 'OK límite de 5 temas principales'; end $$;
+select public.set_my_topics(jsonb_build_array(
+  jsonb_build_object('topic_id', (select id from public.topics where slug = 'astronomia'), 'relation', 'learning', 'is_primary', true),
+  jsonb_build_object('topic_id', (select id from public.topics where slug = 'uap'), 'relation', 'interested', 'is_primary', false),
+  jsonb_build_object('topic_id', (select id from public.topics where slug = 'bioconstruccion'), 'relation', 'interested', 'is_primary', false)));
+reset role;
+set local request.jwt.claim.sub = '';
+
+-- ============================================================ V2: catálogo y privacidad por apartado
+-- Bea: ubicación privada e intereses solo para conexiones
+set local role authenticated;
+set local request.jwt.claim.sub = :bea;
+update public.profiles set country = 'España', region = 'Asturias', bio = 'Hola' where id = auth.uid();
+insert into public.profile_privacy (profile_id, location, interests) values (auth.uid(), 'private', 'connections');
+select public.set_my_topics(jsonb_build_array(
+  jsonb_build_object('topic_id', (select id from public.topics where slug = 'astronomia'), 'relation', 'can_teach', 'is_primary', true)));
+select public.set_my_goals(array['learn', 'debate']::public.user_goal[]);
+do $$ begin
+  update public.profiles set cover_path = 'a0000000-0000-4000-8000-000000000001/x.webp' where id = auth.uid();
+  raise exception 'FALLO: portada de carpeta ajena';
+exception when check_violation then raise notice 'OK la portada solo puede ser un archivo propio'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :ana;
+do $$ begin
+  perform country from public.profiles where username = 'bea_seg';
+  raise exception 'FALLO: lectura directa de la ubicación';
+exception when insufficient_privilege then raise notice 'OK los datos personales no se leen directamente de la tabla de perfiles'; end $$;
+do $$ begin
+  if (select country from public.profile_view('bea_seg')) is not null then raise exception 'FALLO: ubicación privada visible'; end if;
+  if (select bio from public.profile_view('bea_seg')) <> 'Hola' then raise exception 'FALLO: presentación pública oculta'; end if;
+  if (select country from public.member_card_for('a0000000-0000-4000-8000-000000000002')) is not null then raise exception 'FALLO: ubicación en tarjeta'; end if;
+  raise notice 'OK privacidad por apartado: la ubicación privada no se muestra';
+end $$;
+do $$ begin
+  if exists (select 1 from public.profile_topics_for('a0000000-0000-4000-8000-000000000002')) then raise exception 'FALLO: intereses solo-conexiones visibles'; end if;
+  if exists (select 1 from public.profile_topics where profile_id = 'a0000000-0000-4000-8000-000000000002') then raise exception 'FALLO: tabla de temas sin privacidad'; end if;
+  if exists (select 1 from public.profile_goals_for('a0000000-0000-4000-8000-000000000002')) then raise exception 'FALLO: objetivos visibles'; end if;
+  raise notice 'OK intereses y objetivos «solo conexiones» ocultos para quien no es conexión';
+end $$;
+do $$ declare n int; begin
+  update public.profile_privacy set location = 'public' where profile_id = 'a0000000-0000-4000-8000-000000000002';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FALLO: cambia la privacidad ajena'; end if;
+  raise notice 'OK nadie cambia la privacidad de otra persona';
+end $$;
+do $$ begin
+  insert into public.profile_goals (profile_id, goal) values ('a0000000-0000-4000-8000-000000000002', 'learn');
+  raise exception 'FALLO: objetivos ajenos';
+exception when insufficient_privilege then raise notice 'OK nadie escribe objetivos ajenos'; end $$;
+-- Ana propone un tema: queda pendiente y solo lo ven ella y el equipo
+select public.propose_topic('Relojería de sol', 'ingenieria');
+do $$ begin
+  if (select status from public.topics where slug = 'relojeria-de-sol') <> 'pending' then raise exception 'FALLO: propuesta no pendiente'; end if;
+  if public.propose_topic('Relojería  de sol', 'ingenieria') <> (select id from public.topics where slug = 'relojeria-de-sol') then
+    raise exception 'FALLO: propuesta duplicada';
+  end if;
+  raise notice 'OK las propuestas quedan pendientes y no se duplican';
+end $$;
+do $$ begin
+  perform public.admin_review_topic((select id from public.topics where slug = 'relojeria-de-sol'), true, null);
+  raise exception 'FALLO: miembro aprueba temas';
+exception when insufficient_privilege then raise notice 'OK solo el equipo aprueba temas'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :carlos;
+do $$ begin
+  if exists (select 1 from public.topics where slug = 'relojeria-de-sol') then raise exception 'FALLO: propuesta ajena visible'; end if;
+  if exists (select 1 from public.search_topics('relojeria')) then raise exception 'FALLO: propuesta ajena en el buscador'; end if;
+  raise notice 'OK las propuestas pendientes no se ven fuera';
+end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :mod;
+do $$ begin
+  perform public.admin_merge_topics((select id from public.topics where slug = 'relojeria-de-sol'), (select id from public.topics where slug = 'astronomia'));
+  raise exception 'FALLO: moderación fusiona';
+exception when insufficient_privilege then raise notice 'OK fusionar temas es solo de administración'; end $$;
+select public.admin_review_topic((select id from public.topics where slug = 'relojeria-de-sol'), true, null);
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :carlos;
+do $$ begin
+  if not exists (select 1 from public.search_topics('relojeria')) then raise exception 'FALLO: aprobado no visible'; end if;
+  raise notice 'OK un tema aprobado aparece en el buscador';
+end $$;
 reset role;
 set local request.jwt.claim.sub = '';
 
@@ -229,7 +322,8 @@ select public.create_circle('Círculo privado de prueba', 'Solo miembros', 'priv
 select public.create_circle('Círculo secreto de prueba', 'Por invitación', 'invite') as secret_circle \gset
 select public.create_post('En el círculo', 'Contenido interno', 'opinion', null, false, '{}', '{}', '{}', :'private_circle') as circle_post \gset
 insert into public.circle_messages (circle_id, sender_id, body) values (:'private_circle', :ana, 'Chat interno');
-select public.create_project('Proyecto de prueba', 'Resumen', 'Descripción', array['Objetivo'], 'Ayuda', 'active', 'España', 'Asturias', array['bioconstruccion']) as project_id \gset
+select public.create_project('Proyecto de prueba', 'Resumen', 'Descripción', array['Objetivo'], 'Ayuda', 'active', 'España', 'Asturias',
+  'arquitectura', array[(select id from public.topics where slug = 'bioconstruccion')]) as project_id \gset
 reset role;
 set local request.jwt.claim.sub = '';
 

@@ -8,7 +8,7 @@ import { listProjects } from "@/lib/data/projects";
 import { createClient } from "@/lib/supabase/server";
 import { siteSettings } from "@/lib/data/admin";
 import { BRAND } from "@/config/brand";
-import { AREAS, INTEREST_TO_CATEGORIES, PROFILE_AREA, SORTS, parseSort } from "@/lib/content";
+import { AREAS, AREA_TO_CATEGORIES, PROFILE_AREA, SORTS, parseSort } from "@/lib/content";
 import { oneParam, pageParam, plural, timeAgo } from "@/lib/format";
 import { NavTabs, Pagination, hrefWith } from "@/components/ui/nav-tabs";
 import { SectionTitle } from "@/components/ui/section";
@@ -35,20 +35,23 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
     await Promise.all([
       getFeed({ scope: "all", sort, page, limit: 12 }),
       getFeed({ scope: "forum", kind: "hypothesis", sort: "trending", limit: 3 }),
-      getAffinityMembers(profile.id, 4),
-      getNewMembers(profile.id, 5),
+      getAffinityMembers(4),
+      getNewMembers(5),
       activeCircles(3),
       listProjects({}, "active", 3),
       getCategories(),
       getTrendingTags(10),
-      supabase.from("profile_interests").select("interest_slug").eq("profile_id", profile.id),
+      supabase.from("profile_topics").select("is_primary, topics(area_slug)").eq("profile_id", profile.id),
       supabase.rpc("community_activity", { p_limit: 10 }),
       siteSettings(),
     ]);
 
-  const recommended = Array.from(
-    new Set((myInterests ?? []).flatMap((i) => INTEREST_TO_CATEGORIES[i.interest_slug] ?? [])),
-  )
+  // Áreas de mis temas (las principales primero) → territorios recomendados.
+  const myAreas = (myInterests ?? [])
+    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+    .map((t) => t.topics?.area_slug)
+    .filter((a): a is string => Boolean(a));
+  const recommended = Array.from(new Set(myAreas.flatMap((a) => AREA_TO_CATEGORIES[a] ?? [])))
     .map((slug) => categories.find((c) => c.slug === slug))
     .filter(Boolean)
     .slice(0, 6) as { slug: string; name: string }[];

@@ -9,13 +9,13 @@ await runSuite("Comunidad", async (browser) => {
   const ana = await registerMember(browser, {
     key: "ana",
     name: "Ana Lucero",
-    interests: ["Ciencia y física cuántica", "Astronomía y universo", "Bioconstrucción y permacultura"],
+    topics: ["Física cuántica", "Astronomía", "Bioconstrucción"],
     ctx: { viewport: { width: 1360, height: 900 } },
   });
   const bruno = await registerMember(browser, {
     key: "bruno",
     name: "Bruno Sela",
-    interests: ["Ciencia y física cuántica", "Energías alternativas", "Debates libres"],
+    topics: ["Física cuántica", "Energía solar", "Debates"],
     ctx: devices["iPhone 13"],
   });
   step("dos miembros registrados por el flujo real");

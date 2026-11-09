@@ -291,16 +291,16 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"interests": {
+                },"interest_areas": {
                   Row: {
-                    "created_at": string,"name": string,"position": number,"slug": string
+                    "description": string,"name": string,"position": number,"slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"name": string,"position"?: number,"slug": string
+                    "description"?: string,"name": string,"position"?: number,"slug": string
                   }
                   Update: {
-                    "created_at"?: string,"name"?: string,"position"?: number,"slug"?: string
+                    "description"?: string,"name"?: string,"position"?: number,"slug"?: string
                   }
                   Relationships: [
                     
@@ -569,42 +569,82 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"profile_interests": {
+                },"profile_goals": {
                   Row: {
-                    "created_at": string,"interest_slug": string,"is_favorite": boolean,"profile_id": string
+                    "goal": Database["public"]['Enums']["user_goal"],"profile_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"interest_slug": string,"is_favorite"?: boolean,"profile_id": string
+                    "goal": Database["public"]['Enums']["user_goal"],"profile_id": string
                   }
                   Update: {
-                    "created_at"?: string,"interest_slug"?: string,"is_favorite"?: boolean,"profile_id"?: string
+                    "goal"?: Database["public"]['Enums']["user_goal"],"profile_id"?: string
                   }
                   Relationships: [
                     {
-      foreignKeyName: "profile_interests_interest_slug_fkey"
-      columns: ["interest_slug"]
-isOneToOne: false
-      referencedRelation: "interests"
-      referencedColumns: ["slug"]
-    },{
-      foreignKeyName: "profile_interests_profile_id_fkey"
+      foreignKeyName: "profile_goals_profile_id_fkey"
       columns: ["profile_id"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
-                },"profiles": {
+                },"profile_privacy": {
                   Row: {
-                    "availability": Database["public"]['Enums']["chat_availability"],"avatar_url": string | null,"bio": string,"country": string | null,"created_at": string,"display_name": string | null,"id": string,"languages": (string)[],"looking_for": string,"onboarded_at": string | null,"personal_projects": string,"region": string | null,"role": Database["public"]['Enums']["user_role"],"status": Database["public"]['Enums']["account_status"],"updated_at": string,"username": string | null
+                    "about": Database["public"]['Enums']["visibility"],"activity": Database["public"]['Enums']["visibility"],"interests": Database["public"]['Enums']["visibility"],"location": Database["public"]['Enums']["visibility"],"network": Database["public"]['Enums']["visibility"],"profile_id": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "availability"?: Database["public"]['Enums']["chat_availability"],"avatar_url"?: string | null,"bio"?: string,"country"?: string | null,"created_at"?: string,"display_name"?: string | null,"id": string,"languages"?: (string)[],"looking_for"?: string,"onboarded_at"?: string | null,"personal_projects"?: string,"region"?: string | null,"role"?: Database["public"]['Enums']["user_role"],"status"?: Database["public"]['Enums']["account_status"],"updated_at"?: string,"username"?: string | null
+                    "about"?: Database["public"]['Enums']["visibility"],"activity"?: Database["public"]['Enums']["visibility"],"interests"?: Database["public"]['Enums']["visibility"],"location"?: Database["public"]['Enums']["visibility"],"network"?: Database["public"]['Enums']["visibility"],"profile_id": string,"updated_at"?: string
                   }
                   Update: {
-                    "availability"?: Database["public"]['Enums']["chat_availability"],"avatar_url"?: string | null,"bio"?: string,"country"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"languages"?: (string)[],"looking_for"?: string,"onboarded_at"?: string | null,"personal_projects"?: string,"region"?: string | null,"role"?: Database["public"]['Enums']["user_role"],"status"?: Database["public"]['Enums']["account_status"],"updated_at"?: string,"username"?: string | null
+                    "about"?: Database["public"]['Enums']["visibility"],"activity"?: Database["public"]['Enums']["visibility"],"interests"?: Database["public"]['Enums']["visibility"],"location"?: Database["public"]['Enums']["visibility"],"network"?: Database["public"]['Enums']["visibility"],"profile_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "profile_privacy_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profile_topics": {
+                  Row: {
+                    "created_at": string,"is_primary": boolean,"profile_id": string,"relation": Database["public"]['Enums']["topic_relation"],"topic_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"is_primary"?: boolean,"profile_id": string,"relation"?: Database["public"]['Enums']["topic_relation"],"topic_id": number
+                  }
+                  Update: {
+                    "created_at"?: string,"is_primary"?: boolean,"profile_id"?: string,"relation"?: Database["public"]['Enums']["topic_relation"],"topic_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "profile_topics_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "profile_topics_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"profiles": {
+                  Row: {
+                    "availability": Database["public"]['Enums']["chat_availability"],"avatar_url": string | null,"bio": string,"can_offer": string,"country": string | null,"cover_path": string | null,"created_at": string,"display_name": string | null,"exploring": string,"id": string,"languages": (string)[],"last_seen_at": string | null,"looking_for": string,"onboarded_at": string | null,"personal_projects": string,"region": string | null,"role": Database["public"]['Enums']["user_role"],"skills": (string)[],"status": Database["public"]['Enums']["account_status"],"updated_at": string,"username": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "availability"?: Database["public"]['Enums']["chat_availability"],"avatar_url"?: string | null,"bio"?: string,"can_offer"?: string,"country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"display_name"?: string | null,"exploring"?: string,"id": string,"languages"?: (string)[],"last_seen_at"?: string | null,"looking_for"?: string,"onboarded_at"?: string | null,"personal_projects"?: string,"region"?: string | null,"role"?: Database["public"]['Enums']["user_role"],"skills"?: (string)[],"status"?: Database["public"]['Enums']["account_status"],"updated_at"?: string,"username"?: string | null
+                  }
+                  Update: {
+                    "availability"?: Database["public"]['Enums']["chat_availability"],"avatar_url"?: string | null,"bio"?: string,"can_offer"?: string,"country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"display_name"?: string | null,"exploring"?: string,"id"?: string,"languages"?: (string)[],"last_seen_at"?: string | null,"looking_for"?: string,"onboarded_at"?: string | null,"personal_projects"?: string,"region"?: string | null,"role"?: Database["public"]['Enums']["user_role"],"skills"?: (string)[],"status"?: Database["public"]['Enums']["account_status"],"updated_at"?: string,"username"?: string | null
                   }
                   Relationships: [
                     
@@ -687,19 +727,51 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"projects": {
+                },"project_topics": {
                   Row: {
-                    "country": string | null,"cover_path": string | null,"created_at": string,"description": string,"id": string,"interests": (string)[],"last_activity_at": string,"objectives": (string)[],"owner_id": string,"participant_count": number,"region": string | null,"seeking": string,"slug": string,"status": Database["public"]['Enums']["project_status"],"summary": string,"title": string,"updated_at": string
+                    "kind": Database["public"]['Enums']["project_topic_kind"],"project_id": string,"topic_id": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"description"?: string,"id"?: string,"interests"?: (string)[],"last_activity_at"?: string,"objectives"?: (string)[],"owner_id": string,"participant_count"?: number,"region"?: string | null,"seeking"?: string,"slug": string,"status"?: Database["public"]['Enums']["project_status"],"summary"?: string,"title": string,"updated_at"?: string
+                    "kind"?: Database["public"]['Enums']["project_topic_kind"],"project_id": string,"topic_id": number
                   }
                   Update: {
-                    "country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"description"?: string,"id"?: string,"interests"?: (string)[],"last_activity_at"?: string,"objectives"?: (string)[],"owner_id"?: string,"participant_count"?: number,"region"?: string | null,"seeking"?: string,"slug"?: string,"status"?: Database["public"]['Enums']["project_status"],"summary"?: string,"title"?: string,"updated_at"?: string
+                    "kind"?: Database["public"]['Enums']["project_topic_kind"],"project_id"?: string,"topic_id"?: number
                   }
                   Relationships: [
                     {
+      foreignKeyName: "project_topics_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_topics_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"projects": {
+                  Row: {
+                    "area_slug": string | null,"country": string | null,"cover_path": string | null,"created_at": string,"description": string,"id": string,"last_activity_at": string,"objectives": (string)[],"owner_id": string,"participant_count": number,"region": string | null,"seeking": string,"slug": string,"status": Database["public"]['Enums']["project_status"],"summary": string,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "area_slug"?: string | null,"country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"description"?: string,"id"?: string,"last_activity_at"?: string,"objectives"?: (string)[],"owner_id": string,"participant_count"?: number,"region"?: string | null,"seeking"?: string,"slug": string,"status"?: Database["public"]['Enums']["project_status"],"summary"?: string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "area_slug"?: string | null,"country"?: string | null,"cover_path"?: string | null,"created_at"?: string,"description"?: string,"id"?: string,"last_activity_at"?: string,"objectives"?: (string)[],"owner_id"?: string,"participant_count"?: number,"region"?: string | null,"seeking"?: string,"slug"?: string,"status"?: Database["public"]['Enums']["project_status"],"summary"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "projects_area_slug_fkey"
+      columns: ["area_slug"]
+isOneToOne: false
+      referencedRelation: "interest_areas"
+      referencedColumns: ["slug"]
+    },{
       foreignKeyName: "projects_owner_id_fkey"
       columns: ["owner_id"]
 isOneToOne: false
@@ -799,16 +871,123 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"topic_areas": {
+                  Row: {
+                    "area_slug": string,"topic_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "area_slug": string,"topic_id": number
+                  }
+                  Update: {
+                    "area_slug"?: string,"topic_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "topic_areas_area_slug_fkey"
+      columns: ["area_slug"]
+isOneToOne: false
+      referencedRelation: "interest_areas"
+      referencedColumns: ["slug"]
+    },{
+      foreignKeyName: "topic_areas_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"topic_synonyms": {
+                  Row: {
+                    "term": string,"topic_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "term": string,"topic_id": number
+                  }
+                  Update: {
+                    "term"?: string,"topic_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "topic_synonyms_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"topics": {
+                  Row: {
+                    "area_slug": string,"created_at": string,"id": number,"merged_into": number | null,"name": string,"proposed_by": string | null,"slug": string,"status": Database["public"]['Enums']["topic_status"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "area_slug": string,"created_at"?: string,"id"?: never,"merged_into"?: number | null,"name": string,"proposed_by"?: string | null,"slug": string,"status"?: Database["public"]['Enums']["topic_status"]
+                  }
+                  Update: {
+                    "area_slug"?: string,"created_at"?: string,"id"?: never,"merged_into"?: number | null,"name"?: string,"proposed_by"?: string | null,"slug"?: string,"status"?: Database["public"]['Enums']["topic_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "topics_area_slug_fkey"
+      columns: ["area_slug"]
+isOneToOne: false
+      referencedRelation: "interest_areas"
+      referencedColumns: ["slug"]
+    },{
+      foreignKeyName: "topics_merged_into_fkey"
+      columns: ["merged_into"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "topics_proposed_by_fkey"
+      columns: ["proposed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"user_settings": {
+                  Row: {
+                    "profile_id": string,"read_receipts": boolean,"updated_at": string,"who_can_message": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "profile_id": string,"read_receipts"?: boolean,"updated_at"?: string,"who_can_message"?: string
+                  }
+                  Update: {
+                    "profile_id"?: string,"read_receipts"?: boolean,"updated_at"?: string,"who_can_message"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "user_settings_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            "admin_list_members":
+            "admin_add_synonym":
+{ Args: { "p_term": string,"p_topic": number }; Returns: undefined
+                           },
+"admin_list_members":
 { Args: { "p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_role"?: Database["public"]['Enums']["user_role"],"p_status"?: Database["public"]['Enums']["account_status"] }; Returns: {
               "avatar_url": string,"created_at": string,"display_name": string,"email": string,"id": string,"onboarded_at": string,"posts": number,"reports_against": number,"role": Database["public"]['Enums']["user_role"],"status": Database["public"]['Enums']["account_status"],"username": string
             }[]
+                           },
+"admin_merge_topics":
+{ Args: { "p_from": number,"p_into": number }; Returns: undefined
+                           },
+"admin_review_topic":
+{ Args: { "p_approve": boolean,"p_area"?: string,"p_topic": number }; Returns: undefined
                            },
 "admin_save_category":
 { Args: { "p_archived": boolean,"p_description": string,"p_name": string,"p_position": number,"p_slug": string }; Returns: undefined
@@ -827,6 +1006,14 @@ isOneToOne: false
 "admin_update_settings":
 { Args: { "p_registration_open": boolean,"p_welcome": string }; Returns: undefined
                            },
+"affinity_members":
+{ Args: { "p_limit"?: number }; Returns: Database["public"]['CompositeTypes']["member_card"][]
+                          SetofOptions: {
+        from: "*"
+        to: "member_card"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "can_message":
 { Args: { "p_conversation": string }; Returns: boolean
                            },
@@ -859,7 +1046,7 @@ isOneToOne: false
 { Args: { "p_body": string,"p_category"?: string,"p_circle"?: string,"p_image_paths"?: (string)[],"p_is_question"?: boolean,"p_kind": Database["public"]['Enums']["post_kind"],"p_sources"?: (string)[],"p_tags"?: (string)[],"p_title": string }; Returns: string
                            },
 "create_project":
-{ Args: { "p_country": string,"p_cover_path"?: string,"p_description": string,"p_interests": (string)[],"p_objectives": (string)[],"p_region": string,"p_seeking": string,"p_status": Database["public"]['Enums']["project_status"],"p_summary": string,"p_title": string }; Returns: string
+{ Args: { "p_area"?: string,"p_country": string,"p_cover_path"?: string,"p_description": string,"p_objectives": (string)[],"p_region": string,"p_seeking": string,"p_skills"?: (number)[],"p_status": Database["public"]['Enums']["project_status"],"p_summary": string,"p_title": string,"p_topics"?: (number)[] }; Returns: string
                            },
 "current_role_name":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["user_role"]
@@ -985,11 +1172,49 @@ isOneToOne: false
               "can_write": boolean,"id": string,"last_body": string,"last_message_at": string,"last_sender": string,"other_avatar": string,"other_id": string,"other_name": string,"other_username": string,"unread": number
             }[]
                            },
+"my_profile":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "availability": Database["public"]['Enums']["chat_availability"],
+"avatar_url": string | null,
+"bio": string,
+"can_offer": string,
+"country": string | null,
+"cover_path": string | null,
+"created_at": string,
+"display_name": string | null,
+"exploring": string,
+"id": string,
+"languages": (string)[],
+"last_seen_at": string | null,
+"looking_for": string,
+"onboarded_at": string | null,
+"personal_projects": string,
+"region": string | null,
+"role": Database["public"]['Enums']["user_role"],
+"skills": (string)[],
+"status": Database["public"]['Enums']["account_status"],
+"updated_at": string,
+"username": string | null
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "profiles"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "my_unread_counts":
 { Args: Record<PropertyKey, never>; Returns: {
               "messages": number,"notifications": number,"requests": number
             }[]
                            },
+"new_members":
+{ Args: { "p_limit"?: number }; Returns: Database["public"]['CompositeTypes']["member_card"][]
+                          SetofOptions: {
+        from: "*"
+        to: "member_card"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "notify":
 { Args: { "p_actor": string,"p_body"?: string,"p_circle"?: string,"p_comment"?: string,"p_conversation"?: string,"p_post"?: string,"p_project"?: string,"p_type": Database["public"]['Enums']["notification_type"],"p_user": string }; Returns: undefined
                            },
@@ -998,6 +1223,25 @@ isOneToOne: false
                            },
 "post_excerpt":
 { Args: { "p_body": string }; Returns: string
+                           },
+"profile_goals_for":
+{ Args: { "p_profile": string }; Returns: Database["public"]['Enums']["user_goal"][]
+                           },
+"profile_section_visible":
+{ Args: { "p_owner": string,"p_section": string }; Returns: boolean
+                           },
+"profile_topics_for":
+{ Args: { "p_profile": string }; Returns: {
+              "area_name": string,"area_slug": string,"is_primary": boolean,"name": string,"relation": Database["public"]['Enums']["topic_relation"],"slug": string,"topic_id": number
+            }[]
+                           },
+"profile_view":
+{ Args: { "p_username": string }; Returns: {
+              "about_visible": boolean,"activity_visible": boolean,"availability": Database["public"]['Enums']["chat_availability"],"avatar_url": string,"bio": string,"can_offer": string,"connection": string,"connections_count": number,"country": string,"cover_path": string,"created_at": string,"display_name": string,"exploring": string,"id": string,"interests_visible": boolean,"languages": (string)[],"looking_for": string,"network_visible": boolean,"personal_projects": string,"region": string,"skills": (string)[],"username": string
+            }[]
+                           },
+"propose_topic":
+{ Args: { "p_area": string,"p_name": string }; Returns: number
                            },
 "rate_check":
 { Args: { "p_count": number,"p_max": number,"p_message": string }; Returns: undefined
@@ -1028,7 +1272,7 @@ isOneToOne: false
 { Args: { "p_accept": boolean,"p_request": string }; Returns: undefined
                            },
 "search_members":
-{ Args: { "p_availability"?: Database["public"]['Enums']["chat_availability"],"p_country"?: string,"p_interests"?: (string)[],"p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_region"?: string,"p_with_projects"?: boolean }; Returns: Database["public"]['CompositeTypes']["member_card"][]
+{ Args: { "p_areas"?: (string)[],"p_availability"?: Database["public"]['Enums']["chat_availability"],"p_country"?: string,"p_goals"?: (Database["public"]['Enums']["user_goal"])[],"p_in_my_circles"?: boolean,"p_languages"?: (string)[],"p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_region"?: string,"p_relation"?: Database["public"]['Enums']["topic_relation"],"p_topics"?: (number)[],"p_with_projects"?: boolean }; Returns: Database["public"]['CompositeTypes']["member_card"][]
                           SetofOptions: {
         from: "*"
         to: "member_card"
@@ -1043,20 +1287,34 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"search_topics":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "area_name": string,"area_slug": string,"id": number,"name": string,"slug": string,"status": Database["public"]['Enums']["topic_status"],"via": string
+            }[]
+                           },
 "set_circle_role":
 { Args: { "p_circle": string,"p_role": Database["public"]['Enums']["circle_role"],"p_user": string }; Returns: undefined
                            },
-"set_my_interests":
-{ Args: { "p_favorites"?: (string)[],"p_interests": (string)[] }; Returns: undefined
+"set_my_goals":
+{ Args: { "p_goals": (Database["public"]['Enums']["user_goal"])[] }; Returns: undefined
+                           },
+"set_my_topics":
+{ Args: { "p_items": Json }; Returns: undefined
                            },
 "set_post_tags":
 { Args: { "p_post": string,"p_tags": (string)[] }; Returns: undefined
+                           },
+"set_project_topics":
+{ Args: { "p_project": string,"p_skills": (number)[],"p_topics": (number)[] }; Returns: undefined
                            },
 "slugify":
 { Args: { "p": string }; Returns: string
                            },
 "start_conversation":
 { Args: { "p_other": string }; Returns: string
+                           },
+"touch_last_seen":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "trending_tags":
 { Args: { "p_limit"?: number }; Returns: {
@@ -1074,11 +1332,11 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","request_status": "pending"|"accepted"|"declined","user_role": "admin"|"moderator"|"member"|"restricted"
+            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","project_topic_kind": "theme"|"skill","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","request_status": "pending"|"accepted"|"declined","topic_relation": "interested"|"learning"|"knowledgeable"|"experienced"|"can_teach"|"seeking_collaborators","topic_status": "approved"|"pending"|"rejected","user_goal": "learn"|"research"|"debate"|"share"|"meet_people"|"friendship"|"find_collaborators"|"join_projects"|"create_circles"|"join_communities"|"organize_meetups"|"share_experiences","user_role": "admin"|"moderator"|"member"|"restricted","visibility": "public"|"connections"|"private"
           }
           CompositeTypes: {
             "member_card": {
-                        "id": string | null,"username": string | null,"display_name": string | null,"avatar_url": string | null,"bio": string | null,"looking_for": string | null,"country": string | null,"region": string | null,"availability": Database["public"]['Enums']["chat_availability"] | null,"personal_projects": string | null,"shared_count": number | null,"shared_interests": (string)[] | null,"interests": (string)[] | null,"connection": string | null
+                        "id": string | null,"username": string | null,"display_name": string | null,"avatar_url": string | null,"bio": string | null,"looking_for": string | null,"country": string | null,"region": string | null,"availability": Database["public"]['Enums']["chat_availability"] | null,"languages": (string)[] | null,"shared_count": number | null,"shared_topics": (string)[] | null,"topics": (string)[] | null,"reasons": (string)[] | null,"connection": string | null
                       },"post_list_item": {
                         "id": string | null,"title": string | null,"excerpt": string | null,"kind": Database["public"]['Enums']["post_kind"] | null,"is_question": boolean | null,"category_slug": string | null,"category_name": string | null,"circle_id": string | null,"author_id": string | null,"author_username": string | null,"author_name": string | null,"author_avatar": string | null,"tags": (string)[] | null,"comment_count": number | null,"reaction_count": number | null,"image_count": number | null,"is_pinned": boolean | null,"is_locked": boolean | null,"created_at": string | null,"last_activity_at": string | null
                       }
@@ -1194,7 +1452,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"request_status": ["pending", "accepted", "declined"],"user_role": ["admin", "moderator", "member", "restricted"]
+            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"project_topic_kind": ["theme", "skill"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"request_status": ["pending", "accepted", "declined"],"topic_relation": ["interested", "learning", "knowledgeable", "experienced", "can_teach", "seeking_collaborators"],"topic_status": ["approved", "pending", "rejected"],"user_goal": ["learn", "research", "debate", "share", "meet_people", "friendship", "find_collaborators", "join_projects", "create_circles", "join_communities", "organize_meetups", "share_experiences"],"user_role": ["admin", "moderator", "member", "restricted"],"visibility": ["public", "connections", "private"]
           }
         }
 } as const
