@@ -101,7 +101,7 @@ export const commentSchema = z.object({
 });
 
 export const reportSchema = z.object({
-  target_type: z.enum(["post", "comment", "profile", "message", "circle", "project"]),
+  target_type: z.enum(["post", "comment", "profile", "message", "circle", "project", "book", "book_recommendation"]),
   target_id: z.uuid(),
   reason: z.enum(["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"], {
     error: "Elige un motivo.",

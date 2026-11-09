@@ -31,6 +31,136 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"book_recommendation_votes": {
+                  Row: {
+                    "created_at": string,"recommendation_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"recommendation_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"recommendation_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "book_recommendation_votes_recommendation_id_fkey"
+      columns: ["recommendation_id"]
+isOneToOne: false
+      referencedRelation: "book_recommendations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "book_recommendation_votes_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"book_recommendations": {
+                  Row: {
+                    "body": string,"book_id": string,"created_at": string,"edited_at": string | null,"helpful_count": number,"id": string,"level": Database["public"]['Enums']["book_level"],"rating": number | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"book_id": string,"created_at"?: string,"edited_at"?: string | null,"helpful_count"?: number,"id"?: string,"level"?: Database["public"]['Enums']["book_level"],"rating"?: number | null,"user_id": string
+                  }
+                  Update: {
+                    "body"?: string,"book_id"?: string,"created_at"?: string,"edited_at"?: string | null,"helpful_count"?: number,"id"?: string,"level"?: Database["public"]['Enums']["book_level"],"rating"?: number | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "book_recommendations_book_id_fkey"
+      columns: ["book_id"]
+isOneToOne: false
+      referencedRelation: "books"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "book_recommendations_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"book_shelves": {
+                  Row: {
+                    "book_id": string,"status": Database["public"]['Enums']["shelf_status"],"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "book_id": string,"status": Database["public"]['Enums']["shelf_status"],"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "book_id"?: string,"status"?: Database["public"]['Enums']["shelf_status"],"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "book_shelves_book_id_fkey"
+      columns: ["book_id"]
+isOneToOne: false
+      referencedRelation: "books"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "book_shelves_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"book_topics": {
+                  Row: {
+                    "book_id": string,"topic_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "book_id": string,"topic_id": number
+                  }
+                  Update: {
+                    "book_id"?: string,"topic_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "book_topics_book_id_fkey"
+      columns: ["book_id"]
+isOneToOne: false
+      referencedRelation: "books"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "book_topics_topic_id_fkey"
+      columns: ["topic_id"]
+isOneToOne: false
+      referencedRelation: "topics"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"books": {
+                  Row: {
+                    "area_slug": string | null,"authors": string,"cover_path": string | null,"created_at": string,"created_by": string | null,"id": string,"isbn": string | null,"last_rec_at": string,"rating_count": number,"rating_sum": number,"rec_count": number,"search": unknown,"slug": string,"title": string,"year": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "area_slug"?: string | null,"authors": string,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"isbn"?: string | null,"last_rec_at"?: string,"rating_count"?: number,"rating_sum"?: number,"rec_count"?: number,"search"?: never,"slug": string,"title": string,"year"?: number | null
+                  }
+                  Update: {
+                    "area_slug"?: string | null,"authors"?: string,"cover_path"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"isbn"?: string | null,"last_rec_at"?: string,"rating_count"?: number,"rating_sum"?: number,"rec_count"?: number,"search"?: never,"slug"?: string,"title"?: string,"year"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "books_area_slug_fkey"
+      columns: ["area_slug"]
+isOneToOne: false
+      referencedRelation: "interest_areas"
+      referencedColumns: ["slug"]
+    },{
+      foreignKeyName: "books_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"categories": {
                   Row: {
                     "created_at": string,"description": string,"forum_slug": string,"is_archived": boolean,"name": string,"position": number,"slug": string
@@ -1164,6 +1294,19 @@ isOneToOne: true
         isOneToOne: false
         isSetofReturn: true
       } },
+"book_list":
+{ Args: { "p_area"?: string,"p_level"?: Database["public"]['Enums']["book_level"],"p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_recommended_by"?: string,"p_shelf"?: Database["public"]['Enums']["shelf_status"],"p_sort"?: string,"p_topic"?: number }; Returns: Database["public"]['CompositeTypes']["book_card"][]
+                          SetofOptions: {
+        from: "*"
+        to: "book_card"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"book_shelf_counts":
+{ Args: { "p_book": string }; Returns: {
+              "read": number,"reading": number,"want": number
+            }[]
+                           },
 "can_message":
 { Args: { "p_conversation": string }; Returns: boolean
                            },
@@ -1301,6 +1444,12 @@ isOneToOne: true
               "country": string,"members": number
             }[]
                            },
+"mod_delete_book":
+{ Args: { "p_book": string,"p_note"?: string }; Returns: undefined
+                           },
+"mod_delete_book_recommendation":
+{ Args: { "p_note"?: string,"p_rec": string }; Returns: undefined
+                           },
 "mod_delete_circle":
 { Args: { "p_circle": string,"p_note"?: string }; Returns: undefined
                            },
@@ -1414,6 +1563,9 @@ isOneToOne: true
               "mine": boolean,"target": string,"target_id": string,"total": number,"type": Database["public"]['Enums']["reaction_type"]
             }[]
                            },
+"recommend_book":
+{ Args: { "p_area"?: string,"p_authors": string,"p_body": string,"p_cover_path"?: string,"p_isbn"?: string,"p_level": Database["public"]['Enums']["book_level"],"p_rating"?: number,"p_title": string,"p_topics"?: (number)[],"p_year"?: number }; Returns: string
+                           },
 "report_target_preview":
 { Args: { "p_report": string }; Returns: {
               "author_id": string,"author_username": string,"body": string,"link": string,"title": string
@@ -1433,6 +1585,11 @@ isOneToOne: true
                            },
 "respond_project_request":
 { Args: { "p_accept": boolean,"p_request": string }; Returns: undefined
+                           },
+"search_books":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "authors": string,"id": string,"rec_count": number,"slug": string,"title": string,"year": number
+            }[]
                            },
 "search_members":
 { Args: { "p_areas"?: (string)[],"p_availability"?: Database["public"]['Enums']["chat_availability"],"p_country"?: string,"p_goals"?: (Database["public"]['Enums']["user_goal"])[],"p_in_my_circles"?: boolean,"p_languages"?: (string)[],"p_limit"?: number,"p_offset"?: number,"p_query"?: string,"p_region"?: string,"p_relation"?: Database["public"]['Enums']["topic_relation"],"p_topics"?: (number)[],"p_with_projects"?: boolean }; Returns: Database["public"]['CompositeTypes']["member_card"][]
@@ -1454,6 +1611,9 @@ isOneToOne: true
 { Args: { "p_limit"?: number,"p_query": string }; Returns: {
               "area_name": string,"area_slug": string,"id": number,"name": string,"slug": string,"status": Database["public"]['Enums']["topic_status"],"via": string
             }[]
+                           },
+"set_book_shelf":
+{ Args: { "p_book": string,"p_status"?: Database["public"]['Enums']["shelf_status"] }; Returns: undefined
                            },
 "set_circle_role":
 { Args: { "p_circle": string,"p_role": Database["public"]['Enums']["circle_role"],"p_user": string }; Returns: undefined
@@ -1495,6 +1655,9 @@ isOneToOne: true
 "unique_slug":
 { Args: { "p_base": string,"p_table": string }; Returns: string
                            },
+"update_book":
+{ Args: { "p_area"?: string,"p_authors": string,"p_book": string,"p_cover_path"?: string,"p_isbn"?: string,"p_title": string,"p_topics"?: (number)[],"p_year"?: number }; Returns: undefined
+                           },
 "update_post":
 { Args: { "p_body": string,"p_category": string,"p_id": string,"p_image_paths": (string)[],"p_kind": Database["public"]['Enums']["post_kind"],"p_sources": (string)[],"p_tags": (string)[],"p_title": string,"p_type": Database["public"]['Enums']["post_type"] }; Returns: undefined
                            },
@@ -1506,10 +1669,12 @@ isOneToOne: true
                            }
           }
           Enums: {
-            "account_status": "active"|"suspended"|"banned","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience"|"interpretation"|"open_question","post_type": "debate"|"question"|"research"|"discovery"|"experience"|"resource"|"poll"|"idea","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","project_topic_kind": "theme"|"skill","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project","request_status": "pending"|"accepted"|"declined","topic_relation": "interested"|"learning"|"knowledgeable"|"experienced"|"can_teach"|"seeking_collaborators","topic_status": "approved"|"pending"|"rejected","user_goal": "learn"|"research"|"debate"|"share"|"meet_people"|"friendship"|"find_collaborators"|"join_projects"|"create_circles"|"join_communities"|"organize_meetups"|"share_experiences","user_role": "admin"|"moderator"|"member"|"restricted","visibility": "public"|"connections"|"private"
+            "account_status": "active"|"suspended"|"banned","book_level": "intro"|"intermediate"|"advanced","chat_availability": "open"|"sometimes"|"closed","circle_role": "owner"|"admin"|"member","circle_visibility": "public"|"private"|"invite","connection_status": "pending"|"accepted"|"declined","notification_type": "comment"|"reply"|"mention"|"connection_request"|"connection_accepted"|"message"|"circle_invite"|"circle_request"|"circle_approved"|"project_request"|"project_approved"|"project_update"|"moderation","post_kind": "documented"|"hypothesis"|"opinion"|"experience"|"interpretation"|"open_question","post_type": "debate"|"question"|"research"|"discovery"|"experience"|"resource"|"poll"|"idea","project_role": "owner"|"collaborator","project_status": "idea"|"planning"|"active"|"paused"|"completed","project_topic_kind": "theme"|"skill","reaction_type": "valuable"|"curious"|"agree"|"needs_sources","report_reason": "spam"|"harassment"|"hate"|"illegal"|"personal_data"|"mislabeled"|"other","report_status": "open"|"resolved"|"dismissed","report_target": "post"|"comment"|"profile"|"message"|"circle"|"project"|"book"|"book_recommendation","request_status": "pending"|"accepted"|"declined","shelf_status": "want"|"reading"|"read","topic_relation": "interested"|"learning"|"knowledgeable"|"experienced"|"can_teach"|"seeking_collaborators","topic_status": "approved"|"pending"|"rejected","user_goal": "learn"|"research"|"debate"|"share"|"meet_people"|"friendship"|"find_collaborators"|"join_projects"|"create_circles"|"join_communities"|"organize_meetups"|"share_experiences","user_role": "admin"|"moderator"|"member"|"restricted","visibility": "public"|"connections"|"private"
           }
           CompositeTypes: {
-            "member_card": {
+            "book_card": {
+                        "id": string | null,"slug": string | null,"title": string | null,"authors": string | null,"year": number | null,"area_slug": string | null,"area_name": string | null,"cover_path": string | null,"rec_count": number | null,"avg_rating": number | null,"want_count": number | null,"topics": (string)[] | null,"my_shelf": Database["public"]['Enums']["shelf_status"] | null,"my_rec": boolean | null,"last_rec_at": string | null
+                      },"member_card": {
                         "id": string | null,"username": string | null,"display_name": string | null,"avatar_url": string | null,"bio": string | null,"looking_for": string | null,"country": string | null,"region": string | null,"availability": Database["public"]['Enums']["chat_availability"] | null,"languages": (string)[] | null,"shared_count": number | null,"shared_topics": (string)[] | null,"topics": (string)[] | null,"reasons": (string)[] | null,"connection": string | null
                       },"post_list_item": {
                         "id": string | null,"title": string | null,"excerpt": string | null,"kind": Database["public"]['Enums']["post_kind"] | null,"is_question": boolean | null,"category_slug": string | null,"category_name": string | null,"circle_id": string | null,"author_id": string | null,"author_username": string | null,"author_name": string | null,"author_avatar": string | null,"tags": (string)[] | null,"comment_count": number | null,"reaction_count": number | null,"image_count": number | null,"is_pinned": boolean | null,"is_locked": boolean | null,"created_at": string | null,"last_activity_at": string | null,"forum_slug": string | null,"forum_name": string | null,"post_type": Database["public"]['Enums']["post_type"] | null,"has_poll": boolean | null,"attachment_count": number | null
@@ -1626,7 +1791,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "account_status": ["active", "suspended", "banned"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience", "interpretation", "open_question"],"post_type": ["debate", "question", "research", "discovery", "experience", "resource", "poll", "idea"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"project_topic_kind": ["theme", "skill"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project"],"request_status": ["pending", "accepted", "declined"],"topic_relation": ["interested", "learning", "knowledgeable", "experienced", "can_teach", "seeking_collaborators"],"topic_status": ["approved", "pending", "rejected"],"user_goal": ["learn", "research", "debate", "share", "meet_people", "friendship", "find_collaborators", "join_projects", "create_circles", "join_communities", "organize_meetups", "share_experiences"],"user_role": ["admin", "moderator", "member", "restricted"],"visibility": ["public", "connections", "private"]
+            "account_status": ["active", "suspended", "banned"],"book_level": ["intro", "intermediate", "advanced"],"chat_availability": ["open", "sometimes", "closed"],"circle_role": ["owner", "admin", "member"],"circle_visibility": ["public", "private", "invite"],"connection_status": ["pending", "accepted", "declined"],"notification_type": ["comment", "reply", "mention", "connection_request", "connection_accepted", "message", "circle_invite", "circle_request", "circle_approved", "project_request", "project_approved", "project_update", "moderation"],"post_kind": ["documented", "hypothesis", "opinion", "experience", "interpretation", "open_question"],"post_type": ["debate", "question", "research", "discovery", "experience", "resource", "poll", "idea"],"project_role": ["owner", "collaborator"],"project_status": ["idea", "planning", "active", "paused", "completed"],"project_topic_kind": ["theme", "skill"],"reaction_type": ["valuable", "curious", "agree", "needs_sources"],"report_reason": ["spam", "harassment", "hate", "illegal", "personal_data", "mislabeled", "other"],"report_status": ["open", "resolved", "dismissed"],"report_target": ["post", "comment", "profile", "message", "circle", "project", "book", "book_recommendation"],"request_status": ["pending", "accepted", "declined"],"shelf_status": ["want", "reading", "read"],"topic_relation": ["interested", "learning", "knowledgeable", "experienced", "can_teach", "seeking_collaborators"],"topic_status": ["approved", "pending", "rejected"],"user_goal": ["learn", "research", "debate", "share", "meet_people", "friendship", "find_collaborators", "join_projects", "create_circles", "join_communities", "organize_meetups", "share_experiences"],"user_role": ["admin", "moderator", "member", "restricted"],"visibility": ["public", "connections", "private"]
           }
         }
 } as const

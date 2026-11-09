@@ -9,13 +9,24 @@ import {
   modDeleteMessageAction,
   modDeletePostAction,
   modDeleteProjectAction,
+  modDeleteBookAction,
+  modDeleteBookRecommendationAction,
   resolveReportAction,
   setStatusAction,
 } from "@/app/(app)/actions/admin";
 import { REPORT_REASONS } from "@/lib/content";
 import { oneParam, timeAgo } from "@/lib/format";
 
-const TARGET = { post: "Publicación", comment: "Comentario", profile: "Perfil", message: "Mensaje", circle: "Círculo", project: "Proyecto" } as const;
+const TARGET = {
+  post: "Publicación",
+  comment: "Comentario",
+  profile: "Perfil",
+  message: "Mensaje",
+  circle: "Círculo",
+  project: "Proyecto",
+  book: "Libro",
+  book_recommendation: "Recomendación de libro",
+} as const;
 
 export default async function DenunciasPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { profile } = await requireOnboardedMember();
@@ -52,7 +63,11 @@ export default async function DenunciasPage({ searchParams }: { searchParams: Pr
                       ? modDeleteCircleAction.bind(null, r.target_id)
                       : r.target_type === "project"
                         ? modDeleteProjectAction.bind(null, r.target_id)
-                        : null;
+                        : r.target_type === "book"
+                          ? modDeleteBookAction.bind(null, r.target_id)
+                          : r.target_type === "book_recommendation"
+                            ? modDeleteBookRecommendationAction.bind(null, r.target_id)
+                            : null;
             return (
               <li key={r.id} className="border-b hairline py-6">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">

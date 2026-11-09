@@ -316,3 +316,20 @@ export const PROJECT_STATUS = {
   paused: "En pausa",
   completed: "Completado",
 } as const;
+
+/** Biblioteca: nivel de lectura recomendado y estanterías personales. */
+export const BOOK_LEVELS = [
+  { key: "intro", label: "Para empezar", hint: "Divulgación accesible, sin conocimientos previos." },
+  { key: "intermediate", label: "Intermedio", hint: "Conviene tener nociones del tema." },
+  { key: "advanced", label: "Avanzado", hint: "Técnico o académico." },
+] as const;
+export type BookLevelKey = (typeof BOOK_LEVELS)[number]["key"];
+export const BOOK_LEVEL_LABEL = Object.fromEntries(BOOK_LEVELS.map((l) => [l.key, l.label])) as Record<BookLevelKey, string>;
+
+export const SHELVES = [
+  { key: "want", label: "Quiero leerlo" },
+  { key: "reading", label: "Leyendo" },
+  { key: "read", label: "Leído" },
+] as const;
+export type ShelfKey = (typeof SHELVES)[number]["key"];
+export const SHELF_LABEL = Object.fromEntries(SHELVES.map((s) => [s.key, s.label])) as Record<ShelfKey, string>;

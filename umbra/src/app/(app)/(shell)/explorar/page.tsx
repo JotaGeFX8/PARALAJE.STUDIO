@@ -3,6 +3,8 @@ import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
 import { getAffinityMembers, getNewMembers } from "@/lib/data/members";
 import { getFeed, getForums, getTrendingTags } from "@/lib/data/posts";
+import { listBooks } from "@/lib/data/books";
+import { BookCover } from "@/components/books/book-cover";
 import { activeCircles } from "@/lib/data/circles";
 import { listProjects } from "@/lib/data/projects";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +32,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
   const welcome = oneParam(sp.bienvenida) === "1";
   const supabase = await createClient();
 
-  const [feed, unanswered, affinity, newcomers, circles, projects, forums, tags, { data: myInterests }, { data: activity }, settings] =
+  const [feed, unanswered, affinity, newcomers, circles, projects, forums, tags, { data: myInterests }, { data: activity }, settings, books] =
     await Promise.all([
       getFeed({ scope: "all", sort, page, limit: 12 }),
       getFeed({ unanswered: true, type: "question", sort: "recent", limit: 3 }),
@@ -43,6 +45,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
       supabase.from("profile_topics").select("is_primary, topics(area_slug)").eq("profile_id", profile.id),
       supabase.rpc("community_activity", { p_limit: 10 }),
       siteSettings(),
+      listBooks({ sort: "recent" }, 4),
     ]);
 
   // Áreas de mis temas (las principales primero) → territorios recomendados.
@@ -176,6 +179,27 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
                       <span className="text-xs text-muted">{d.forum_name}</span>
                       <span className="mt-1 block font-serif text-[1.0625rem] leading-snug text-ink group-hover:text-accent">{d.title ?? d.excerpt}</span>
                       <span className="mt-1 block text-xs text-muted">{timeAgo(d.created_at)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {books.items.length > 0 && (
+            <section>
+              <SectionTitle eyebrow="Biblioteca" title="Libros recomendados" href="/libros" />
+              <ul className="space-y-4 border-t hairline pt-4">
+                {books.items.map((b) => (
+                  <li key={b.id}>
+                    <Link href={`/libros/${b.slug}`} className="group grid grid-cols-[2.75rem_1fr] items-start gap-3">
+                      <BookCover title={b.title} authors={b.authors} slug={b.slug} url={b.cover_url} size="sm" />
+                      <span className="min-w-0">
+                        <span className="line-clamp-2 block font-serif text-[1.0625rem] leading-snug text-ink group-hover:text-accent">{b.title}</span>
+                        <span className="block truncate text-xs text-muted">
+                          {b.authors} · {b.rec_count} {b.rec_count === 1 ? "recomendación" : "recomendaciones"}
+                        </span>
+                      </span>
                     </Link>
                   </li>
                 ))}

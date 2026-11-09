@@ -8,6 +8,8 @@ import { ProfileView } from "@/components/profile/profile-view";
 import { ConnectButton } from "@/components/social/connect-button";
 import { MemberSafetyActions } from "@/components/social/member-actions";
 import { PostList } from "@/components/posts/post-row";
+import { listBooks } from "@/lib/data/books";
+import { BookGrid } from "@/components/books/book-grid";
 import { USERNAME_RE } from "@/lib/validation/profile";
 
 type Props = { params: Promise<{ username: string }> };
@@ -27,11 +29,12 @@ export default async function MiembroPage({ params }: Props) {
 
   const member = await getMemberByUsername(username);
   if (!member) notFound();
-  const [card, blocked, { items }] = await Promise.all([
+  const [card, blocked, { items }, books] = await Promise.all([
     memberCard(member.id),
     isBlockedByMe(profile.id, member.id),
     // La actividad en el perfil respeta la privacidad elegida (las publicaciones siguen en sus foros).
     member.visible.activity ? getFeed({ scope: "all", author: member.id, limit: 5 }) : Promise.resolve({ items: [], hasMore: false }),
+    member.visible.activity ? listBooks({ recommendedBy: member.id }, 8) : Promise.resolve({ items: [], hasMore: false }),
   ]);
   const name = member.display_name || member.username;
 
@@ -50,6 +53,12 @@ export default async function MiembroPage({ params }: Props) {
         }
         footer={<MemberSafetyActions otherId={member.id} blocked={blocked} />}
       />
+      {!blocked && books.items.length > 0 && (
+        <section className="mt-16 max-w-5xl">
+          <h2 className="label mb-5">Libros que recomienda</h2>
+          <BookGrid books={books.items} empty={null} />
+        </section>
+      )}
       {!blocked && items.length > 0 && (
         <section className="mt-16 max-w-5xl">
           <h2 className="label mb-2">Publicaciones recientes</h2>

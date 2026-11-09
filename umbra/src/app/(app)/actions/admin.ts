@@ -46,6 +46,14 @@ export async function modDeleteProjectAction(projectId: string, reason: string) 
   return call((s) => s.rpc("mod_delete_project", { p_project: projectId, p_note: note(reason) }));
 }
 
+export async function modDeleteBookAction(bookId: string, reason: string) {
+  return call((s) => s.rpc("mod_delete_book", { p_book: bookId, p_note: note(reason) }));
+}
+
+export async function modDeleteBookRecommendationAction(recId: string, reason: string) {
+  return call((s) => s.rpc("mod_delete_book_recommendation", { p_rec: recId, p_note: note(reason) }));
+}
+
 export async function setPostFlagsAction(postId: string, locked: boolean, pinned: boolean) {
   return call((s) => s.rpc("mod_set_post_flags", { p_post: postId, p_locked: locked, p_pinned: pinned }));
 }

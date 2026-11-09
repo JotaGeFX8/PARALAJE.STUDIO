@@ -12,10 +12,13 @@ export function CoverPicker({
   currentUrl,
   onFile,
   error,
+  aspect = "aspect-[16/7]",
 }: {
   currentUrl?: string | null;
   onFile: (file: File | null) => void;
   error?: string;
+  /** Proporción del recuadro (p. ej. «aspect-[2/3]» para libros). */
+  aspect?: string;
 }) {
   const [preview, setPreview] = useState<string | null>(currentUrl ?? null);
   const [busy, setBusy] = useState(false);
@@ -27,7 +30,7 @@ export function CoverPicker({
       <button
         type="button"
         onClick={() => ref.current?.click()}
-        className="relative flex aspect-[16/7] w-full items-center justify-center overflow-hidden rounded-sm border border-dashed border-line-2 bg-surface-2 text-muted transition-colors hover:border-accent-mid hover:text-accent"
+        className={`relative flex ${aspect} w-full items-center justify-center overflow-hidden rounded-sm border border-dashed border-line-2 bg-surface-2 text-muted transition-colors hover:border-accent-mid hover:text-accent`}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element -- vista previa local

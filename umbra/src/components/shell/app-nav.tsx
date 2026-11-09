@@ -4,16 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AREAS, MOBILE_NAV } from "@/lib/content";
 import { useUnread } from "./unread-provider";
-import {
-  IconBell,
-  IconBookmark,
-  IconMail,
-  IconPlus,
-  IconProfile,
-  IconSearch,
-  IconSettings,
-  IconShield,
-} from "@/components/ui/icons";
+import { IconBell, IconBook, IconBookmark, IconMail, IconPlus, IconProfile, IconSearch, IconSettings, IconShield } from "@/components/ui/icons";
 
 function isActive(path: string, href: string) {
   return path === href || path.startsWith(href + "/");
@@ -61,6 +52,7 @@ export function SideNav({ isStaff }: { isStaff: boolean }) {
   const personal: Item[] = [
     { href: "/mensajes", name: "Mensajes", icon: IconMail, count: counts.messages },
     { href: "/notificaciones", name: "Notificaciones", icon: IconBell, count: counts.notifications },
+    { href: "/libros", name: "Biblioteca", icon: IconBook },
     { href: "/guardados", name: "Guardados", icon: IconBookmark },
     { href: "/perfil", name: "Perfil", icon: IconProfile },
     { href: "/ajustes", name: "Ajustes", icon: IconSettings },

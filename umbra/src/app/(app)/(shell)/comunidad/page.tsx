@@ -64,6 +64,11 @@ export default async function ComunidadPage() {
         </ol>
 
         <aside className="space-y-10">
+          <Link href="/libros" className="group block rounded-sm border border-line-2 p-5 transition-colors hover:border-accent-mid">
+            <p className="label">Biblioteca</p>
+            <p className="mt-2 font-serif text-xl text-ink group-hover:text-accent">Libros recomendados por la comunidad</p>
+            <p className="mt-1 text-sm text-muted">Con el porqué, el nivel de lectura y tu estantería personal.</p>
+          </Link>
           <div>
             <p className="label mb-4">Etiquetas del mes</p>
             {tags.length ? (

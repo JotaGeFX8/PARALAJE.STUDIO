@@ -349,6 +349,61 @@ exception when check_violation then raise notice 'OK una etiqueta bloqueada no s
 reset role;
 set local request.jwt.claim.sub = '';
 
+-- ============================================================ Biblioteca
+set local role authenticated;
+set local request.jwt.claim.sub = :ana;
+do $$ begin
+  insert into public.books (slug, title, authors) values ('libro-directo', 'Libro directo', 'Nadie');
+  raise exception 'FALLO: alta directa de libros';
+exception when insufficient_privilege then raise notice 'OK los libros solo se crean con una recomendación'; end $$;
+select public.recommend_book(p_title => 'Cosmos', p_authors => 'Carl Sagan', p_body => 'Un clásico de la divulgación que cambia la forma de mirar el cielo.', p_level => 'intro', p_rating => 5::smallint) as book_slug \gset
+do $$ begin
+  if public.recommend_book(p_title => 'COSMOS', p_authors => 'carl  sagan', p_body => 'Lo releo y lo vuelvo a recomendar, sigue vigente.', p_level => 'intro')
+     <> (select slug from public.books where title = 'Cosmos') then
+    raise exception 'FALLO: ficha duplicada';
+  end if;
+  if (select rec_count from public.books where title = 'Cosmos') <> 1 then raise exception 'FALLO: recomendación duplicada'; end if;
+  raise notice 'OK sin fichas duplicadas y una recomendación por persona';
+end $$;
+do $$ begin
+  perform public.recommend_book(p_title => 'Otro', p_authors => 'Alguien', p_body => 'Portada robada de otra carpeta de usuario.', p_level => 'intro',
+    p_cover_path => 'a0000000-0000-4000-8000-000000000002/libro.webp');
+  raise exception 'FALLO: portada ajena';
+exception when invalid_parameter_value then raise notice 'OK la portada de un libro es un archivo propio'; end $$;
+select public.set_book_shelf((select id from public.books where title = 'Cosmos'), 'want');
+do $$ begin
+  insert into public.book_recommendation_votes (recommendation_id, user_id)
+  select id, auth.uid() from public.book_recommendations where user_id = auth.uid() limit 1;
+  raise exception 'FALLO: voto a la propia recomendación';
+exception when insufficient_privilege then raise notice 'OK nadie se vota a sí mismo como útil'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :bea;
+do $$ declare n int; begin
+  if exists (select 1 from public.book_shelves) then raise exception 'FALLO: estantería ajena visible'; end if;
+  if (select want from public.book_shelf_counts((select id from public.books where title = 'Cosmos'))) <> 1 then raise exception 'FALLO: totales'; end if;
+  update public.book_recommendations set body = 'Texto cambiado por otra persona, no debería poder.' where user_id <> auth.uid();
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FALLO: edita recomendación ajena'; end if;
+  raise notice 'OK estanterías privadas (solo totales) y recomendaciones ajenas protegidas';
+end $$;
+do $$ begin
+  perform public.update_book((select id from public.books where title = 'Cosmos'), 'Cosmos 2', 'Carl Sagan');
+  raise exception 'FALLO: corrige ficha ajena';
+exception when insufficient_privilege then raise notice 'OK solo quien creó la ficha o el equipo la corrigen'; end $$;
+insert into public.book_recommendation_votes (recommendation_id, user_id)
+select id, auth.uid() from public.book_recommendations where book_id = (select id from public.books where title = 'Cosmos');
+do $$ begin
+  if (select helpful_count from public.book_recommendations where book_id = (select id from public.books where title = 'Cosmos')) <> 1 then
+    raise exception 'FALLO: contador de útiles';
+  end if;
+  raise notice 'OK contador de «Me ha sido útil»';
+end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
 -- Miembro restringido: lee y reacciona, no publica
 update public.profiles set role = 'restricted' where id = :carlos;
 set local role authenticated;

@@ -13,6 +13,8 @@ import { oneParam, pageParam } from "@/lib/format";
 import { discoverCircles } from "@/lib/data/circles";
 import { listProjects } from "@/lib/data/projects";
 import { CircleCard, ProjectCard } from "@/components/groups/cards";
+import { listBooks } from "@/lib/data/books";
+import { BookGrid } from "@/components/books/book-grid";
 
 export const metadata: Metadata = { title: "Buscar" };
 
@@ -21,6 +23,7 @@ const TABS = [
   { key: "personas", label: "Personas" },
   { key: "circulos", label: "Círculos" },
   { key: "proyectos", label: "Proyectos" },
+  { key: "libros", label: "Libros" },
   { key: "etiquetas", label: "Etiquetas" },
 ] as const;
 
@@ -103,6 +106,16 @@ async function Results({ tab, q, page, userId }: { tab: string; q: string; page:
       </ul>
     ) : (
       <EmptyState>Ningún proyecto coincide con «{q}».</EmptyState>
+    );
+  }
+  if (tab === "libros") {
+    const { items } = await listBooks({ q }, 24);
+    return items.length ? (
+      <div className="border-t hairline pt-6">
+        <BookGrid books={items} empty={null} />
+      </div>
+    ) : (
+      <EmptyState>Ningún libro coincide con «{q}».</EmptyState>
     );
   }
   if (tab === "etiquetas") {
