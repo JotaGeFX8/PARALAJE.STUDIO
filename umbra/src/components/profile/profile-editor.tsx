@@ -9,6 +9,7 @@ import type { ProfileRow } from "@/lib/supabase/types";
 import { FormMessage, SubmitButton } from "@/components/forms/fields";
 import { AvatarUploader } from "./avatar-uploader";
 import { IconArrow, IconBack } from "@/components/ui/icons";
+import { BRAND } from "@/config/brand";
 
 type Interest = { slug: string; name: string };
 
@@ -122,20 +123,20 @@ export function ProfileEditor({
             <span className="label">
               Paso {step + 1} de {STEPS.length}
             </span>
-            <span className="label text-lichen">{STEPS[step].key === "interests" ? `${chosen.length} elegidos` : ""}</span>
+            <span className="label text-accent">{STEPS[step].key === "interests" ? `${chosen.length} elegidos` : ""}</span>
           </div>
           <div className="mt-4 grid grid-cols-4 gap-1.5" aria-hidden="true">
             {STEPS.map((s, i) => (
               <span
                 key={s.key}
-                className={`h-px transition-colors duration-500 ${i <= step ? "bg-bone" : "bg-line-2"}`}
+                className={`h-px transition-colors duration-500 ${i <= step ? "bg-accent" : "bg-line-2"}`}
               />
             ))}
           </div>
-          <h1 ref={headingRef} tabIndex={-1} className="display mt-10 text-[clamp(2.4rem,7vw,3.5rem)] text-bone outline-none">
+          <h1 ref={headingRef} tabIndex={-1} className="display mt-10 text-[clamp(2.4rem,7vw,3.5rem)] text-ink outline-none">
             {STEPS[step].title}
           </h1>
-          <p className="mt-4 font-serif text-lg text-stone-2">{STEPS[step].lead}</p>
+          <p className="mt-4 font-serif text-lg text-ink-2">{STEPS[step].lead}</p>
         </div>
       )}
 
@@ -162,7 +163,7 @@ export function ProfileEditor({
             maxLength={24}
             autoComplete="username"
             prefix="@"
-            hint="Letras, números y guion bajo. Será tu dirección en UMBRA."
+            hint="Letras, números y guion bajo. Será tu dirección en la comunidad."
             error={errors.username}
           />
         </Section>
@@ -201,7 +202,7 @@ export function ProfileEditor({
                       disabled={!favs.includes(it.slug) && favs.length >= 3}
                       onClick={() => toggleFav(it.slug)}
                     >
-                      <span aria-hidden="true" className={favs.includes(it.slug) ? "text-lichen" : "text-stone"}>
+                      <span aria-hidden="true" className={favs.includes(it.slug) ? "text-accent" : "text-muted"}>
                         ✦
                       </span>
                       {it.name}
@@ -278,7 +279,7 @@ export function ProfileEditor({
           </fieldset>
           <div>
             <p className="label mb-1">Ubicación aproximada · opcional</p>
-            <p className="mb-2 text-sm text-stone">
+            <p className="mb-2 text-sm text-muted">
               Solo país y región, nunca tu dirección. Déjalo en blanco si prefieres no mostrarla.
             </p>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -293,7 +294,7 @@ export function ProfileEditor({
         className={
           onboarding
             ? "mt-14 flex items-center justify-between gap-4"
-            : "sticky bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] z-10 -mx-5 mt-14 flex justify-end border-t hairline bg-carbon/90 px-5 py-4 backdrop-blur md:bottom-0"
+            : "sticky bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] z-10 -mx-5 mt-14 flex justify-end border-t hairline bg-canvas/90 px-5 py-4 backdrop-blur md:bottom-0"
         }
       >
         {onboarding && (
@@ -313,7 +314,7 @@ export function ProfileEditor({
           </button>
         ) : (
           <SubmitButton className="btn btn-primary" pendingLabel="Guardando…">
-            {onboarding ? "Entrar en UMBRA" : "Guardar cambios"}
+            {onboarding ? `Entrar en ${BRAND.name}` : "Guardar cambios"}
           </SubmitButton>
         )}
       </div>
@@ -334,7 +335,7 @@ function Section({
 }) {
   return (
     <section hidden={!show} className={onboarding ? "" : "grid gap-8 border-t hairline pt-8 md:grid-cols-[12rem_1fr]"}>
-      {!onboarding && <h2 className="font-serif text-xl text-bone">{title}</h2>}
+      {!onboarding && <h2 className="font-serif text-xl text-ink">{title}</h2>}
       <div className="space-y-9">{children}</div>
     </section>
   );
@@ -366,7 +367,7 @@ function TextInput({
     <div>
       <label htmlFor={id} className="label block">{label}</label>
       <div className="flex items-baseline">
-        {prefix && <span className="pr-1 font-mono text-stone">{prefix}</span>}
+        {prefix && <span className="pr-1 font-mono text-muted">{prefix}</span>}
         <input
           id={id}
           name={name}
@@ -384,7 +385,7 @@ function TextInput({
       {error ? (
         <p id={`${id}-e`} role="alert" className="mt-2 text-sm text-danger">{error}</p>
       ) : hint ? (
-        <p id={`${id}-h`} className="mt-2 text-sm text-stone">{hint}</p>
+        <p id={`${id}-h`} className="mt-2 text-sm text-muted">{hint}</p>
       ) : null}
     </div>
   );
@@ -411,7 +412,7 @@ function TextArea({
     <div>
       <div className="flex items-baseline justify-between">
         <label htmlFor={id} className="label block">{label}</label>
-        <span className="font-mono text-[0.6875rem] text-stone" aria-hidden="true">
+        <span className="font-mono text-[0.6875rem] text-muted" aria-hidden="true">
           {len}/{maxLength}
         </span>
       </div>

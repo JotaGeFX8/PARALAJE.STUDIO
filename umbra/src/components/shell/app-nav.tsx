@@ -25,16 +25,16 @@ export function SideNav() {
               href={a.href}
               aria-current={active ? "page" : undefined}
               className={`group relative flex items-center gap-3.5 py-2.5 pl-4 pr-3 text-[0.9375rem] transition-colors duration-300 ${
-                active ? "text-bone-2" : "text-stone hover:text-bone"
+                active ? "text-ink" : "text-muted hover:text-ink"
               }`}
             >
               <span
                 aria-hidden="true"
                 className={`absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 transition-colors duration-300 ${
-                  active ? "bg-lichen" : "bg-transparent"
+                  active ? "bg-accent" : "bg-transparent"
                 }`}
               />
-              <Icon size={19} className={active ? "text-lichen" : ""} />
+              <Icon size={19} className={active ? "text-accent" : ""} />
               {a.name}
             </Link>
           </div>
@@ -50,7 +50,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Secciones"
-      className="fixed inset-x-0 bottom-0 z-40 border-t hairline bg-carbon/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t hairline bg-canvas/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       <ul className="mx-auto grid h-[var(--nav-h)] max-w-lg grid-cols-5">
         {MOBILE_NAV.map((a) => {
@@ -62,10 +62,10 @@ export function BottomNav() {
                 href={a.href}
                 aria-current={active ? "page" : undefined}
                 className={`flex h-full flex-col items-center justify-center gap-1 transition-colors ${
-                  active ? "text-bone-2" : "text-stone"
+                  active ? "text-ink" : "text-muted"
                 }`}
               >
-                <Icon size={22} className={active ? "text-lichen" : ""} />
+                <Icon size={22} className={active ? "text-accent" : ""} />
                 <span className="text-[0.625rem] tracking-wide">{a.name}</span>
               </Link>
             </li>

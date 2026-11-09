@@ -4,7 +4,7 @@ import { IconExit } from "@/components/ui/icons";
 export function SignOutButton({ className = "" }: { className?: string }) {
   return (
     <form action="/auth/salir" method="post">
-      <button type="submit" className={`flex items-center gap-2 text-sm text-stone transition-colors hover:text-bone ${className}`}>
+      <button type="submit" className={`flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink ${className}`}>
         <IconExit size={17} /> Cerrar sesión
       </button>
     </form>

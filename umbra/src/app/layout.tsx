@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import { SITE_URL } from "@/lib/env";
+import { BRAND } from "@/config/brand";
 import "./globals.css";
 
 const serif = Source_Serif_4({
@@ -16,15 +17,14 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", dis
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "UMBRA — Explora ideas. Encuentra personas.",
-    template: "%s · UMBRA",
+    default: `${BRAND.name} — ${BRAND.shortTagline}`,
+    template: `%s · ${BRAND.name}`,
   },
-  description:
-    "Comunidad independiente de exploración, conocimiento y conexión humana. Ciencia, historia, conciencia, autosuficiencia y proyectos reales.",
-  applicationName: "UMBRA",
+  description: BRAND.description,
+  applicationName: BRAND.name,
   openGraph: {
-    title: "UMBRA",
-    description: "Explora ideas. Encuentra personas. Construye posibilidades.",
+    title: BRAND.name,
+    description: BRAND.tagline,
     type: "website",
     locale: "es_ES",
   },
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b0a",
-  colorScheme: "dark",
+  themeColor: "#f4f4ee",
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -42,7 +42,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
-      <body className="grain">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

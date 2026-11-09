@@ -1,0 +1,249 @@
+"use server";
+
+import { randomUUID } from "node:crypto";
+import { redirect } from "next/navigation";
+import { refresh } from "next/cache";
+import { getActionContext, dbErrorMessage, SESSION_EXPIRED } from "@/lib/actions";
+import { fieldErrors, type FormState } from "@/lib/form-state";
+import { commentSchema, postSchema, readPostForm, reportSchema } from "@/lib/validation/posts";
+import type { ReactionType } from "@/lib/supabase/types";
+
+const MAX_IMAGES = 4;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const IMAGE_TYPES = /^image\/(webp|jpeg|png)$/;
+
+type Supa = Awaited<ReturnType<typeof getActionContext>>["supabase"];
+
+/** Sube las imágenes nuevas a la carpeta del usuario. Devuelve sus rutas. */
+async function uploadImages(supabase: Supa, userId: string, files: File[]) {
+  const paths: string[] = [];
+  for (const file of files) {
+    if (!IMAGE_TYPES.test(file.type) || file.size > MAX_IMAGE_BYTES) {
+      throw new Error("Imágenes JPG, PNG o WebP de hasta 5 MB.");
+    }
+    const ext = file.type === "image/png" ? "png" : file.type === "image/jpeg" ? "jpg" : "webp";
+    const path = `${userId}/${randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("post-images")
+      .upload(path, file, { contentType: file.type, cacheControl: "31536000", upsert: false });
+    if (error) throw new Error("No se pudo subir una imagen.");
+    paths.push(path);
+  }
+  return paths;
+}
+
+function imageFiles(fd: FormData) {
+  return fd.getAll("images").filter((f): f is File => f instanceof File && f.size > 0);
+}
+
+// ---------------------------------------------------------------- Publicaciones
+
+export async function createPostAction(_: FormState, fd: FormData): Promise<FormState> {
+  const raw = readPostForm(fd);
+  const parsed = postSchema.safeParse(raw);
+  const values = { title: raw.title, body: raw.body };
+  if (!parsed.success) return { errors: fieldErrors(parsed.error), message: "Revisa los campos marcados.", values };
+
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { message: SESSION_EXPIRED, values };
+
+  const circle = String(fd.get("circle") ?? "") || null;
+  const files = imageFiles(fd);
+  if (files.length > MAX_IMAGES) return { errors: { images: `Máximo ${MAX_IMAGES} imágenes.` }, values };
+
+  let paths: string[] = [];
+  try {
+    paths = await uploadImages(supabase, userId, files);
+  } catch (e) {
+    return { errors: { images: (e as Error).message }, values };
+  }
+
+  const d = parsed.data;
+  const { data: id, error } = await supabase.rpc("create_post", {
+    p_title: d.title ?? "",
+    p_body: d.body,
+    p_kind: d.kind,
+    p_category: d.category ?? undefined,
+    p_is_question: d.is_question,
+    p_sources: d.sources,
+    p_tags: d.tags,
+    p_image_paths: paths,
+    p_circle: circle ?? undefined,
+  });
+
+  if (error || !id) {
+    if (paths.length) await supabase.storage.from("post-images").remove(paths);
+    return { message: dbErrorMessage(error, "No se ha podido publicar."), values };
+  }
+  redirect(`/p/${id}`);
+}
+
+export async function updatePostAction(_: FormState, fd: FormData): Promise<FormState> {
+  const postId = String(fd.get("post_id") ?? "");
+  const raw = readPostForm(fd);
+  const parsed = postSchema.safeParse(raw);
+  const values = { title: raw.title, body: raw.body };
+  if (!parsed.success) return { errors: fieldErrors(parsed.error), message: "Revisa los campos marcados.", values };
+
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { message: SESSION_EXPIRED, values };
+
+  const { data: current } = await supabase
+    .from("posts")
+    .select("image_paths, author_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (!current || current.author_id !== userId) return { message: "No puedes editar esta publicación." };
+
+  const keep = fd.getAll("keep_images").map(String).filter((p) => current.image_paths.includes(p));
+  const files = imageFiles(fd);
+  if (keep.length + files.length > MAX_IMAGES) return { errors: { images: `Máximo ${MAX_IMAGES} imágenes.` }, values };
+
+  let added: string[] = [];
+  try {
+    added = await uploadImages(supabase, userId, files);
+  } catch (e) {
+    return { errors: { images: (e as Error).message }, values };
+  }
+
+  const d = parsed.data;
+  const { error } = await supabase.rpc("update_post", {
+    p_id: postId,
+    p_title: d.title ?? "",
+    p_body: d.body,
+    p_kind: d.kind,
+    p_is_question: d.is_question,
+    p_sources: d.sources,
+    p_tags: d.tags,
+    p_image_paths: [...keep, ...added],
+  });
+  if (error) {
+    if (added.length) await supabase.storage.from("post-images").remove(added);
+    return { message: dbErrorMessage(error, "No se han podido guardar los cambios."), values };
+  }
+  const removed = current.image_paths.filter((p) => !keep.includes(p));
+  if (removed.length) await supabase.storage.from("post-images").remove(removed);
+  redirect(`/p/${postId}`);
+}
+
+export async function deletePostAction(postId: string): Promise<{ ok: boolean; message?: string }> {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { data: post } = await supabase
+    .from("posts")
+    .select("author_id, image_paths, category_slug, circle_id")
+    .eq("id", postId)
+    .maybeSingle();
+  const { error } = await supabase.rpc("delete_post", { p_id: postId });
+  if (error) return { ok: false, message: dbErrorMessage(error) };
+  if (post && post.author_id === userId && post.image_paths.length) {
+    await supabase.storage.from("post-images").remove(post.image_paths);
+  }
+  redirect(
+    post?.circle_id
+      ? `/circulos/${post.circle_id}`
+      : post?.category_slug
+        ? `/comunidad/${post.category_slug}`
+        : "/agora",
+  );
+}
+
+// ---------------------------------------------------------------- Guardar y seguir
+
+export async function setSavedAction(postId: string, on: boolean) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { error } = on
+    ? await supabase.from("saved_posts").upsert({ user_id: userId, post_id: postId }, { ignoreDuplicates: true })
+    : await supabase.from("saved_posts").delete().eq("user_id", userId).eq("post_id", postId);
+  return error ? { ok: false, message: dbErrorMessage(error) } : { ok: true };
+}
+
+export async function setFollowAction(postId: string, on: boolean) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { error } = on
+    ? await supabase.from("post_follows").upsert({ user_id: userId, post_id: postId }, { ignoreDuplicates: true })
+    : await supabase.from("post_follows").delete().eq("user_id", userId).eq("post_id", postId);
+  return error ? { ok: false, message: dbErrorMessage(error) } : { ok: true };
+}
+
+// ---------------------------------------------------------------- Reacciones
+
+const REACTION_TYPES: ReactionType[] = ["valuable", "curious", "agree", "needs_sources"];
+
+export async function setReactionAction(target: "post" | "comment", id: string, type: ReactionType, on: boolean) {
+  if (!REACTION_TYPES.includes(type)) return { ok: false };
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  let error;
+  if (target === "post") {
+    ({ error } = on
+      ? await supabase.from("post_reactions").upsert({ post_id: id, user_id: userId, type }, { ignoreDuplicates: true })
+      : await supabase.from("post_reactions").delete().match({ post_id: id, user_id: userId, type }));
+  } else {
+    ({ error } = on
+      ? await supabase.from("comment_reactions").upsert({ comment_id: id, user_id: userId, type }, { ignoreDuplicates: true })
+      : await supabase.from("comment_reactions").delete().match({ comment_id: id, user_id: userId, type }));
+  }
+  return error ? { ok: false, message: dbErrorMessage(error) } : { ok: true };
+}
+
+// ---------------------------------------------------------------- Comentarios
+
+export async function createCommentAction(_: FormState, fd: FormData): Promise<FormState> {
+  const parsed = commentSchema.safeParse({ body: fd.get("body") });
+  if (!parsed.success) return { errors: fieldErrors(parsed.error), values: { body: String(fd.get("body") ?? "") } };
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { message: SESSION_EXPIRED };
+  const postId = String(fd.get("post_id") ?? "");
+  const parentId = String(fd.get("parent_id") ?? "") || null;
+  const { error } = await supabase
+    .from("comments")
+    .insert({ post_id: postId, parent_id: parentId, author_id: userId, body: parsed.data.body });
+  if (error) return { message: dbErrorMessage(error, "No se ha podido comentar."), values: { body: parsed.data.body } };
+  refresh();
+  return { ok: true };
+}
+
+export async function editCommentAction(commentId: string, body: string) {
+  const parsed = commentSchema.safeParse({ body });
+  if (!parsed.success) return { ok: false, message: parsed.error.issues[0]?.message };
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { error, count } = await supabase
+    .from("comments")
+    .update({ body: parsed.data.body }, { count: "exact" })
+    .eq("id", commentId)
+    .eq("author_id", userId);
+  if (error || !count) return { ok: false, message: dbErrorMessage(error, "No se ha podido editar.") };
+  refresh();
+  return { ok: true };
+}
+
+export async function deleteCommentAction(commentId: string) {
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { ok: false, message: SESSION_EXPIRED };
+  const { error } = await supabase.rpc("delete_comment", { p_id: commentId });
+  if (error) return { ok: false, message: dbErrorMessage(error) };
+  refresh();
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------- Denuncias
+
+export async function createReportAction(_: FormState, fd: FormData): Promise<FormState> {
+  const parsed = reportSchema.safeParse({
+    target_type: fd.get("target_type"),
+    target_id: fd.get("target_id"),
+    reason: fd.get("reason"),
+    details: String(fd.get("details") ?? ""),
+  });
+  if (!parsed.success) return { errors: fieldErrors(parsed.error) };
+  const { supabase, userId } = await getActionContext();
+  if (!userId) return { message: SESSION_EXPIRED };
+  const { error } = await supabase.from("reports").insert({ ...parsed.data, reporter_id: userId });
+  if (error?.code === "23505") return { ok: true, message: "Ya habías denunciado esto. El equipo lo revisará." };
+  if (error) return { message: dbErrorMessage(error, "No se ha podido enviar la denuncia.") };
+  return { ok: true, message: "Gracias. Una persona del equipo de moderación lo revisará." };
+}

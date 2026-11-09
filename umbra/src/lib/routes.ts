@@ -10,6 +10,14 @@ export const PRIVATE_PREFIXES = [
   "/miembros",
   "/ajustes",
   "/bienvenida",
+  "/publicar",
+  "/p",
+  "/guardados",
+  "/buscar",
+  "/etiqueta",
+  "/mensajes",
+  "/notificaciones",
+  "/admin",
 ] as const;
 
 export const AUTH_PAGES = ["/acceso", "/registro", "/recuperar"] as const;

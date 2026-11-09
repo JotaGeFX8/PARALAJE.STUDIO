@@ -56,7 +56,7 @@ export function Field({
           <button
             type="button"
             onClick={() => setReveal((v) => !v)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 px-1 py-2 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-stone hover:text-bone"
+            className="absolute right-0 top-1/2 -translate-y-1/2 px-1 py-2 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-muted hover:text-ink"
             aria-pressed={reveal}
             aria-label={reveal ? "Ocultar contraseña" : "Mostrar contraseña"}
           >
@@ -69,7 +69,7 @@ export function Field({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="mt-2 text-sm text-stone">
+        <p id={`${id}-hint`} className="mt-2 text-sm text-muted">
           {hint}
         </p>
       ) : null}
@@ -107,7 +107,7 @@ export function FormMessage({ message, tone = "error" }: { message?: string; ton
     <p
       role={tone === "error" ? "alert" : "status"}
       className={`border-l-2 px-4 py-3 text-sm leading-relaxed ${
-        tone === "error" ? "border-danger bg-danger/5 text-bone" : "border-moss-2 bg-moss/15 text-bone"
+        tone === "error" ? "border-danger bg-danger-soft text-ink" : "border-accent-mid bg-accent-soft text-ink"
       }`}
     >
       {message}

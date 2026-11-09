@@ -93,3 +93,19 @@ export async function getMemberByUsername(username: string) {
   if (!data) return null;
   return { ...toCard(data), looking_for: data.looking_for, personal_projects: data.personal_projects, languages: data.languages, created_at: data.created_at };
 }
+
+/** Búsqueda simple de miembros por nombre o usuario. */
+export async function searchMembersByName(q: string, excludeId: string, limit = 20): Promise<MemberCard[]> {
+  const supabase = await createClient();
+  const term = q.replace(/[%_,()*]/g, " ").trim();
+  if (!term) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select(CARD_COLUMNS)
+    .not("onboarded_at", "is", null)
+    .neq("id", excludeId)
+    .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+    .limit(limit)
+    .returns<RawCard[]>();
+  return (data ?? []).map(toCard);
+}

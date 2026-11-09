@@ -32,7 +32,7 @@ export function SignInForm({ next, notice }: { next?: string; notice?: string })
           maxLength={72}
           error={state.errors?.password}
         />
-        <Link href="/recuperar" className="link-draw mt-3 inline-block text-sm text-stone hover:text-bone">
+        <Link href="/recuperar" className="link-draw mt-3 inline-block text-sm text-muted hover:text-ink">
           ¿Olvidaste tu contraseña?
         </Link>
       </div>

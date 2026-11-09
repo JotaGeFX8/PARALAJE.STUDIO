@@ -26,7 +26,7 @@ export function DeleteAccountForm({ username }: { username: string }) {
       <FormMessage message={state.message} />
       <Field label={`Escribe «${username}» para confirmar`} name="confirm" autoComplete="off" maxLength={25}
         error={state.errors?.confirm} />
-      <SubmitButton className="btn border border-danger/60 text-danger hover:bg-danger/10" pendingLabel="Eliminando…">
+      <SubmitButton className="btn border border-danger/60 text-danger hover:bg-danger-soft" pendingLabel="Eliminando…">
         Eliminar mi cuenta para siempre
       </SubmitButton>
     </form>

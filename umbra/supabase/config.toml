@@ -247,11 +247,11 @@ otp_expiry = 3600
 
 # Uncomment to customize email template
 [auth.email.template.confirmation]
-subject = "Confirma tu cuenta en UMBRA"
+subject = "Confirma tu cuenta"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Recupera tu acceso a UMBRA"
+subject = "Recupera tu acceso"
 content_path = "./supabase/templates/recovery.html"
 
 # [auth.email.template.invite]

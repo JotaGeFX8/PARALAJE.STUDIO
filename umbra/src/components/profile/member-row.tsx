@@ -15,25 +15,25 @@ export function MemberRow({ m }: { m: MemberCard }) {
         <Avatar url={m.avatar_url} name={name} size={48} />
         <div className="min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-serif text-lg text-bone transition-colors group-hover:text-bone-2">{name}</span>
-            <span className="font-mono text-xs text-stone">@{m.username}</span>
+            <span className="font-serif text-lg text-ink transition-colors group-hover:text-ink">{name}</span>
+            <span className="font-mono text-xs text-muted">@{m.username}</span>
             {m.availability === "open" && (
-              <span className="label !text-[0.625rem] text-lichen">{AVAILABILITY_LABELS.open}</span>
+              <span className="label !text-[0.625rem] text-accent">{AVAILABILITY_LABELS.open}</span>
             )}
           </div>
           {(place || m.shared) && (
-            <p className="mt-1 text-sm text-stone">
+            <p className="mt-1 text-sm text-muted">
               {[place, m.shared ? `${m.shared} ${m.shared === 1 ? "interés" : "intereses"} en común` : ""]
                 .filter(Boolean)
                 .join(" · ")}
             </p>
           )}
           {m.interests.length > 0 && (
-            <p className="mt-2 truncate text-sm text-stone-2">
+            <p className="mt-2 truncate text-sm text-ink-2">
               {m.interests.slice(0, 4).map((i, idx) => (
                 <span key={i.slug}>
-                  {idx > 0 && <span className="px-1.5 text-stone/60">/</span>}
-                  <span className={i.is_favorite ? "text-bone" : ""}>{i.name}</span>
+                  {idx > 0 && <span className="px-1.5 text-muted/60">/</span>}
+                  <span className={i.is_favorite ? "text-ink" : ""}>{i.name}</span>
                 </span>
               ))}
             </p>

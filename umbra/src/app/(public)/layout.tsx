@@ -6,7 +6,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
     <>
       <a
         href="#contenido"
-        className="sr-only z-[60] bg-bone px-4 py-2 text-carbon focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+        className="sr-only z-[60] bg-accent px-4 py-2 text-on-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         Saltar al contenido
       </a>

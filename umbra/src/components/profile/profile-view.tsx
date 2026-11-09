@@ -30,11 +30,11 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
       <header className="flex flex-col gap-8 border-b hairline pb-12 sm:flex-row sm:items-end">
         <Avatar url={p.avatar_url} name={name} size={112} />
         <div className="min-w-0 flex-1 animate-rise">
-          <p className="font-mono text-sm text-stone">@{p.username}</p>
-          <h1 className="display mt-3 break-words text-[clamp(2.4rem,6vw,4rem)] text-bone">{name}</h1>
-          <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone">
+          <p className="font-mono text-sm text-muted">@{p.username}</p>
+          <h1 className="display mt-3 break-words text-[clamp(2.4rem,6vw,4rem)] text-ink">{name}</h1>
+          <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
             {place && <span>{place}</span>}
-            <span className={p.availability === "open" ? "text-lichen" : ""}>{AVAILABILITY_LABELS[p.availability]}</span>
+            <span className={p.availability === "open" ? "text-accent" : ""}>{AVAILABILITY_LABELS[p.availability]}</span>
             <span>Miembro desde {fmt.format(new Date(p.created_at))}</span>
           </p>
         </div>
@@ -53,8 +53,8 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
               <h2 className="label mb-4">Favoritos</h2>
               <ul className="space-y-2">
                 {favs.map((i) => (
-                  <li key={i.slug} className="flex items-baseline gap-3 font-serif text-lg text-bone">
-                    <span aria-hidden="true" className="text-lichen">✦</span>
+                  <li key={i.slug} className="flex items-baseline gap-3 font-serif text-lg text-ink">
+                    <span aria-hidden="true" className="text-accent">✦</span>
                     {i.name}
                   </li>
                 ))}
@@ -66,7 +66,7 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
               <h2 className="label mb-4">Intereses</h2>
               <ul className="flex flex-wrap gap-2">
                 {rest.map((i) => (
-                  <li key={i.slug} className="border border-line-2 px-3 py-1.5 text-sm text-stone-2">{i.name}</li>
+                  <li key={i.slug} className="border border-line-2 px-3 py-1.5 text-sm text-ink-2">{i.name}</li>
                 ))}
               </ul>
             </div>
@@ -74,7 +74,7 @@ export function ProfileView({ p, actions }: { p: ProfileViewData; actions?: Reac
           {p.languages.length > 0 && (
             <div>
               <h2 className="label mb-4">Idiomas</h2>
-              <p className="text-stone-2">{p.languages.join(" · ")}</p>
+              <p className="text-ink-2">{p.languages.join(" · ")}</p>
             </div>
           )}
         </aside>
@@ -88,7 +88,7 @@ function Block({ title, text, empty }: { title: string; text: string; empty?: st
   return (
     <section>
       <h2 className="label mb-4">{title}</h2>
-      <p className={`whitespace-pre-line font-serif text-lg leading-relaxed ${text ? "text-stone-2" : "text-stone"}`}>
+      <p className={`whitespace-pre-line font-serif text-lg leading-relaxed ${text ? "text-ink-2" : "text-muted"}`}>
         {text || empty}
       </p>
     </section>

@@ -79,7 +79,7 @@ export const PROFILE_AREA: Area = {
   href: "/perfil",
   name: "Perfil",
   short: "Perfil",
-  description: "Tu identidad en UMBRA.",
+  description: "Tu identidad en la comunidad.",
   icon: IconProfile,
   phase: 2,
 };
@@ -148,3 +148,63 @@ export const TERRITORIES = [
   ["supervivencia", "Supervivencia y conocimientos prácticos"],
   ["debate", "Debate libre"],
 ] as const;
+
+export type PostKind = (typeof EPISTEMIC_KINDS)[number]["key"];
+export const KIND_BY_KEY = Object.fromEntries(EPISTEMIC_KINDS.map((k) => [k.key, k])) as Record<
+  PostKind,
+  (typeof EPISTEMIC_KINDS)[number]
+>;
+
+/** Reacciones propias de la comunidad (no «me gusta»). */
+export const REACTIONS = [
+  { key: "valuable", label: "Aporta", hint: "Esta aportación suma a la conversación" },
+  { key: "curious", label: "Me intriga", hint: "Quiero saber más" },
+  { key: "agree", label: "De acuerdo", hint: "Comparto esta postura" },
+  { key: "needs_sources", label: "Pide fuentes", hint: "Necesita referencias para sostenerse" },
+] as const;
+export type ReactionKey = (typeof REACTIONS)[number]["key"];
+
+/** Ordenaciones de los listados. */
+export const SORTS: readonly { key: "recent" | "popular" | "commented" | "trending"; label: string; short?: string }[] = [
+  { key: "recent", label: "Recientes" },
+  { key: "popular", label: "Populares" },
+  { key: "commented", label: "Más comentados", short: "Comentados" },
+  { key: "trending", label: "Tendencias" },
+];
+export type SortKey = (typeof SORTS)[number]["key"];
+export function parseSort(v: string | undefined): SortKey {
+  return SORTS.some((s) => s.key === v) ? (v as SortKey) : "recent";
+}
+
+export const REPORT_REASONS = [
+  { key: "spam", label: "Spam o publicidad" },
+  { key: "harassment", label: "Acoso o ataques personales" },
+  { key: "hate", label: "Discurso de odio" },
+  { key: "personal_data", label: "Datos personales de terceros" },
+  { key: "mislabeled", label: "Presenta una hipótesis como hecho" },
+  { key: "illegal", label: "Contenido ilegal" },
+  { key: "other", label: "Otro motivo" },
+] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number]["key"];
+
+/** Qué territorios recomendar según los intereses de cada persona. */
+export const INTEREST_TO_CATEGORIES: Record<string, string[]> = {
+  "fisica-cuantica": ["ciencia", "universo"],
+  astronomia: ["universo", "ciencia"],
+  conciencia: ["conciencia"],
+  civilizaciones: ["historia", "misterios"],
+  historia: ["historia"],
+  "sociedades-discretas": ["simbolismo", "historia"],
+  misterios: ["misterios"],
+  uap: ["misterios", "universo"],
+  "ia-tecnologia": ["tecnologia"],
+  autosuficiencia: ["autosuficiencia", "supervivencia"],
+  bioconstruccion: ["bioconstruccion", "autosuficiencia"],
+  agricultura: ["vida-rural", "autosuficiencia"],
+  "energias-alternativas": ["autosuficiencia", "tecnologia"],
+  "vida-rural": ["vida-rural"],
+  psicologia: ["conciencia"],
+  debate: ["debate"],
+  proyectos: ["bioconstruccion", "tecnologia"],
+  amistad: ["debate"],
+};

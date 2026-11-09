@@ -28,7 +28,7 @@ export function Avatar({
         height={size}
         loading="lazy"
         decoding="async"
-        className={`shrink-0 rounded-full bg-graphite-2 object-cover ${className}`}
+        className={`shrink-0 rounded-full bg-surface-3 object-cover ${className}`}
         style={style}
       />
     );
@@ -36,7 +36,7 @@ export function Avatar({
   return (
     <span
       aria-hidden="true"
-      className={`grid shrink-0 place-items-center rounded-full border border-line-2 bg-graphite font-mono text-stone-2 ${className}`}
+      className={`grid shrink-0 place-items-center rounded-full bg-accent-soft font-mono font-medium text-accent-strong ${className}`}
       style={{ ...style, fontSize: Math.max(10, size * 0.32) }}
     >
       {initials}

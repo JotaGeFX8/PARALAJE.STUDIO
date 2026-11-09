@@ -7,6 +7,7 @@ import { AREAS, PROFILE_AREA } from "@/lib/content";
 import { PageHeader } from "@/components/ui/page-header";
 import { MemberRow } from "@/components/profile/member-row";
 import { IconArrow } from "@/components/ui/icons";
+import { BRAND } from "@/config/brand";
 
 export const metadata: Metadata = { title: "Explorar" };
 
@@ -36,7 +37,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
       />
 
       {/* Accesos a las seis áreas */}
-      <nav aria-label="Áreas de UMBRA" className="mb-16 grid grid-cols-2 md:mb-20 gap-px overflow-hidden border hairline bg-line sm:grid-cols-3">
+      <nav aria-label={`Áreas de ${BRAND.name}`} className="mb-16 grid grid-cols-2 md:mb-20 gap-px overflow-hidden border hairline bg-line sm:grid-cols-3">
         {[...AREAS.slice(1), PROFILE_AREA].map((a) => {
           const Icon = a.icon;
           const ready = a.phase <= 2;
@@ -44,11 +45,11 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
             <Link
               key={a.href}
               href={a.href}
-              className="group flex items-center gap-3.5 bg-carbon px-4 py-4 transition-colors duration-300 hover:bg-graphite md:min-h-40 md:flex-col md:items-start md:justify-between md:p-6"
+              className="group flex items-center gap-3.5 bg-canvas px-4 py-4 transition-colors duration-300 hover:bg-surface-2 md:min-h-40 md:flex-col md:items-start md:justify-between md:p-6"
             >
-              <Icon size={22} className="shrink-0 text-stone transition-colors group-hover:text-lichen" />
+              <Icon size={22} className="shrink-0 text-muted transition-colors group-hover:text-accent" />
               <span className="min-w-0">
-                <span className="block font-serif text-[1.0625rem] leading-tight text-bone md:text-xl">{a.name}</span>
+                <span className="block font-serif text-[1.0625rem] leading-tight text-ink md:text-xl">{a.name}</span>
                 <span className="label mt-1.5 block !text-[0.5625rem] md:mt-2 md:!text-[0.625rem]">{ready ? a.short : `Fase ${a.phase}`}</span>
               </span>
             </Link>
@@ -73,7 +74,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
           {newcomers.length ? (
             <ul className="border-t hairline">{newcomers.map((m) => <MemberRow key={m.id} m={m} />)}</ul>
           ) : (
-            <Empty>Eres de los primeros miembros de UMBRA. Las próximas personas en llegar aparecerán aquí.</Empty>
+            <Empty>Eres de los primeros miembros de {BRAND.name}. Las próximas personas en llegar aparecerán aquí.</Empty>
           )}
         </section>
       </div>
@@ -83,13 +84,13 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
         <ul className="grid border-t hairline sm:grid-cols-2 sm:gap-x-10 xl:grid-cols-3">
           {(categories ?? []).map((c, i) => (
             <li key={c.slug} className="border-b hairline py-5">
-              <span className="font-mono text-[0.6875rem] text-stone">{String(i + 1).padStart(2, "0")}</span>
-              <p className="mt-2 font-serif text-lg text-bone">{c.name}</p>
-              <p className="mt-1 text-sm leading-relaxed text-stone">{c.description}</p>
+              <span className="font-mono text-[0.6875rem] text-muted">{String(i + 1).padStart(2, "0")}</span>
+              <p className="mt-2 font-serif text-lg text-ink">{c.name}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{c.description}</p>
             </li>
           ))}
         </ul>
-        <Link href="/comunidad" className="link-draw mt-8 inline-flex items-center gap-2 text-sm text-stone-2 hover:text-bone">
+        <Link href="/comunidad" className="link-draw mt-8 inline-flex items-center gap-2 text-sm text-ink-2 hover:text-ink">
           Ir a Comunidad <IconArrow size={16} />
         </Link>
       </section>
@@ -101,11 +102,11 @@ function SectionTitle({ id, eyebrow, title }: { id: string; eyebrow: string; tit
   return (
     <div className="mb-6">
       <p className="label">{eyebrow}</p>
-      <h2 id={id} className="mt-3 font-serif text-2xl text-bone md:text-3xl">{title}</h2>
+      <h2 id={id} className="mt-3 font-serif text-2xl text-ink md:text-3xl">{title}</h2>
     </div>
   );
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="border-t hairline pt-6 font-serif text-lg leading-relaxed text-stone">{children}</p>;
+  return <p className="border-t hairline pt-6 font-serif text-lg leading-relaxed text-muted">{children}</p>;
 }

@@ -68,7 +68,7 @@ export function AvatarUploader({ userId, initialUrl, name }: { userId: string; i
             </button>
           )}
         </div>
-        <p className="text-xs text-stone">Opcional. JPG, PNG o WebP. Se recorta a 512 px.</p>
+        <p className="text-xs text-muted">Opcional. JPG, PNG o WebP. Se recorta a 512 px.</p>
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       </div>
       <input

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DocPage } from "@/components/ui/doc-page";
+import { BRAND } from "@/config/brand";
 
 export const metadata: Metadata = { title: "Normas de convivencia" };
 
@@ -7,7 +8,7 @@ export default function NormasPage() {
   return (
     <DocPage eyebrow="Convivencia" title="Normas de la comunidad" updated="noviembre 2026">
       <p>
-        UMBRA existe para conversar sobre cualquier idea —también las incómodas o minoritarias— sin perder el
+        {BRAND.name} existe para conversar sobre cualquier idea —también las incómodas o minoritarias— sin perder el
         respeto ni la honestidad intelectual. Estas normas protegen ese equilibrio.
       </p>
       <h2>1. Discute ideas, no personas</h2>

@@ -1,21 +1,22 @@
 import Link from "next/link";
-import { UmbraWordmark } from "@/components/ui/logo";
+import { Wordmark } from "@/components/ui/logo";
+import { BRAND } from "@/config/brand";
 
 export function PublicHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 bg-carbon/70 pt-[env(safe-area-inset-top)] backdrop-blur-md [mask-image:linear-gradient(to_bottom,black_75%,transparent)] supports-[backdrop-filter]:bg-carbon/55">
+    <header className="fixed inset-x-0 top-0 z-50 bg-canvas/70 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-canvas/55">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Link href="/" aria-label="UMBRA, inicio" className="text-bone">
-          <UmbraWordmark />
+        <Link href="/" aria-label={`${BRAND.name}, inicio`} className="text-ink">
+          <Wordmark />
         </Link>
         <nav aria-label="Principal" className="flex items-center gap-1 sm:gap-6">
-          <Link href="/#manifiesto" className="link-draw hidden text-sm text-stone-2 hover:text-bone md:inline">
+          <Link href="/#manifiesto" className="link-draw hidden text-sm text-ink-2 hover:text-ink md:inline">
             Manifiesto
           </Link>
-          <Link href="/#areas" className="link-draw hidden text-sm text-stone-2 hover:text-bone md:inline">
+          <Link href="/#areas" className="link-draw hidden text-sm text-ink-2 hover:text-ink md:inline">
             Áreas
           </Link>
-          <Link href="/normas" className="link-draw hidden text-sm text-stone-2 hover:text-bone md:inline">
+          <Link href="/normas" className="link-draw hidden text-sm text-ink-2 hover:text-ink md:inline">
             Normas
           </Link>
           <Link href="/acceso" className="btn btn-quiet min-h-10 text-sm">

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { requireOnboardedMember } from "@/lib/auth";
-import { UmbraWordmark } from "@/components/ui/logo";
+import { Wordmark } from "@/components/ui/logo";
 import { Avatar } from "@/components/ui/avatar";
 import { BottomNav, SideNav } from "@/components/shell/app-nav";
 import { SignOutButton } from "@/components/shell/sign-out";
+import { BRAND } from "@/config/brand";
 
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
   const { profile } = await requireOnboardedMember();
@@ -11,22 +12,22 @@ export default async function ShellLayout({ children }: { children: React.ReactN
 
   return (
     <div className="md:grid md:min-h-[100dvh] md:grid-cols-[15.5rem_1fr]">
-      <a href="#contenido" className="sr-only z-[60] bg-bone px-4 py-2 text-carbon focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+      <a href="#contenido" className="sr-only z-[60] bg-accent px-4 py-2 text-on-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Saltar al contenido
       </a>
 
       {/* Lateral (escritorio) */}
       <aside className="sticky top-0 hidden h-[100dvh] flex-col border-r hairline px-4 py-7 md:flex">
-        <Link href="/explorar" aria-label="UMBRA, explorar" className="mb-10 px-4 text-bone">
-          <UmbraWordmark />
+        <Link href="/explorar" aria-label={`${BRAND.name}, explorar`} className="mb-10 px-4 text-ink">
+          <Wordmark />
         </Link>
         <SideNav />
         <div className="mt-auto space-y-5 border-t hairline px-4 pt-5">
           <Link href="/perfil" className="flex items-center gap-3">
             <Avatar url={profile.avatar_url} name={name} size={34} />
             <span className="min-w-0">
-              <span className="block truncate text-sm text-bone">{name}</span>
-              <span className="block truncate font-mono text-xs text-stone">@{profile.username}</span>
+              <span className="block truncate text-sm text-ink">{name}</span>
+              <span className="block truncate font-mono text-xs text-muted">@{profile.username}</span>
             </span>
           </Link>
           <SignOutButton />
@@ -34,10 +35,10 @@ export default async function ShellLayout({ children }: { children: React.ReactN
       </aside>
 
       {/* Cabecera (móvil) */}
-      <header className="sticky top-0 z-30 border-b hairline bg-carbon/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:hidden">
+      <header className="sticky top-0 z-30 border-b hairline bg-canvas/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:hidden">
         <div className="flex h-14 items-center justify-between px-5">
-          <Link href="/explorar" aria-label="UMBRA, explorar" className="text-bone">
-            <UmbraWordmark />
+          <Link href="/explorar" aria-label={`${BRAND.name}, explorar`} className="text-ink">
+            <Wordmark />
           </Link>
           <Link href="/ajustes" aria-label="Ajustes de la cuenta">
             <Avatar url={profile.avatar_url} name={name} size={30} />

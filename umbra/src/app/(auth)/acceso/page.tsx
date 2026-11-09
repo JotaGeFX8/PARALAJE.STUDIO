@@ -19,11 +19,11 @@ export default async function AccesoPage({
   return (
     <>
       <p className="label">Miembros</p>
-      <h1 className="display mb-10 mt-5 text-[2.75rem] text-bone">Hola de nuevo.</h1>
+      <h1 className="display mb-10 mt-5 text-[2.75rem] text-ink">Hola de nuevo.</h1>
       <SignInForm next={next} notice={notice} />
-      <p className="mt-10 text-sm text-stone">
+      <p className="mt-10 text-sm text-muted">
         ¿Aún no eres miembro?{" "}
-        <Link href="/registro" className="text-bone underline decoration-line-2 underline-offset-4">
+        <Link href="/registro" className="text-ink underline decoration-line-2 underline-offset-4">
           Crear cuenta
         </Link>
       </p>
