@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // Tolera espacios o texto extra pegado por error en la variable: se queda con la primera URL válida.
-const SUPABASE = ((process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").match(/https?:\/\/[^\s"']+/)?.[0] ?? "").replace(/\/$/, "");
+const SUPABASE = ((process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").match(/(https?:\/\/)?[a-z0-9-]+\.supabase\.co|https?:\/\/[^\s"']+/)?.[0] ?? "").replace(/^(?!https?:\/\/)(.)/, "https://$1").replace(/\/$/, "");
 const SUPABASE_WS = SUPABASE.replace(/^http/, "ws");
 const isDev = process.env.NODE_ENV !== "production";
 // Solo para vistas previas embebidas: permite mostrar la web dentro de un marco.

@@ -4,7 +4,7 @@
  */
 // Tolera espacios o texto extra pegado por error al configurar las variables.
 const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-export const SUPABASE_URL = (rawUrl.match(/https?:\/\/[^\s"']+/)?.[0] ?? "").replace(/\/$/, "");
+export const SUPABASE_URL = (rawUrl.match(/(https?:\/\/)?[a-z0-9-]+\.supabase\.co|https?:\/\/[^\s"']+/)?.[0] ?? "").replace(/^(?!https?:\/\/)(.)/, "https://$1").replace(/\/$/, "");
 const rawKey = (
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
