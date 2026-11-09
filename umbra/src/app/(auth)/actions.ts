@@ -24,7 +24,7 @@ export async function signUpAction(_: FormState, formData: FormData): Promise<Fo
   }
   // Campo trampa invisible: si un bot lo rellena, fingimos éxito sin crear nada.
   if (raw.website) return { ok: true, values: { email: parsed.data.email } };
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: { emailRedirectTo: `${SITE_URL}/auth/confirm?next=/bienvenida` },
@@ -40,6 +40,9 @@ export async function signUpAction(_: FormState, formData: FormData): Promise<Fo
     console.error("signUp", error.code, error.message);
     return { message: "No hemos podido crear la cuenta. Inténtalo de nuevo en unos minutos." };
   }
+
+  // Si Supabase no exige confirmar el correo, la cuenta ya tiene sesión: directo a la bienvenida.
+  if (data.session) redirect("/bienvenida");
 
   // Por privacidad, la respuesta es idéntica exista o no ya el correo.
   return { ok: true, values: { email: parsed.data.email } };
