@@ -10,7 +10,7 @@ import { safeNext } from "@/lib/routes";
  *  - code (flujo PKCE por defecto; mismo navegador que inició el registro)
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     ok = !error;
   }
 
-  if (ok) return NextResponse.redirect(new URL(next, origin));
-  return NextResponse.redirect(new URL("/acceso?error=enlace", origin));
+  // Redirecciones relativas: válidas detrás de cualquier proxy o dominio.
+  const location = ok ? next : "/acceso?error=enlace";
+  return new NextResponse(null, { status: 303, headers: { Location: location } });
 }

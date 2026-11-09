@@ -85,10 +85,10 @@ try {
   await bruno.page.getByRole("button", { name: "Cambiar foto" }).waitFor({ timeout: 15000 });
   await bruno.page.goto(`${APP}/perfil`);
   const src = await bruno.page.locator("article img").first().getAttribute("src");
-  assert.match(src ?? "", /\/storage\/v1\/object\/public\/avatars\//);
-  assert.equal((await fetch(src)).status, 200);
+  assert.match(src ?? "", /^\/media\/public\/avatars\//);
+  assert.equal((await fetch(new URL(src, APP))).status, 200);
   await shot(bruno.page, "perfil-propio-bruno");
-  step("avatar subido a Storage y visible");
+  step("avatar subido a Storage y servido desde /media");
 
   // 6. Cierre de sesión
   await bruno.page.goto(`${APP}/ajustes`);

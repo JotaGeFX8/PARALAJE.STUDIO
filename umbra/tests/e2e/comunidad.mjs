@@ -45,8 +45,8 @@ await runSuite("Comunidad", async (browser) => {
   await ana.page.getByRole("heading", { name: title }).waitFor();
   await ana.page.getByText("plato.stanford.edu", { exact: false }).first().waitFor();
   const imgSrc = await ana.page.locator("article img").last().getAttribute("src");
-  assert.match(imgSrc ?? "", /\/storage\/v1\/object\/sign\/post-images\//);
-  assert.equal((await fetch(imgSrc)).status, 200);
+  assert.match(imgSrc ?? "", /^\/media\/sign\/post-images\//);
+  assert.equal((await fetch(new URL(imgSrc, APP))).status, 200);
   assert.ok(await ana.page.locator("blockquote").count(), "cita renderizada");
   assert.ok(await ana.page.locator("strong", { hasText: "superposición" }).count(), "negrita renderizada");
   await shot(ana.page, "comunidad-publicacion");

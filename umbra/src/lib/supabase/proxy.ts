@@ -46,10 +46,15 @@ export async function updateSession(request: NextRequest) {
   return response;
 }
 
+/**
+ * Redirección absoluta construida con el host que ve el navegador (cabeceras
+ * x-forwarded-* de un proxy, si las hay), para no redirigir a un host interno.
+ */
 function redirectTo(request: NextRequest, pathname: string, next?: string) {
-  const url = request.nextUrl.clone();
-  url.pathname = pathname;
-  url.search = "";
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+  const origin = host ? `${proto}://${host}` : request.nextUrl.origin;
+  const url = new URL(pathname, origin);
   if (next) url.searchParams.set("next", next);
   return NextResponse.redirect(url);
 }

@@ -8,10 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "db:start": "npx supabase@3.0.0 start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,postgres-meta,supavisor",
+    "db:start": "npx supabase@3.0.0 start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor",
     "db:reset": "npx supabase@3.0.0 db reset",
-    "test:db": "bash supabase/tests/run.sh",
-    "test:e2e": "node tests/e2e/flujo-completo.mjs"
+    "test:e2e": "node tests/e2e/run-all.mjs",
+    "test:security": "bash supabase/tests/run.sh",
+    "test": "npm run typecheck && npm run lint && npm run test:security",
+    "db:types": "npx supabase@3.0.0 gen types typescript --local --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
