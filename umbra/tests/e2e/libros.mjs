@@ -82,8 +82,7 @@ await runSuite("Biblioteca", async (browser) => {
   step("la ficha queda protegida cuando otras personas la han recomendado");
 
   // 6. Perfil, listado filtrado y búsqueda
-  await bruno.page.goto(`${APP}/miembros/${ana.username}`);
-  await bruno.page.getByText("Libros que recomienda").waitFor();
+  await bruno.page.goto(`${APP}/miembros/${ana.username}?ver=libros`);
   await bruno.page.getByRole("link", { name: title }).first().waitFor();
   await bruno.page.goto(`${APP}/libros?area=cosmos&nivel=intermediate`);
   await bruno.page.getByRole("link", { name: title }).first().waitFor();

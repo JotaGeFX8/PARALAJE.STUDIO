@@ -356,13 +356,13 @@ do $$ begin
   insert into public.books (slug, title, authors) values ('libro-directo', 'Libro directo', 'Nadie');
   raise exception 'FALLO: alta directa de libros';
 exception when insufficient_privilege then raise notice 'OK los libros solo se crean con una recomendación'; end $$;
-select public.recommend_book(p_title => 'Cosmos', p_authors => 'Carl Sagan', p_body => 'Un clásico de la divulgación que cambia la forma de mirar el cielo.', p_level => 'intro', p_rating => 5::smallint) as book_slug \gset
+select public.recommend_book(p_title => 'Lectura segura', p_authors => 'Autoría de prueba', p_body => 'Un clásico de la divulgación que cambia la forma de mirar el cielo.', p_level => 'intro', p_rating => 5::smallint) as book_slug \gset
 do $$ begin
-  if public.recommend_book(p_title => 'COSMOS', p_authors => 'carl  sagan', p_body => 'Lo releo y lo vuelvo a recomendar, sigue vigente.', p_level => 'intro')
-     <> (select slug from public.books where title = 'Cosmos') then
+  if public.recommend_book(p_title => 'LECTURA SEGURA', p_authors => 'autoria  de prueba', p_body => 'Lo releo y lo vuelvo a recomendar, sigue vigente.', p_level => 'intro')
+     <> (select slug from public.books where title = 'Lectura segura') then
     raise exception 'FALLO: ficha duplicada';
   end if;
-  if (select rec_count from public.books where title = 'Cosmos') <> 1 then raise exception 'FALLO: recomendación duplicada'; end if;
+  if (select rec_count from public.books where title = 'Lectura segura') <> 1 then raise exception 'FALLO: recomendación duplicada'; end if;
   raise notice 'OK sin fichas duplicadas y una recomendación por persona';
 end $$;
 do $$ begin
@@ -370,7 +370,7 @@ do $$ begin
     p_cover_path => 'a0000000-0000-4000-8000-000000000002/libro.webp');
   raise exception 'FALLO: portada ajena';
 exception when invalid_parameter_value then raise notice 'OK la portada de un libro es un archivo propio'; end $$;
-select public.set_book_shelf((select id from public.books where title = 'Cosmos'), 'want');
+select public.set_book_shelf((select id from public.books where title = 'Lectura segura'), 'want');
 do $$ begin
   insert into public.book_recommendation_votes (recommendation_id, user_id)
   select id, auth.uid() from public.book_recommendations where user_id = auth.uid() limit 1;
@@ -383,24 +383,58 @@ set local role authenticated;
 set local request.jwt.claim.sub = :bea;
 do $$ declare n int; begin
   if exists (select 1 from public.book_shelves) then raise exception 'FALLO: estantería ajena visible'; end if;
-  if (select want from public.book_shelf_counts((select id from public.books where title = 'Cosmos'))) <> 1 then raise exception 'FALLO: totales'; end if;
+  if (select want from public.book_shelf_counts((select id from public.books where title = 'Lectura segura'))) <> 1 then raise exception 'FALLO: totales'; end if;
   update public.book_recommendations set body = 'Texto cambiado por otra persona, no debería poder.' where user_id <> auth.uid();
   get diagnostics n = row_count;
   if n <> 0 then raise exception 'FALLO: edita recomendación ajena'; end if;
   raise notice 'OK estanterías privadas (solo totales) y recomendaciones ajenas protegidas';
 end $$;
 do $$ begin
-  perform public.update_book((select id from public.books where title = 'Cosmos'), 'Cosmos 2', 'Carl Sagan');
+  perform public.update_book((select id from public.books where title = 'Lectura segura'), 'Lectura segura 2', 'Autoría de prueba');
   raise exception 'FALLO: corrige ficha ajena';
 exception when insufficient_privilege then raise notice 'OK solo quien creó la ficha o el equipo la corrigen'; end $$;
 insert into public.book_recommendation_votes (recommendation_id, user_id)
-select id, auth.uid() from public.book_recommendations where book_id = (select id from public.books where title = 'Cosmos');
+select id, auth.uid() from public.book_recommendations where book_id = (select id from public.books where title = 'Lectura segura');
 do $$ begin
-  if (select helpful_count from public.book_recommendations where book_id = (select id from public.books where title = 'Cosmos')) <> 1 then
+  if (select helpful_count from public.book_recommendations where book_id = (select id from public.books where title = 'Lectura segura')) <> 1 then
     raise exception 'FALLO: contador de útiles';
   end if;
   raise notice 'OK contador de «Me ha sido útil»';
 end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+-- ============================================================ Red social: seguir, públicos y borradores
+set local role authenticated;
+set local request.jwt.claim.sub = :bea;
+insert into public.posts (author_id, body, kind, post_type, image_paths, audience)
+values (:bea, 'Solo para quien me sigue', 'opinion', 'photo', array['a0000000-0000-4000-8000-000000000002/f.webp'], 'followers');
+insert into public.posts (author_id, body, kind, post_type, is_draft) values (:bea, 'Borrador secreto de Bea', 'opinion', 'debate', true);
+do $$ begin
+  insert into public.posts (author_id, body, kind, forum_slug, audience) values (auth.uid(), 'En un foro solo para seguidores', 'opinion', 'agora', 'followers');
+  raise exception 'FALLO: foro con público restringido';
+exception when check_violation then raise notice 'OK solo las publicaciones del perfil eligen su público'; end $$;
+reset role;
+set local request.jwt.claim.sub = '';
+
+set local role authenticated;
+set local request.jwt.claim.sub = :carlos;
+do $$ begin
+  if exists (select 1 from public.posts where body = 'Solo para quien me sigue') then raise exception 'FALLO: visible sin seguir'; end if;
+  if exists (select 1 from public.posts where body = 'Borrador secreto de Bea') then raise exception 'FALLO: borrador ajeno visible'; end if;
+  raise notice 'OK publicaciones para seguidores y borradores ocultos a terceros';
+end $$;
+insert into public.member_follows (follower_id, followed_id) values (:carlos, :bea);
+do $$ begin
+  if not exists (select 1 from public.posts where body = 'Solo para quien me sigue') then raise exception 'FALLO: seguidor no la ve'; end if;
+  if exists (select 1 from public.posts where body = 'Borrador secreto de Bea') then raise exception 'FALLO: borrador visible al seguidor'; end if;
+  if (select followers from public.follow_stats('a0000000-0000-4000-8000-000000000002')) < 1 then raise exception 'FALLO: recuento'; end if;
+  raise notice 'OK al seguir se ve lo publicado para seguidores (nunca los borradores)';
+end $$;
+do $$ begin
+  insert into public.member_follows (follower_id, followed_id) values ('a0000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000002');
+  raise exception 'FALLO: seguir en nombre de otra persona';
+exception when insufficient_privilege then raise notice 'OK nadie sigue en nombre de otra persona'; end $$;
 reset role;
 set local request.jwt.claim.sub = '';
 

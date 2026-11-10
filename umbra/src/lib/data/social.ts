@@ -178,6 +178,8 @@ export async function notificationPrefs(userId: string) {
       messages: true,
       circles: true,
       projects: true,
+      follows: true,
+      reactions: true,
       updated_at: "",
     }
   );

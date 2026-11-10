@@ -14,6 +14,7 @@ const SUITES = [
   ["conexiones.mjs", "Conexiones, mensajería y notificaciones"],
   ["grupos.mjs", "Círculos, proyectos y Ágora"],
   ["libros.mjs", "Biblioteca: libros recomendados"],
+  ["red-social.mjs", "Red social: fotos, seguidores y me gusta"],
   ["admin.mjs", "Administración y moderación"],
 ];
 

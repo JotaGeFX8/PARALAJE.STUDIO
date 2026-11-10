@@ -68,7 +68,7 @@ export async function ProfilePage({
 
   let content: React.ReactNode;
   if (tab === "acerca") {
-    content = <ProfileView p={p} bare own={own} privacy={privacy} shared={shared} reasons={reasons} footer={footer} />;
+    content = <ProfileView p={p} bare own={own} privacy={privacy} shared={shared} reasons={reasons} />;
   } else if (!canSeeActivity) {
     content = <p className="py-12 text-center text-[0.9375rem] text-muted">Esta persona solo muestra su actividad a sus conexiones.</p>;
   } else if (tab === "fotos") {
@@ -154,6 +154,7 @@ export async function ProfilePage({
         items={TABS.map((t) => ({ key: t.key, label: t.label, href: t.key === "fotos" ? base : `${base}?ver=${t.key}` }))}
       />
       <div className="mt-5">{content}</div>
+      {footer && <div className="mt-12 border-t hairline pt-4">{footer}</div>}
     </article>
   );
 }

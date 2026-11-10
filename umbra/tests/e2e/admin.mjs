@@ -95,7 +95,7 @@ await runSuite("Administración y moderación", async (browser) => {
   await gema.page.getByRole("button", { name: "Reactivar cuenta" }).click();
   await gema.page.locator("li", { hasText: `@${hugo.username}` }).getByRole("button", { name: "Suspender" }).waitFor();
   await hugo.page.goto(`${APP}/explorar`);
-  await hugo.page.getByRole("heading", { name: /Hola, Hugo/ }).waitFor();
+  await hugo.page.getByText("¿Qué estás explorando, Hugo?").waitFor();
   step("suspensión (acceso bloqueado) y reactivación");
 
   // 4. Roles: Inés pasa a moderación

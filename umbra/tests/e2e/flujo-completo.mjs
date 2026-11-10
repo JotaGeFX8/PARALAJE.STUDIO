@@ -60,18 +60,27 @@ try {
     ctx: { viewport: { width: 1440, height: 900 } },
   });
 
-  // 3. Bruno ve a Ana por afinidad (2 temas en común)
-  const anaLink = bruno.page.getByRole("link", { name: new RegExp(`@ana_${run}.*2 temas en común`) }).first();
+  // 3. Bruno descubre a Ana por afinidad y la sigue
+  await bruno.page.goto(`${APP}/descubrir`);
+  const anaLink = bruno.page.getByRole("link", { name: "Ana Lucero" }).first();
   await anaLink.waitFor();
-  await shot(bruno.page, "explorar-escritorio-bruno");
-  step("afinidad: Bruno ve a Ana con 2 temas en común");
+  await bruno.page.getByText("Compartís 2 intereses").first().waitFor();
+  await shot(bruno.page, "descubrir-escritorio-bruno");
+  step("Descubrir: Bruno ve a Ana con la razón «Compartís 2 intereses»");
   await anaLink.click();
   await bruno.page.waitForURL(`**/miembros/ana_${run}`);
   await bruno.page.getByText("Asturias, España").waitFor();
-  await bruno.page.getByText("Compartís 2 intereses").waitFor();
+  await bruno.page.getByRole("button", { name: "Seguir", exact: true }).click();
+  await bruno.page.getByRole("button", { name: "Siguiendo" }).waitFor();
+  await bruno.page.reload();
+  await bruno.page.getByRole("button", { name: "Siguiendo" }).waitFor();
+  await bruno.page.goto(`${APP}/miembros/ana_${run}?ver=acerca`);
   await bruno.page.getByText("Puede enseñar o ayudar").waitFor();
   await shot(bruno.page, "perfil-ana-visto-por-bruno");
-  step("perfil de otro miembro: ubicación, razones de afinidad y relación con los temas");
+  step("perfil de otro miembro: ubicación, seguir (persistente) y relación con los temas");
+  await ana.page.goto(`${APP}/notificaciones`);
+  await ana.page.getByText(/empezó a seguirte/).first().waitFor();
+  step("aviso «empezó a seguirte»");
 
   // 3b. Privacidad por apartado: Ana oculta su ubicación
   await ana.page.goto(`${APP}/perfil/editar`);
@@ -79,7 +88,7 @@ try {
   await ana.page.getByRole("button", { name: "Guardar cambios" }).click();
   await ana.page.getByText("Perfil actualizado.").waitFor();
   await bruno.page.reload();
-  await bruno.page.getByText("Compartís 2 intereses").waitFor();
+  await bruno.page.getByText("Puede enseñar o ayudar").waitFor();
   assert.equal(await bruno.page.getByText("Asturias, España").count(), 0);
   step("privacidad por apartado: la ubicación «Solo yo» deja de verse");
 

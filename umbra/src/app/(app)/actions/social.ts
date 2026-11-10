@@ -163,7 +163,7 @@ export async function markAllNotificationsReadAction(): Promise<Result> {
   return { ok: true };
 }
 
-const PREF_KEYS = ["comments", "replies", "mentions", "connections", "messages", "circles", "projects"] as const;
+const PREF_KEYS = ["comments", "replies", "mentions", "connections", "messages", "circles", "projects", "follows", "reactions"] as const;
 
 export async function saveNotificationPrefsAction(_: FormState, fd: FormData): Promise<FormState> {
   const { supabase, userId } = await getActionContext();

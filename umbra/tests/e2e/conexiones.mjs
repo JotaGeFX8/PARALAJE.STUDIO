@@ -56,7 +56,7 @@ await runSuite("Conexiones y mensajería", async (browser) => {
   // 3. Carla recibe el aviso y escribe
   await carla.page.goto(`${APP}/notificaciones`);
   await carla.page.getByText("David Orce aceptó tu solicitud de conexión").waitFor();
-  await carla.page.goto(`${APP}/miembros/${david.username}`);
+  await carla.page.goto(`${APP}/miembros/${david.username}?ver=acerca`);
   await carla.page.getByText("Compartís 2 intereses").waitFor();
   await carla.page.getByRole("button", { name: "Mensaje" }).click();
   await carla.page.waitForURL(/\/mensajes\/[0-9a-f-]{36}$/);

@@ -13,6 +13,8 @@ const ITEMS = [
   ["messages", "Mensajes privados"],
   ["circles", "Invitaciones y solicitudes de círculos"],
   ["projects", "Actividad en mis proyectos"],
+  ["follows", "Nuevos seguidores"],
+  ["reactions", "«Me gusta» en mis publicaciones"],
 ] as const;
 
 export function NotificationPrefsForm({ prefs }: { prefs: Record<(typeof ITEMS)[number][0], boolean> }) {

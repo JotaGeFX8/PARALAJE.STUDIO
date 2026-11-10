@@ -173,12 +173,12 @@ await runSuite("Círculos, proyectos y Ágora", async (browser) => {
   await shot(felix.page, "agora-movil");
   step("Ágora: publicación rápida, filtros «Preguntas» y «Sin responder»");
 
-  // 6. Explorar y búsqueda reflejan círculos y proyectos
+  // 6. Inicio, Descubrir y búsqueda reflejan círculos y proyectos
   await elena.page.goto(`${APP}/explorar`);
   await elena.page.getByRole("heading", { name: "Círculos activos" }).waitFor();
-  await elena.page.getByRole("link", { name: projectTitle }).first().waitFor();
-  await elena.page.getByRole("heading", { name: "Actividad de la comunidad" }).waitFor();
-  await shot(elena.page, "explorar-escritorio", true);
+  await elena.page.goto(`${APP}/descubrir`);
+  await elena.page.getByRole("heading", { name: "Espacios de la comunidad" }).waitFor();
+  await shot(elena.page, "descubrir-escritorio", true);
   await elena.page.goto(`${APP}/buscar?q=${encodeURIComponent(`Astronomía de patio ${RUN}`)}&en=circulos`);
   await elena.page.getByRole("link", { name: new RegExp(publicName) }).waitFor();
   await elena.page.goto(`${APP}/buscar?q=${encodeURIComponent("Huerto comunitario")}&en=proyectos`);

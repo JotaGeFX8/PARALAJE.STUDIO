@@ -52,6 +52,10 @@ function describe(n: NotificationRow, actor: string): { text: React.ReactNode; h
       return { text: <>Te han aceptado en el proyecto {quote}</>, href: `/proyectos/${n.project_id}` };
     case "project_update":
       return { text: <>Novedades en el proyecto {quote}</>, href: `/proyectos/${n.project_id}` };
+    case "follow":
+      return { text: <>{actor} empezó a seguirte</>, href: `/miembros/${n.actor?.username ?? ""}` };
+    case "reaction":
+      return { text: <>A {actor} le ha gustado tu publicación</>, href: post };
     case "moderation":
     default:
       return { text: <>{n.body || "Aviso del equipo de moderación"}</>, href: "/notificaciones" };
