@@ -46,7 +46,9 @@ export default async function PostPage({ params, searchParams }: Props) {
   const authorName = author?.display_name ?? author?.username ?? "Miembro";
   const crumbs = post.circle_id
     ? [{ href: `/circulos/${post.circle_id}`, label: "Círculo" }]
-    : [
+    : !post.forum
+      ? [{ href: "/explorar", label: "Inicio" }]
+      : [
         { href: `/comunidad/${post.forum?.slug ?? "agora"}`, label: post.forum?.name ?? "Ágora" },
         ...(post.category ? [{ href: `/comunidad/${post.forum?.slug}/${post.category.slug}`, label: post.category.name }] : []),
       ];
@@ -80,7 +82,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       <header>
         <div className="flex flex-wrap items-center gap-2">
           <TypeBadge type={post.post_type} />
-          <KindBadge kind={post.kind} />
+          {post.post_type !== "photo" && <KindBadge kind={post.kind} />}
           {post.is_pinned && (
             <span className="flex items-center gap-1 text-xs text-accent">
               <IconPin size={14} /> Fijada
@@ -111,12 +113,39 @@ export default async function PostPage({ params, searchParams }: Props) {
         </div>
       </header>
 
-      <div className={post.title ? "mt-9" : "mt-6"}>
-        <RichText text={post.body} className={`prose-doc ${post.title ? "" : "!text-[1.1875rem]"}`} />
-      </div>
-
+      {post.post_type === "photo" ? (
+        <>
+          {post.images.length > 0 && (
+            <div className="mt-6 max-sm:-mx-5">
+              <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto sm:rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {post.images.map((img, i) => (
+                  <a key={img.path} href={img.url} target="_blank" rel="noopener" className="relative aspect-[4/5] w-full shrink-0 snap-center bg-surface-2 sm:w-[85%]">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada temporal del bucket privado */}
+                    <img src={img.url} alt={post.image_alt || `Foto ${i + 1} de ${post.images.length}`} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 h-full w-full object-cover" />
+                    {post.images.length > 1 && (
+                      <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2 py-0.5 font-mono text-xs text-white">
+                        {i + 1}/{post.images.length}
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+              {post.images.length > 1 && <p className="mt-2 text-center text-xs text-muted">Desliza para ver todas las fotos</p>}
+            </div>
+          )}
+          {post.body.trim() && (
+            <div className="mt-5">
+              <RichText text={post.body} className="prose-doc" />
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className={post.title ? "mt-9" : "mt-6"}>
+            <RichText text={post.body} className={`prose-doc ${post.title ? "" : "!text-[1.1875rem]"}`} />
+          </div>
       {post.images.length > 0 &&
-        (post.post_type === "photo" || post.images.length > 2 ? (
+        (post.images.length > 2 ? (
           <div className="mt-8 max-sm:-mx-5">
             <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto sm:rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {post.images.map((img, i) => (
@@ -143,6 +172,9 @@ export default async function PostPage({ params, searchParams }: Props) {
             ))}
           </div>
         ))}
+
+        </>
+      )}
 
       {post.poll && (
         <PollWidget
