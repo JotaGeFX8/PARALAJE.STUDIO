@@ -161,7 +161,7 @@ export async function ForumView({
         </div>
 
         <aside className="space-y-8 xl:sticky xl:top-8 xl:self-start">
-          <div className="rounded-sm bg-surface-2 p-5">
+          <div className="rounded-xl bg-surface-2 p-5">
             <p className="label mb-3">Normas de {forum.name}</p>
             <ul className="space-y-2 text-[0.9375rem] leading-relaxed text-ink-2">
               {forum.rules

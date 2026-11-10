@@ -111,7 +111,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       {post.images.length > 0 && (
         <div className={`mt-8 grid gap-2 ${post.images.length > 1 ? "grid-cols-2" : ""}`}>
           {post.images.map((img) => (
-            <a key={img.path} href={img.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-sm border border-line bg-surface-2">
+            <a key={img.path} href={img.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl border border-line bg-surface-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada temporal del bucket privado */}
               <img src={img.url} alt="" loading="lazy" className="max-h-[32rem] w-full object-cover" />
             </a>
@@ -137,7 +137,7 @@ export default async function PostPage({ params, searchParams }: Props) {
                 <a
                   href={a.url ?? undefined}
                   rel="noopener nofollow"
-                  className="flex items-center gap-3 rounded-sm border border-line px-3.5 py-3 transition-colors hover:border-accent-mid"
+                  className="flex items-center gap-3 rounded-xl border border-line px-3.5 py-3 transition-colors hover:border-accent-mid"
                 >
                   <IconFile size={20} className="shrink-0 text-muted" />
                   <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-ink">{a.name}</span>
@@ -151,7 +151,7 @@ export default async function PostPage({ params, searchParams }: Props) {
       )}
 
       {post.sources.length > 0 && (
-        <section className="mt-9 rounded-sm bg-surface-2 p-5">
+        <section className="mt-9 rounded-xl bg-surface-2 p-5">
           <h2 className="label mb-3">Fuentes</h2>
           <ol className="list-decimal space-y-1.5 pl-5 text-[0.9375rem] text-ink-2 marker:text-muted">
             {post.sources.map((s, i) => (
@@ -211,7 +211,7 @@ export default async function PostPage({ params, searchParams }: Props) {
         </div>
         <div className="mt-5">
           {post.is_locked ? (
-            <p className="rounded-sm bg-surface-2 p-4 text-sm text-ink-2">El equipo de moderación ha cerrado esta conversación.</p>
+            <p className="rounded-xl bg-surface-2 p-4 text-sm text-ink-2">El equipo de moderación ha cerrado esta conversación.</p>
           ) : canWrite ? (
             <CommentForm postId={post.id} />
           ) : (

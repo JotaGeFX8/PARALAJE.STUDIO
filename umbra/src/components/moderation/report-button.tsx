@@ -31,7 +31,7 @@ export function ReportButton({
       </button>
       <dialog
         ref={ref}
-        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-sm border border-line-2 bg-surface p-0 text-ink shadow-xl backdrop:bg-ink/30"
+        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl border border-line-2 bg-surface p-0 text-ink shadow-xl backdrop:bg-ink/30"
         onClick={(e) => e.target === ref.current && ref.current?.close()}
       >
         <div className="p-6 sm:p-7">

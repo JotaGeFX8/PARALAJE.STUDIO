@@ -9,7 +9,7 @@ import { IconCircles, IconLock, IconProjects } from "@/components/ui/icons";
 function Cover({ path, icon }: { path: string | null; icon: React.ReactNode }) {
   const url = coverUrl(path);
   return (
-    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-sm bg-surface-2">
+    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-surface-2">
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element -- imagen ya reducida al subir
         <img src={url} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />

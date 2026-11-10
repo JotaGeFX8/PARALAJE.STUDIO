@@ -64,7 +64,7 @@ export default async function ComunidadPage() {
         </ol>
 
         <aside className="space-y-10">
-          <Link href="/libros" className="group block rounded-sm border border-line-2 p-5 transition-colors hover:border-accent-mid">
+          <Link href="/libros" className="group block rounded-xl border border-line-2 p-5 transition-colors hover:border-accent-mid">
             <p className="label">Biblioteca</p>
             <p className="mt-2 font-serif text-xl text-ink group-hover:text-accent">Libros recomendados por la comunidad</p>
             <p className="mt-1 text-sm text-muted">Con el porqué, el nivel de lectura y tu estantería personal.</p>
@@ -83,7 +83,7 @@ export default async function ComunidadPage() {
               <p className="text-sm text-muted">Aún no hay etiquetas este mes.</p>
             )}
           </div>
-          <div className="rounded-sm bg-surface-2 p-5 text-sm leading-relaxed text-ink-2">
+          <div className="rounded-xl bg-surface-2 p-5 text-sm leading-relaxed text-ink-2">
             <p className="font-medium text-ink">Antes de publicar</p>
             <p className="mt-2">
               Elige el tipo (debate, pregunta, investigación, recurso, encuesta…) y clasifica tu aportación: hecho

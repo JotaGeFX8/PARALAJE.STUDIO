@@ -38,7 +38,7 @@ export function CoverUploader({ initialPath }: { initialPath: string | null }) {
         type="button"
         onClick={() => input.current?.click()}
         disabled={pending}
-        className="relative flex aspect-[3/1] w-full items-center justify-center overflow-hidden rounded-sm border border-dashed border-line-2 bg-surface-2 text-muted transition-colors hover:border-accent-mid hover:text-accent"
+        className="relative flex aspect-[3/1] w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-line-2 bg-surface-2 text-muted transition-colors hover:border-accent-mid hover:text-accent"
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element -- imagen servida desde /media

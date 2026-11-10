@@ -52,7 +52,7 @@ export function ProfileView({
       {p.cover_url && (
         <div className="relative mb-16 sm:mb-20">
           {/* eslint-disable-next-line @next/next/no-img-element -- imagen servida desde /media */}
-          <img src={p.cover_url} alt="" className="aspect-[5/2] w-full rounded-sm object-cover sm:aspect-[4/1]" />
+          <img src={p.cover_url} alt="" className="aspect-[5/2] w-full rounded-xl object-cover sm:aspect-[4/1]" />
           <div className="absolute -bottom-12 left-4 rounded-full ring-4 ring-canvas sm:-bottom-14 sm:left-6">
             <Avatar url={p.avatar_url} name={name} size={104} />
           </div>
@@ -202,7 +202,7 @@ export function ProfileView({
               <h2 className="label mb-3">Habilidades</h2>
               <ul className="flex flex-wrap gap-1.5">
                 {p.skills.map((s) => (
-                  <li key={s} className="rounded-sm bg-surface-2 px-2.5 py-1 text-sm text-ink-2">
+                  <li key={s} className="rounded-xl bg-surface-2 px-2.5 py-1 text-sm text-ink-2">
                     {s}
                   </li>
                 ))}

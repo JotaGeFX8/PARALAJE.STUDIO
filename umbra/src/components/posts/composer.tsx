@@ -234,7 +234,7 @@ export function Composer({
             return (
               <label
                 key={t.key}
-                className={`flex cursor-pointer flex-col rounded-sm border p-3 transition-colors ${
+                className={`flex cursor-pointer flex-col rounded-xl border p-3 transition-colors ${
                   type === t.key ? "border-accent-mid bg-accent-faint" : "border-line-2 hover:border-accent-mid"
                 } ${disabled ? "pointer-events-none opacity-40" : ""}`}
               >
@@ -276,7 +276,7 @@ export function Composer({
 
       {/* Encuesta */}
       {type === "poll" && !pollLocked && (
-        <fieldset className="rounded-sm border border-line-2 p-4 sm:p-5">
+        <fieldset className="rounded-xl border border-line-2 p-4 sm:p-5">
           <legend className="label px-1">Opciones de la encuesta · de 2 a 10</legend>
           <div className="space-y-2">
             {pollOptions.map((o, i) => (
@@ -364,7 +364,7 @@ export function Composer({
           {EPISTEMIC_KINDS.map((k) => (
             <label
               key={k.key}
-              className={`flex cursor-pointer gap-3 rounded-sm border p-3.5 transition-colors ${
+              className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors ${
                 kind === k.key ? "border-accent-mid bg-accent-faint" : "border-line-2 hover:border-accent-mid"
               }`}
             >
@@ -451,7 +451,7 @@ export function Composer({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={processing}
-              className="grid h-24 w-24 place-items-center rounded-sm border border-dashed border-line-2 text-muted transition-colors hover:border-accent-mid hover:text-accent"
+              className="grid h-24 w-24 place-items-center rounded-xl border border-dashed border-line-2 text-muted transition-colors hover:border-accent-mid hover:text-accent"
             >
               <span className="flex flex-col items-center gap-1 text-xs">
                 <IconImage size={22} />
@@ -609,7 +609,7 @@ function TagField({
 
 function FileLine({ name, size, onRemove }: { name: string; size: number; onRemove: () => void }) {
   return (
-    <li className="flex items-center gap-3 rounded-sm border border-line px-3 py-2">
+    <li className="flex items-center gap-3 rounded-xl border border-line px-3 py-2">
       <IconFile size={18} className="shrink-0 text-muted" />
       <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-ink">{name}</span>
       <span className="shrink-0 font-mono text-xs text-muted">{fileSize(size)}</span>
@@ -622,7 +622,7 @@ function FileLine({ name, size, onRemove }: { name: string; size: number; onRemo
 
 function Thumb({ url, onRemove }: { url: string; onRemove: () => void }) {
   return (
-    <div className="relative h-24 w-24 overflow-hidden rounded-sm border border-line">
+    <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-line">
       {/* eslint-disable-next-line @next/next/no-img-element -- vista previa local */}
       <img src={url} alt="" className="h-full w-full object-cover" />
       <button

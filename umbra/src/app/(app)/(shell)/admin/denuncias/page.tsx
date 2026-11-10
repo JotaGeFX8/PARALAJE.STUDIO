@@ -78,7 +78,7 @@ export default async function DenunciasPage({ searchParams }: { searchParams: Pr
                   </span>
                 </div>
                 {r.details && <p className="mt-2 text-[0.9375rem] italic text-ink-2">«{r.details}»</p>}
-                <div className="mt-3 rounded-sm bg-surface-2 p-4">
+                <div className="mt-3 rounded-xl bg-surface-2 p-4">
                   {p ? (
                     <>
                       <p className="text-sm font-medium text-ink">

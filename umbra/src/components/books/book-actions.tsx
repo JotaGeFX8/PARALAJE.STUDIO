@@ -140,7 +140,7 @@ export function RecommendationFields({
         <legend className="label mb-3">Nivel de lectura</legend>
         <div className="grid gap-2 sm:grid-cols-3">
           {BOOK_LEVELS.map((l) => (
-            <label key={l.key} className="flex cursor-pointer gap-3 rounded-sm border border-line-2 p-3 has-[:checked]:border-accent-mid has-[:checked]:bg-accent-faint">
+            <label key={l.key} className="flex cursor-pointer gap-3 rounded-xl border border-line-2 p-3 has-[:checked]:border-accent-mid has-[:checked]:bg-accent-faint">
               <input type="radio" name="level" value={l.key} defaultChecked={(initial?.level ?? "intro") === l.key} className="mt-1" />
               <span>
                 <span className="block text-[0.9375rem] font-medium text-ink">{l.label}</span>

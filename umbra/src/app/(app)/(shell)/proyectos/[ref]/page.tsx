@@ -53,7 +53,7 @@ export default async function ProyectoPage({ params }: Props) {
       </p>
       {cover && (
         // eslint-disable-next-line @next/next/no-img-element -- portada ya reducida
-        <img src={cover} alt="" className="mb-8 aspect-[16/7] w-full rounded-sm object-cover" />
+        <img src={cover} alt="" className="mb-8 aspect-[16/7] w-full rounded-xl object-cover" />
       )}
 
       <header className="border-b hairline pb-8">
@@ -99,7 +99,7 @@ export default async function ProyectoPage({ params }: Props) {
             </section>
           )}
           {project.seeking && (
-            <section className="rounded-sm bg-surface-2 p-6">
+            <section className="rounded-xl bg-surface-2 p-6">
               <h2 className="label mb-3">Qué ayuda buscan</h2>
               <p className="font-serif text-lg leading-relaxed text-ink">{project.seeking}</p>
             </section>
@@ -187,7 +187,7 @@ export default async function ProyectoPage({ params }: Props) {
                   {requests.map((r) => {
                     const name = r.person?.display_name ?? r.person?.username ?? "Miembro";
                     return (
-                      <li key={r.id} className="rounded-sm border border-line-2 p-4">
+                      <li key={r.id} className="rounded-xl border border-line-2 p-4">
                         <Link href={`/miembros/${r.person?.username}`} className="flex items-center gap-3">
                           <Avatar url={r.person?.avatar_url} name={name} size={32} />
                           <span className="text-ink">{name}</span>

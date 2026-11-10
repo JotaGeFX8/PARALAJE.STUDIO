@@ -24,7 +24,7 @@ function NavLink({ item, path }: { item: Item; path: string }) {
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`group relative flex items-center gap-3.5 rounded-sm py-2 pl-4 pr-3 text-[0.9375rem] transition-colors duration-200 ${
+      className={`group relative flex items-center gap-3.5 rounded-xl py-2 pl-4 pr-3 text-[0.9375rem] transition-colors duration-200 ${
         active ? "bg-surface-2 text-ink" : "text-ink-2 hover:bg-surface-2/60 hover:text-ink"
       }`}
     >

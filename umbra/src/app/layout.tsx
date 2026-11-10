@@ -35,16 +35,25 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f4ee",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f9f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#111713" },
+  ],
+  colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
+const THEME_SCRIPT = `try{var m=document.cookie.match(/(?:^|; )umbra-theme=(light|dark|system)/);if(m)document.documentElement.setAttribute("data-theme",m[1])}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="es" data-theme="light" suppressHydrationWarning className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
+      <head>
+        {/* Aplica el tema elegido antes de pintar (sin parpadeo). La preferencia vive en la cuenta y se copia en una cookie. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>
         {children}
         {DEMO_NOTICE && (

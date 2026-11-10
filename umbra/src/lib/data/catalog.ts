@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { TopicRelation, UserGoal, Visibility } from "@/lib/supabase/types";
+import type { ThemeKey } from "@/lib/theme";
 
 /** Catálogo de intereses: 22 áreas → temas (con sinónimos para el buscador). */
 export type CatalogArea = { slug: string; name: string; description: string };
@@ -59,7 +60,7 @@ export async function getMyCatalogState(userId: string) {
     supabase.from("profile_topics").select("topic_id, relation, is_primary").eq("profile_id", userId),
     supabase.from("profile_goals").select("goal").eq("profile_id", userId),
     supabase.from("profile_privacy").select("location, about, interests, activity, network").eq("profile_id", userId).maybeSingle(),
-    supabase.from("user_settings").select("who_can_message, read_receipts").eq("profile_id", userId).maybeSingle(),
+    supabase.from("user_settings").select("who_can_message, read_receipts, theme").eq("profile_id", userId).maybeSingle(),
   ]);
   return {
     topics: (topics ?? []) as MyTopic[],
@@ -74,6 +75,7 @@ export async function getMyCatalogState(userId: string) {
     settings: {
       who_can_message: (settings?.who_can_message ?? "everyone") as "everyone" | "connections",
       read_receipts: settings?.read_receipts ?? true,
+      theme: (settings?.theme ?? "light") as ThemeKey,
     },
   };
 }

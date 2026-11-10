@@ -42,3 +42,15 @@ export async function deleteAccountAction(_: FormState, formData: FormData): Pro
   await supabase.auth.signOut();
   redirect("/?cuenta=eliminada");
 }
+
+/** Guarda el tema elegido en la cuenta (claro, oscuro o automático). */
+export async function saveThemeAction(theme: string): Promise<{ ok: boolean; message?: string }> {
+  if (!["light", "dark", "system"].includes(theme)) return { ok: false, message: "Tema no válido." };
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return { ok: false, message: "Sesión caducada." };
+  const { error } = await supabase
+    .from("user_settings")
+    .upsert({ profile_id: data.user.id, theme, updated_at: new Date().toISOString() }, { onConflict: "profile_id" });
+  return error ? { ok: false, message: "No se pudo guardar el tema." } : { ok: true };
+}

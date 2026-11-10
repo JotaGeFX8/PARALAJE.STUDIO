@@ -88,7 +88,7 @@ export function BookForm({
         />
         {e.title && <p className="mt-2 text-sm text-danger">{e.title}</p>}
         {matches.length > 0 && (
-          <div className="mt-3 rounded-sm bg-surface-2 p-4" aria-live="polite">
+          <div className="mt-3 rounded-xl bg-surface-2 p-4" aria-live="polite">
             <p className="text-sm text-ink-2">¿Es alguno de estos? Si ya está en la biblioteca, añade tu recomendación en su ficha:</p>
             <ul className="mt-2 space-y-1.5">
               {matches.map((m) => (

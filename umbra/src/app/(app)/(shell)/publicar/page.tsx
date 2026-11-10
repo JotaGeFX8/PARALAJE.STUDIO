@@ -49,7 +49,7 @@ export default async function PublicarPage({
     <div className="max-w-3xl">
       <PageHeader eyebrow="Nueva publicación" title="Comparte algo" lead="Un debate, una pregunta, una investigación, un recurso o una encuesta. Lo que aportes, clasifícalo con honestidad." />
       {forum?.rules && (
-        <details className="mb-8 rounded-sm bg-surface-2 p-4 text-sm text-ink-2">
+        <details className="mb-8 rounded-xl bg-surface-2 p-4 text-sm text-ink-2">
           <summary className="cursor-pointer font-medium text-ink">Normas de {forum.name}</summary>
           <p className="mt-2 whitespace-pre-line leading-relaxed">{forum.rules}</p>
         </details>

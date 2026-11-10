@@ -33,7 +33,7 @@ export function DiscoverDeck({ cards }: { cards: MemberCard[] }) {
 
   if (!card) {
     return (
-      <div className="rounded-sm border border-line-2 bg-surface p-8 text-center">
+      <div className="rounded-xl border border-line-2 bg-surface p-8 text-center">
         <p className="font-serif text-2xl text-ink">Has visto a todas las personas afines por ahora.</p>
         <p className="mx-auto mt-3 max-w-md text-[0.9375rem] text-muted">
           {flash ? `${flash} ` : ""}Vuelve más tarde: cada semana llegan miembros nuevos. Mientras, puedes usar el buscador con filtros.
@@ -59,7 +59,7 @@ export function DiscoverDeck({ cards }: { cards: MemberCard[] }) {
         )}
       </div>
 
-      <article key={card.id} className="animate-rise rounded-sm border border-line-2 bg-surface p-6 sm:p-8">
+      <article key={card.id} className="animate-rise rounded-xl border border-line-2 bg-surface p-6 sm:p-8">
         <header className="flex items-start gap-5">
           <Avatar url={card.avatar_url} name={card.display_name} size={84} />
           <div className="min-w-0">

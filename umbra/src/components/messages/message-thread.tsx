@@ -141,7 +141,7 @@ export function MessageThread({
           </button>
         </form>
       ) : (
-        <p className="rounded-sm bg-surface-2 p-4 text-sm text-ink-2">
+        <p className="rounded-xl bg-surface-2 p-4 text-sm text-ink-2">
           No podéis escribiros ahora: la conexión ya no existe o hay un bloqueo. El historial se conserva.
         </p>
       )}

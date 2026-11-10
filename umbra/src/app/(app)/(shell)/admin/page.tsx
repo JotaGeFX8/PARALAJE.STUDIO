@@ -15,7 +15,7 @@ export default async function AdminPage() {
   ];
   return (
     <div className="space-y-14">
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-sm border hairline bg-line sm:grid-cols-3 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border hairline bg-line sm:grid-cols-3 lg:grid-cols-4">
         {figures.map((f) => {
           const inner = (
             <>

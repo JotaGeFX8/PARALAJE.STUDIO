@@ -34,7 +34,7 @@ export function PollWidget({ postId, poll, canVote, canClose }: { postId: string
   }
 
   return (
-    <section aria-labelledby={`poll-${postId}`} className="mt-9 rounded-sm border border-line-2 p-5">
+    <section aria-labelledby={`poll-${postId}`} className="mt-9 rounded-xl border border-line-2 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id={`poll-${postId}`} className="label flex items-center gap-2">
           <IconPoll size={16} /> Encuesta · {poll.multiple ? "varias respuestas" : "una respuesta"}
@@ -74,7 +74,7 @@ export function PollWidget({ postId, poll, canVote, canClose }: { postId: string
             {poll.options.map((o) => (
               <label
                 key={o.id}
-                className={`flex cursor-pointer items-center gap-3 rounded-sm border px-3.5 py-3 text-[0.9375rem] transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-3 text-[0.9375rem] transition-colors ${
                   choice.includes(o.id) ? "border-accent-mid bg-accent-faint" : "border-line-2 hover:border-accent-mid"
                 }`}
               >

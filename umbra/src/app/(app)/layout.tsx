@@ -1,6 +1,9 @@
 import { requireMember } from "@/lib/auth";
 import { Wordmark } from "@/components/ui/logo";
 import { SignOutButton } from "@/components/shell/sign-out";
+import { ThemeSync } from "@/components/shell/theme-sync";
+import { createClient } from "@/lib/supabase/server";
+import type { ThemeKey } from "@/lib/theme";
 
 /**
  * Zona privada. Segunda barrera tras el proxy: verifica la sesión contra
@@ -24,5 +27,12 @@ export default async function PrivateLayout({ children }: { children: React.Reac
       </main>
     );
   }
-  return children;
+  const supabase = await createClient();
+  const { data: settings } = await supabase.from("user_settings").select("theme").eq("profile_id", profile.id).maybeSingle();
+  return (
+    <>
+      <ThemeSync theme={(settings?.theme ?? "light") as ThemeKey} />
+      {children}
+    </>
+  );
 }

@@ -176,7 +176,7 @@ export function TopicPicker({
                 ))}
               </ul>
             ) : (
-              <div className="space-y-4 rounded-sm bg-surface-2 p-4">
+              <div className="space-y-4 rounded-xl bg-surface-2 p-4">
                 {visibleSuggestions.length > 0 && (
                   <div>
                     <p className="text-sm text-ink-2">¿Quizá buscabas…?</p>
@@ -291,7 +291,7 @@ export function TopicRelations({
 
   if (!chosen.length) {
     return (
-      <div className="rounded-sm bg-surface-2 p-5 text-[0.9375rem] text-ink-2">
+      <div className="rounded-xl bg-surface-2 p-5 text-[0.9375rem] text-ink-2">
         Aún no has elegido temas.
         {onPickMore && (
           <button type="button" className="link ml-1" onClick={onPickMore}>

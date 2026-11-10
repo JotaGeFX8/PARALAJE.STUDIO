@@ -78,7 +78,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
       </header>
 
       {welcome && (
-        <section className="mb-10 rounded-sm bg-surface-2 p-6 md:p-8">
+        <section className="mb-10 rounded-xl bg-surface-2 p-6 md:p-8">
           {settings.welcome_message && (
             <p className="mb-5 whitespace-pre-line border-l-2 border-accent pl-4 font-serif text-lg leading-relaxed text-ink-2">
               {settings.welcome_message}
@@ -103,7 +103,7 @@ export default async function ExplorarPage({ searchParams }: { searchParams: Pro
       )}
 
       {/* Accesos a las áreas */}
-      <nav aria-label={`Áreas de ${BRAND.name}`} className="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-sm border hairline bg-line sm:grid-cols-3 lg:grid-cols-6">
+      <nav aria-label={`Áreas de ${BRAND.name}`} className="mb-12 grid grid-cols-2 gap-px overflow-hidden rounded-xl border hairline bg-line sm:grid-cols-3 lg:grid-cols-6">
         {[...AREAS.slice(1), PROFILE_AREA].map((a) => {
           const Icon = a.icon;
           return (

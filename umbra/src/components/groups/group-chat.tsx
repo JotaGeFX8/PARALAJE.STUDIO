@@ -102,7 +102,7 @@ export function GroupChat({
             <li key={m.id}>
               {showDay && <p className="label my-5">{day}</p>}
               <article
-                className={`group flex gap-3 rounded-sm px-2 py-1.5 ${m.is_update ? "my-2 border-l-2 border-accent bg-accent-faint py-3" : ""}`}
+                className={`group flex gap-3 rounded-xl px-2 py-1.5 ${m.is_update ? "my-2 border-l-2 border-accent bg-accent-faint py-3" : ""}`}
               >
                 <span className="w-9 shrink-0">
                   {!sameAuthor && (

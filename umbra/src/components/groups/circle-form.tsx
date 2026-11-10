@@ -73,7 +73,7 @@ export function CircleForm({ initial = {} }: { initial?: Initial }) {
           {(Object.keys(VISIBILITY) as (keyof typeof VISIBILITY)[]).map((k) => (
             <label
               key={k}
-              className={`flex cursor-pointer gap-3 rounded-sm border p-3.5 transition-colors ${
+              className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors ${
                 visibility === k ? "border-accent-mid bg-accent-faint" : "border-line-2 hover:border-accent-mid"
               }`}
             >

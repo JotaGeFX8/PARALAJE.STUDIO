@@ -53,7 +53,7 @@ export default async function CirculoPage({ params, searchParams }: Props) {
       </p>
       {cover && (
         // eslint-disable-next-line @next/next/no-img-element -- portada ya reducida
-        <img src={cover} alt="" className="mb-8 aspect-[16/6] w-full rounded-sm object-cover" />
+        <img src={cover} alt="" className="mb-8 aspect-[16/6] w-full rounded-xl object-cover" />
       )}
       <header className="flex flex-col gap-6 border-b hairline pb-8 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">

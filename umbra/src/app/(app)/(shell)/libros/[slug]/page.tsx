@@ -135,7 +135,7 @@ export default async function LibroPage({ params }: Props) {
           )}
 
           {canWrite && (
-            <div className="mt-12 rounded-sm border border-line-2 p-5 sm:p-7">
+            <div className="mt-12 rounded-xl border border-line-2 p-5 sm:p-7">
               <h2 className="mb-6 font-serif text-xl text-ink">{book.mine ? "Tu recomendación" : "Recomendar este libro"}</h2>
               <RecommendationForm
                 bookId={book.id}
