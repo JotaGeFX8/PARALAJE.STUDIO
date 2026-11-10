@@ -131,7 +131,7 @@ export async function searchTags(q: string) {
 }
 
 const POST_COLUMNS = `
-  id, title, body, kind, post_type, is_question, sources, image_paths, comment_count, reaction_count,
+  id, title, body, kind, post_type, is_draft, audience, image_alt, is_question, sources, image_paths, comment_count, reaction_count,
   is_locked, is_pinned, created_at, edited_at, deleted_at, forum_slug, category_slug, circle_id, author_id,
   author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url),
   category:categories(slug, name),
@@ -252,6 +252,7 @@ export async function getCommentTree(postId: string, order: "oldest" | "valued" 
 export type ReactionState = Record<ReactionType, { total: number; mine: boolean }>;
 
 const EMPTY: ReactionState = {
+  like: { total: 0, mine: false },
   valuable: { total: 0, mine: false },
   curious: { total: 0, mine: false },
   agree: { total: 0, mine: false },

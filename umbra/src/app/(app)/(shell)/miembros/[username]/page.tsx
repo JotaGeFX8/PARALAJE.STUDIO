@@ -3,68 +3,53 @@ import { notFound, redirect } from "next/navigation";
 import { requireOnboardedMember } from "@/lib/auth";
 import { getMemberByUsername } from "@/lib/data/members";
 import { isBlockedByMe, memberCard } from "@/lib/data/social";
-import { getFeed } from "@/lib/data/posts";
-import { ProfileView } from "@/components/profile/profile-view";
+import { followStats } from "@/lib/data/feed";
+import { ProfilePage, parseProfileTab } from "@/components/profile/profile-page";
 import { ConnectButton } from "@/components/social/connect-button";
+import { FollowButton } from "@/components/feed/follow-button";
 import { MemberSafetyActions } from "@/components/social/member-actions";
-import { PostList } from "@/components/posts/post-row";
-import { listBooks } from "@/lib/data/books";
-import { BookGrid } from "@/components/books/book-grid";
 import { USERNAME_RE } from "@/lib/validation/profile";
+import { oneParam } from "@/lib/format";
 
-type Props = { params: Promise<{ username: string }> };
+type Props = { params: Promise<{ username: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   return { title: `@${decodeURIComponent(username)}`, robots: { index: false } };
 }
 
-export default async function MiembroPage({ params }: Props) {
+export default async function MiembroPage({ params, searchParams }: Props) {
   const { username: raw } = await params;
   const username = decodeURIComponent(raw);
   if (!USERNAME_RE.test(username)) notFound();
-
   const { profile } = await requireOnboardedMember();
   if (profile.username?.toLowerCase() === username.toLowerCase()) redirect("/perfil");
 
   const member = await getMemberByUsername(username);
   if (!member) notFound();
-  const [card, blocked, { items }, books] = await Promise.all([
-    memberCard(member.id),
-    isBlockedByMe(profile.id, member.id),
-    // La actividad en el perfil respeta la privacidad elegida (las publicaciones siguen en sus foros).
-    member.visible.activity ? getFeed({ scope: "all", author: member.id, limit: 5 }) : Promise.resolve({ items: [], hasMore: false }),
-    member.visible.activity ? listBooks({ recommendedBy: member.id }, 8) : Promise.resolve({ items: [], hasMore: false }),
-  ]);
+  const tab = parseProfileTab(oneParam((await searchParams).ver));
+  const [card, blocked, stats] = await Promise.all([memberCard(member.id), isBlockedByMe(profile.id, member.id), followStats(member.id)]);
   const name = member.display_name || member.username;
 
   return (
-    <>
-      <ProfileView
-        p={member}
-        shared={card?.shared_topics}
-        reasons={card?.reasons}
-        actions={
-          blocked ? (
-            <span className="label">Has bloqueado a esta persona</span>
-          ) : (
+    <ProfilePage
+      p={member}
+      base={`/miembros/${member.username}`}
+      tab={tab}
+      own={false}
+      shared={card?.shared_topics}
+      reasons={card?.reasons}
+      footer={<MemberSafetyActions otherId={member.id} blocked={blocked} />}
+      actions={
+        blocked ? (
+          <span className="label">Has bloqueado a esta persona</span>
+        ) : (
+          <>
+            <FollowButton profileId={member.id} initial={stats.iFollow} followsMe={stats.followsMe} />
             <ConnectButton otherId={member.id} otherName={name} initial={card?.connection ?? "none"} />
-          )
-        }
-        footer={<MemberSafetyActions otherId={member.id} blocked={blocked} />}
-      />
-      {!blocked && books.items.length > 0 && (
-        <section className="mt-16 max-w-5xl">
-          <h2 className="label mb-5">Libros que recomienda</h2>
-          <BookGrid books={books.items} empty={null} />
-        </section>
-      )}
-      {!blocked && items.length > 0 && (
-        <section className="mt-16 max-w-5xl">
-          <h2 className="label mb-2">Publicaciones recientes</h2>
-          <PostList items={items} empty={null} />
-        </section>
-      )}
-    </>
+          </>
+        )
+      }
+    />
   );
 }

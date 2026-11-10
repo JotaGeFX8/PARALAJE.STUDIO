@@ -259,7 +259,7 @@ export async function setFollowAction(postId: string, on: boolean) {
 
 // ---------------------------------------------------------------- Reacciones
 
-const REACTION_TYPES: ReactionType[] = ["valuable", "curious", "agree", "needs_sources"];
+const REACTION_TYPES: ReactionType[] = ["like", "valuable", "curious", "agree", "needs_sources"];
 
 export async function setReactionAction(target: "post" | "comment", id: string, type: ReactionType, on: boolean) {
   if (!REACTION_TYPES.includes(type)) return { ok: false };

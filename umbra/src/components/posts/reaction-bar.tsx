@@ -4,11 +4,11 @@ import { useState, useTransition } from "react";
 import { setReactionAction } from "@/app/(app)/actions/posts";
 import { REACTIONS } from "@/lib/content";
 import type { ReactionType } from "@/lib/supabase/types";
-import { IconCheck, IconEye, IconQuote, IconSpark } from "@/components/ui/icons";
+import { IconCheck, IconEye, IconHeart, IconQuote, IconSpark } from "@/components/ui/icons";
 
 export type ReactionCounts = Record<ReactionType, { total: number; mine: boolean }>;
 
-const ICONS = { valuable: IconSpark, curious: IconEye, agree: IconCheck, needs_sources: IconQuote } as const;
+const ICONS = { like: IconHeart, valuable: IconSpark, curious: IconEye, agree: IconCheck, needs_sources: IconQuote } as const;
 
 /** Reacciones con actualización inmediata (se revierte si el servidor falla). */
 export function ReactionBar({
@@ -56,9 +56,9 @@ export function ReactionBar({
             onClick={() => toggle(r.key)}
             aria-pressed={s.mine}
             title={r.hint}
-            className={`icon-btn ${s.mine ? "bg-accent-soft !text-accent-strong" : ""}`}
+            className={`icon-btn ${s.mine ? (r.key === "like" ? "!text-like" : "bg-accent-soft !text-accent-strong") : ""}`}
           >
-            <Icon size={compact ? 15 : 17} />
+            {r.key === "like" ? <IconHeart size={compact ? 15 : 17} filled={s.mine} /> : <Icon size={compact ? 15 : 17} />}
             {!compact && <span>{r.label}</span>}
             <span className="font-mono text-xs tabular-nums">{s.total > 0 ? s.total : compact ? "" : 0}</span>
             {compact && <span className="sr-only">{r.label}</span>}

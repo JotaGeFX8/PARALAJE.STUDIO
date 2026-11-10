@@ -27,8 +27,11 @@ export function ProfileView({
   reasons,
   own,
   privacy,
+  bare = false,
 }: {
   p: MemberProfile;
+  /** Sin cabecera (la página de perfil ya la muestra): solo la información detallada. */
+  bare?: boolean;
   actions?: React.ReactNode;
   footer?: React.ReactNode;
   shared?: string[];
@@ -49,6 +52,8 @@ export function ProfileView({
 
   return (
     <article className="max-w-5xl">
+      {!bare && (
+        <>
       {p.cover_url && (
         <div className="relative mb-16 sm:mb-20">
           {/* eslint-disable-next-line @next/next/no-img-element -- imagen servida desde /media */}
@@ -76,6 +81,8 @@ export function ProfileView({
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </header>
+        </>
+      )}
 
       {((reasons && reasons.length > 0) || (shared && shared.length > 0)) && (
         <div className="space-y-3 border-b hairline py-5">

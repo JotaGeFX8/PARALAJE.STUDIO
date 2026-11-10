@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { RichText } from "@/components/ui/rich-text";
 import { KindBadge, TypeBadge } from "@/components/posts/kind-badge";
 import { PollWidget } from "@/components/posts/poll-widget";
+import { DraftActions } from "@/components/feed/draft-actions";
 import { ReactionBar } from "@/components/posts/reaction-bar";
 import { PostActions } from "@/components/posts/post-actions";
 import { CommentThread } from "@/components/posts/comment-thread";
@@ -64,6 +65,12 @@ export default async function PostPage({ params, searchParams }: Props) {
           </span>
         ))}
       </nav>
+      {post.is_draft && (
+        <div role="status" className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-accent-soft px-4 py-3 text-sm text-accent-strong">
+          <span>Borrador: solo tú puedes verlo.</span>
+          <DraftActions id={post.id} />
+        </div>
+      )}
       {notice && (
         <p role="alert" className="mb-6 border-l-2 border-danger bg-danger-soft px-4 py-3 text-sm text-ink">
           La publicación se guardó, pero algún archivo no se pudo adjuntar. Puedes intentarlo de nuevo desde «Editar».
@@ -108,16 +115,34 @@ export default async function PostPage({ params, searchParams }: Props) {
         <RichText text={post.body} className={`prose-doc ${post.title ? "" : "!text-[1.1875rem]"}`} />
       </div>
 
-      {post.images.length > 0 && (
-        <div className={`mt-8 grid gap-2 ${post.images.length > 1 ? "grid-cols-2" : ""}`}>
-          {post.images.map((img) => (
-            <a key={img.path} href={img.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl border border-line bg-surface-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada temporal del bucket privado */}
-              <img src={img.url} alt="" loading="lazy" className="max-h-[32rem] w-full object-cover" />
-            </a>
-          ))}
-        </div>
-      )}
+      {post.images.length > 0 &&
+        (post.post_type === "photo" || post.images.length > 2 ? (
+          <div className="mt-8 max-sm:-mx-5">
+            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto sm:rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {post.images.map((img, i) => (
+                <a key={img.path} href={img.url} target="_blank" rel="noopener" className="relative aspect-[4/5] w-full shrink-0 snap-center bg-surface-2 sm:w-[85%]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada temporal del bucket privado */}
+                  <img src={img.url} alt={post.image_alt || `Foto ${i + 1} de ${post.images.length}`} loading={i === 0 ? "eager" : "lazy"} className="absolute inset-0 h-full w-full object-cover" />
+                  {post.images.length > 1 && (
+                    <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2 py-0.5 font-mono text-xs text-white">
+                      {i + 1}/{post.images.length}
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+            {post.images.length > 1 && <p className="mt-2 text-center text-xs text-muted">Desliza para ver todas las fotos</p>}
+          </div>
+        ) : (
+          <div className={`mt-8 grid gap-2 ${post.images.length > 1 ? "grid-cols-2" : ""}`}>
+            {post.images.map((img) => (
+              <a key={img.path} href={img.url} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl border border-line bg-surface-2">
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada temporal del bucket privado */}
+                <img src={img.url} alt={post.image_alt || ""} loading="lazy" className="max-h-[32rem] w-full object-cover" />
+              </a>
+            ))}
+          </div>
+        ))}
 
       {post.poll && (
         <PollWidget

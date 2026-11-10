@@ -23,7 +23,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
 
         {/* Lateral (escritorio) */}
         <aside className="sticky top-0 hidden h-[100dvh] flex-col overflow-y-auto border-r hairline px-3 py-6 md:flex">
-          <Link href="/explorar" aria-label={`${BRAND.name}, explorar`} className="mb-7 px-4 text-ink">
+          <Link href="/explorar" aria-label={`${BRAND.name}, inicio`} className="mb-7 px-4 text-ink">
             <Wordmark />
           </Link>
           <SideNav isStaff={isStaff} />
@@ -42,10 +42,10 @@ export default async function ShellLayout({ children }: { children: React.ReactN
         {/* Cabecera (móvil) */}
         <header className="sticky top-0 z-30 border-b hairline bg-canvas/92 pt-[env(safe-area-inset-top)] backdrop-blur-md md:hidden">
           <div className="flex h-14 items-center justify-between pl-5 pr-3">
-            <Link href="/explorar" aria-label={`${BRAND.name}, explorar`} className="text-ink">
+            <Link href="/explorar" aria-label={`${BRAND.name}, inicio`} className="text-ink">
               <Wordmark />
             </Link>
-            <MobileHeaderActions />
+            <MobileHeaderActions isStaff={isStaff} />
           </div>
         </header>
 
@@ -56,7 +56,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           {children}
         </main>
 
-        <BottomNav />
+        <BottomNav avatar={<Avatar url={profile.avatar_url} name={name} size={26} />} />
       </div>
     </UnreadProvider>
   );

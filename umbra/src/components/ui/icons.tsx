@@ -257,3 +257,36 @@ export const IconBook = (p: P) => (
     <path d="M12 6.5v13" />
   </Base>
 );
+export const IconHeart = (p: P & { filled?: boolean }) => {
+  const { filled, ...rest } = p;
+  return (
+    <Base {...rest}>
+      <path
+        d="M12 20.2s-7.3-4.4-8.8-9.2C2.3 7.9 4.2 4.8 7.4 4.6c1.9-.1 3.4.9 4.6 2.5 1.2-1.6 2.7-2.6 4.6-2.5 3.2.2 5.1 3.3 4.2 6.4-1.5 4.8-8.8 9.2-8.8 9.2Z"
+        fill={filled ? "currentColor" : "none"}
+      />
+    </Base>
+  );
+};
+export const IconHome = (p: P) => (
+  <Base {...p}>
+    <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1Z" />
+  </Base>
+);
+export const IconCompass = (p: P) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M15.2 8.8 13.3 13.3 8.8 15.2 10.7 10.7Z" />
+  </Base>
+);
+export const IconGrid = (p: P) => (
+  <Base {...p}>
+    <rect x="4" y="4" width="16" height="16" rx="1.5" />
+    <path d="M9.3 4v16M14.7 4v16M4 9.3h16M4 14.7h16" />
+  </Base>
+);
+export const IconMenu = (p: P) => (
+  <Base {...p}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </Base>
+);

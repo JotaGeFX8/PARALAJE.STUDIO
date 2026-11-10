@@ -84,8 +84,6 @@ export const PROFILE_AREA: Area = {
   phase: 2,
 };
 
-/** Barra inferior móvil: cinco destinos. */
-export const MOBILE_NAV = [AREAS[0], AREAS[1], AREAS[2], AREAS[5], PROFILE_AREA];
 
 /** Clasificación epistémica de una aportación (lo que se ofrece al publicar). */
 export const EPISTEMIC_KINDS = [
@@ -145,6 +143,8 @@ export const POST_TYPES = [
   { key: "resource", name: "Recurso", description: "Un libro, enlace, herramienta o guía útil." },
   { key: "poll", name: "Encuesta", description: "Una pregunta con opciones para votar." },
   { key: "idea", name: "Idea", description: "Una propuesta para desarrollar entre varias personas." },
+  { key: "photo", name: "Fotografía", description: "Una o varias fotos con su pie." },
+  { key: "exploration", name: "Exploración", description: "Una pregunta o descubrimiento que otras personas amplían con aportaciones y fuentes." },
 ] as const;
 export type PostTypeKey = (typeof POST_TYPES)[number]["key"];
 export const TYPE_BY_KEY = Object.fromEntries(POST_TYPES.map((t) => [t.key, t])) as Record<PostTypeKey, (typeof POST_TYPES)[number]>;
@@ -196,6 +196,7 @@ export const KIND_BY_KEY = Object.fromEntries(
 
 /** Reacciones propias de la comunidad (no «me gusta»). */
 export const REACTIONS = [
+  { key: "like", label: "Me gusta", hint: "Me gusta" },
   { key: "valuable", label: "Aporta", hint: "Esta aportación suma a la conversación" },
   { key: "curious", label: "Me intriga", hint: "Quiero saber más" },
   { key: "agree", label: "De acuerdo", hint: "Comparto esta postura" },
